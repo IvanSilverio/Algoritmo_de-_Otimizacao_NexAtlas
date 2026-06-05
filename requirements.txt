@@ -1,0 +1,5 @@
+numpy>=1.26
+matplotlib>=3.8
+psycopg2-binary>=2.9
+# opcional, só para desenhar o contorno do Brasil na plotagem:
+geopandas>=0.14  # necessário para plot_national (contorno do Brasil)

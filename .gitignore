@@ -1,0 +1,17 @@
+# Credenciais — NUNCA versionar
+.env.sh
+.env
+*.env
+CLAUDE.md
+# Ambiente virtual
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Saídas geradas
+*.png
+airports_world.csv
+
+# Dados provisórios baixados (opcional — descomente se não quiser versionar)
+# data/aerodromos_br_ourairports.csv
