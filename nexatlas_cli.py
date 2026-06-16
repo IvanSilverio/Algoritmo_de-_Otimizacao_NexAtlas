@@ -30,7 +30,7 @@ from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.plot_route import plot_v1_route
-from nexatlas_router.resolver import CsvResolver
+from nexatlas_router.resolver import AdhpsGeomResolver
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 RST = "\033[0m"
@@ -44,8 +44,7 @@ MGN = "\033[35m"
 
 # ── caminhos ──────────────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_CSV = os.path.join(_HERE, "data", "aerodromos_br_ourairports.csv")
-AERODROME_COORD_SQL = None   # trocar por AdhpsGeomResolver quando geom existir
+AERODROME_COORD_SQL = None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,8 +98,9 @@ def _print_route(origin: str, dest: str, result) -> None:
     corridors   = result.corridors_used
     dep_req     = result.meta.get("departure_corridor_required", False)
     arr_req     = result.meta.get("arrival_corridor_required", False)
-    dep_cors    = set(result.meta.get("departure_mandatory_corridors", []))
-    arr_cors    = set(result.meta.get("arrival_mandatory_corridors", []))
+    dep_cors    = set(result.meta.get("departure_corridors_available", []))
+    arr_cors    = set(result.meta.get("arrival_corridors_available", []))
+    rule_satisfied = result.meta.get("rule_satisfied", False)
     iters       = result.meta.get("iterations_run", "?")
     direct_nm   = result.direct_distance_nm
     total_nm    = result.total_distance_nm
@@ -165,23 +165,28 @@ def _print_route(origin: str, dest: str, result) -> None:
         for c in corridors:
             tags: list[str] = []
             if c in dep_cors:
-                tags.append(f"{YLW}OBRIGATÓRIO na saída{RST}")
+                tags.append(f"{GRN}entrada (saída){RST}")
             if c in arr_cors:
-                tags.append(f"{YLW}OBRIGATÓRIO na chegada{RST}")
-            if not tags:
-                tag_str = f"  {DIM}(passagem optativa nesta rota){RST}"
-            else:
-                tag_str = "  — " + " | ".join(tags)
+                tags.append(f"{GRN}saída (chegada){RST}")
+            tag_str = ("  — " + " | ".join(tags)) if tags else ""
             print(f"    • {BLD}{c}{RST}{tag_str}")
 
-        # lista todos os corredores que existem no raio, mesmo os não usados
-        all_mandatory = dep_cors | arr_cors
-        unused_mandatory = all_mandatory - set(corridors)
-        if unused_mandatory:
-            print()
-            print(f"  {RED}⚠  Corredor(es) obrigatório(s) NÃO percorridos: "
-                  f"{', '.join(sorted(unused_mandatory))}{RST}")
-            print(f"  {DIM}(penalidade μ aplicada no fitness){RST}")
+        # A regra V1 não exige passar por TODOS os corredores da região —
+        # eles são alternativas. Informamos quantas existiam, sem alarme.
+        n_dep = len(dep_cors)
+        n_arr = len(arr_cors)
+        if n_dep or n_arr:
+            partes = []
+            if n_dep:
+                partes.append(f"{n_dep} na saída")
+            if n_arr:
+                partes.append(f"{n_arr} na chegada")
+            print(f"  {DIM}ℹ  Corredores disponíveis na região: "
+                  f"{' e '.join(partes)} — o algoritmo escolheu o(s) "
+                  f"de menor distância.{RST}")
+        if rule_satisfied:
+            print(f"  {GRN}✓ Regra VFR cumprida: rota usa corredor onde havia "
+                  f"corredor aplicável.{RST}")
 
     elif dep_req or arr_req:
         print(f"  {RED}⚠  Existem corredores aplicáveis mas NENHUM foi utilizado.{RST}")
@@ -199,34 +204,32 @@ def _print_route(origin: str, dest: str, result) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-def _setup_autocomplete(resolver: CsvResolver) -> None:
-    """Configura Tab-completion de ICAO com nome do aeródromo no terminal."""
+def _setup_autocomplete(icao_list: list[str]) -> None:
+    """Configura Tab-completion de ICAO no terminal."""
     if not _HAS_READLINE:
         return
 
-    # Tabela ICAO -> nome (vem do CsvResolver: table[icao] = (name, lon, lat))
-    icao_list = sorted(resolver.table.keys())
-    names: dict[str, str] = {k: v[0] for k, v in resolver.table.items()}
+    sorted_list = sorted(icao_list)
     _matches: list[str] = []
 
     def _completer(text: str, state: int) -> str | None:
         nonlocal _matches
         if state == 0:
             prefix = text.upper()
-            _matches = [ic for ic in icao_list if ic.startswith(prefix)]
+            _matches = [ic for ic in sorted_list if ic.startswith(prefix)]
         return _matches[state] if state < len(_matches) else None
 
     def _show_matches(substitution: str, matches: list[str], longest: int) -> None:
-        print()  # sai da linha do prompt
+        print()
         display = sorted(matches)[:20]
         for m in display:
-            print(f"    {CYN}{m:<8}{RST} {DIM}{names.get(m, '')}{RST}")
+            print(f"    {CYN}{m}{RST}")
         if len(matches) > 20:
             print(f"    {DIM}... e mais {len(matches) - 20} aeródromos{RST}")
-        print()  # linha em branco antes do prompt ser reimpresso pelo readline
+        print()
 
     _rl.set_completer(_completer)
-    _rl.set_completer_delims("")          # linha inteira = 1 token
+    _rl.set_completer_delims("")
     _rl.set_completion_display_matches_hook(_show_matches)
     _rl.parse_and_bind("tab: complete")
 
@@ -249,9 +252,17 @@ def main() -> None:
         print(f"  {RED}✗ Erro de conexão: {e}{RST}")
         sys.exit(1)
 
-    resolver = CsvResolver(DEFAULT_CSV)
-    _setup_autocomplete(resolver)
-    print(f"  {DIM}Coordenadas: OurAirports CSV (provisório — fonte pública){RST}")
+    try:
+        with conn.cursor() as _cur:
+            _cur.execute("SELECT icao FROM adhps ORDER BY icao;")
+            _icaos = [r[0] for r in _cur.fetchall()]
+        _setup_autocomplete(_icaos)
+        print(f"  {GRN}✓ Autocomplete:{RST} {len(_icaos)} aeródromos (adhps)")
+    except Exception:
+        pass
+
+    resolver = AdhpsGeomResolver(conn)
+    print(f"  {DIM}Coordenadas: adhps.geom (banco oficial){RST}")
     hint = "Tab = sugestões de ICAO  |  " if _HAS_READLINE else ""
     print(f"  {DIM}{hint}Digite 'q' ou Ctrl+C para sair.{RST}")
     print()

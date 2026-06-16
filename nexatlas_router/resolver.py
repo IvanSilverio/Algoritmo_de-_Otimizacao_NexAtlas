@@ -1,17 +1,11 @@
 """Resolução de ICAO -> coordenada (ponto terminal da rota).
 
-PROBLEMA: o usuário informa o aeródromo pelo código ICAO (ex.: "SBMT"). O
-motor precisa da coordenada (lon, lat) desse aeródromo para iniciar/terminar
-a rota. Hoje a tabela `adhps` NÃO tem geometria (confirmado no banco), então
-esta camada isola "de onde vem a coordenada" do resto do motor.
+A tabela `adhps` tem a coluna `geom GEOMETRY(Point, 4326) NULLABLE`.
+Aeródromos sem coordenada (poucos, privados/pequenos) levantam LookupError.
 
-DESENHO: uma interface AerodromeResolver com várias implementações plugáveis.
+DESENHO: interface AerodromeResolver com implementações plugáveis.
 Trocar a fonte = trocar a instância passada ao motor. Nenhuma outra parte do
 código muda.
-
-Backends prontos para o dia em que a fonte existir:
-  - AdhpsGeomResolver: lê a coordenada da `adhps` QUANDO ela ganhar geometria.
-  - OwnTableResolver:   lê de uma tabela própria (ex.: importada do DECEA).
 
 """
 from __future__ import annotations
@@ -32,10 +26,10 @@ class AerodromeResolver(Protocol):
 # ---------------------------------------------------------------------------
 
 class AdhpsGeomResolver:
-    """Lê a coordenada da `adhps` QUANDO a coluna de geometria for populada.
+    """Lê a coordenada da `adhps.geom` (GEOMETRY(Point, 4326) NULLABLE).
 
-    Ative quando o admin confirmar o nome da coluna geométrica (ex.: 'geom').
-    Ajuste `geom_col` conforme a resposta.
+    Aeródromos pequenos/privados podem ter geom NULL (ETL não capturou).
+    Nesses casos levanta LookupError com mensagem explicativa.
     """
     def __init__(self, conn: Any, geom_col: str = "geom") -> None:
         self.conn = conn
@@ -53,9 +47,9 @@ class AdhpsGeomResolver:
             raise LookupError(f"Aeródromo '{icao}' não encontrado na adhps.")
         code, lon, lat = row
         if lon is None or lat is None:
-            raise ValueError(
-                f"'{icao}' existe na adhps mas está SEM coordenada. "
-                "A coluna de geometria ainda não foi populada."
+            raise LookupError(
+                f"'{icao}' existe na adhps mas sem coordenada "
+                "(aeródromo pequeno/privado — geom não ingerida pelo ETL)."
             )
         return Node(id=f"ADHP:{code}", name=code,
                     pos=LonLat(lon, lat), kind="aerodrome")

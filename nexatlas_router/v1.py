@@ -17,6 +17,21 @@ from .graphmodel import RouteGraph
 from .gwo import GWOConfig, GWORouter
 
 
+def _v1_rule_satisfied(corridors_used, dep_nodes, arr_nodes, route) -> bool:
+    """A regra V1 foi cumprida?
+
+    Regra: se havia corredor aplicável na saída (dep_nodes não vazio), a rota
+    deve ter tocado ALGUM nó de corredor; idem para a chegada. Não importa
+    QUAL corredor — o algoritmo escolhe o melhor. Se não havia corredor
+    aplicável, a regra é trivialmente satisfeita (rota direta permitida).
+    """
+    used_nodes = {nid for e in route.edges if not e.synthetic
+                  for nid in (e.source, e.target)}
+    dep_ok = (not dep_nodes) or bool(dep_nodes & used_nodes)
+    arr_ok = (not arr_nodes) or bool(arr_nodes & used_nodes)
+    return dep_ok and arr_ok
+
+
 @dataclass
 class V1RouteResult:
     points: list[dict]                  # [{id, name, kind, lon, lat}]
@@ -75,12 +90,14 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             partes.append("saída")
         if arr_required:
             partes.append("chegada")
-        obrig = f" (uso obrigatório na {' e na '.join(partes)})" if partes else ""
+        ctx = (f" Havia corredor visual aplicável na {' e na '.join(partes)}, "
+               f"e a rota usa corredor conforme exigido pela regra VFR."
+               if partes else "")
         reason = (
-            f"Rota utiliza o(s) corredor(es) visual(is) {', '.join(corridors)}"
-            f"{obrig}, com acréscimo de {overhead:.1f} NM sobre a rota direta "
-            f"({direct_nm:.1f} NM); é a menor distância total que respeita a "
-            f"estrutura VFR publicada."
+            f"Rota usa o(s) corredor(es) visual(is) {', '.join(corridors)}, "
+            f"com acréscimo de {overhead:.1f} NM sobre a rota direta "
+            f"({direct_nm:.1f} NM) — menor distância total entre as "
+            f"alternativas de corredor disponíveis.{ctx}"
         )
     elif dep_required or arr_required:
         reason = (
@@ -94,9 +111,13 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             f"rota direta de {direct_nm:.1f} NM autorizada pela regra V1."
         )
 
-    # Quais corredores têm nós dentro do raio da origem/destino (uso obrigatório).
-    dep_mandatory: list[str] = []
-    arr_mandatory: list[str] = []
+    # Corredores DISPONÍVEIS na região (têm nós no raio da origem/destino).
+    # NÃO são individualmente obrigatórios — são as ALTERNATIVAS entre as
+    # quais o algoritmo escolhe. A regra V1 exige usar ALGUM deles quando o
+    # conjunto não é vazio, não todos. (dep_required/arr_required guardam o
+    # "havia alternativa?"; corridors_used guarda "qual foi escolhido".)
+    dep_available: list[str] = []
+    arr_available: list[str] = []
     seen_dep: set[str] = set()
     seen_arr: set[str] = set()
     for edges in graph.adj.values():
@@ -107,12 +128,12 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
                     e.target in router.dep_corridor_nodes):
                 if e.corridor not in seen_dep:
                     seen_dep.add(e.corridor)
-                    dep_mandatory.append(e.corridor)
+                    dep_available.append(e.corridor)
             if (e.source in router.arr_corridor_nodes or
                     e.target in router.arr_corridor_nodes):
                 if e.corridor not in seen_arr:
                     seen_arr.add(e.corridor)
-                    arr_mandatory.append(e.corridor)
+                    arr_available.append(e.corridor)
 
     return V1RouteResult(
         points=points,
@@ -123,8 +144,11 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
         meta={
             "departure_corridor_required": dep_required,
             "arrival_corridor_required": arr_required,
-            "departure_mandatory_corridors": dep_mandatory,
-            "arrival_mandatory_corridors": arr_mandatory,
+            "departure_corridors_available": dep_available,
+            "arrival_corridors_available": arr_available,
+            "rule_satisfied": _v1_rule_satisfied(
+                corridors, router.dep_corridor_nodes, router.arr_corridor_nodes,
+                route),
             "iterations_run": result.iterations_run,
             "final_fitness_m": route.fitness,
             "fitness_history": result.history,

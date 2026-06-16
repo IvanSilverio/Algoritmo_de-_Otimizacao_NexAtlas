@@ -12,14 +12,12 @@ Setup (uma vez):
     export NEXATLAS_DB_PASSWORD=sua_senha
 
 Uso:
-    # Enquanto a fonte de coordenadas da adhps não estiver mapeada,
-    # informe lon/lat manualmente (ordem do banco: LONGITUDE primeiro):
+    # Coordenadas lidas automaticamente de adhps.geom:
+    python run_v1.py SBMT SBJD
+
+    # Override manual (lon lat) — sobrepõe o banco para um aeródromo sem geom:
     python run_v1.py SBMT SBJD --origin-lonlat -46.6377 -23.5092 \
                                --dest-lonlat   -46.9436 -23.1817
-
-    # Quando o banco interno tiver a coordenada oficial, troque o
-    # CsvResolver pelo AdhpsGeomResolver em resolver.py.
-    python run_v1.py SBMT SBJD
 """
 from __future__ import annotations
 
@@ -37,16 +35,9 @@ from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.plot_route import plot_v1_route
-from nexatlas_router.resolver import CsvResolver
+from nexatlas_router.resolver import AdhpsGeomResolver
 
-# Reservado para quando a coordenada oficial existir no banco (ver
-# AdhpsGeomResolver em nexatlas_router/resolver.py).
 AERODROME_COORD_SQL: str | None = None
-
-# Fonte PROVISÓRIA de coordenadas: CSV público (OurAirports, domínio público).
-# Substituir por AdhpsGeomResolver quando o banco interno tiver a geometria.
-DEFAULT_CSV = os.path.join(os.path.dirname(__file__), "data",
-                           "aerodromos_br_ourairports.csv")
 
 
 def get_conn():
@@ -71,20 +62,16 @@ def main() -> None:
     ap.add_argument("--iterations", type=int, default=200)
     ap.add_argument("--wolves", type=int, default=30)
     ap.add_argument("--plot", default=None, help="caminho do PNG de saída")
-    ap.add_argument("--csv", default=DEFAULT_CSV,
-                    help="CSV de coordenadas (default: OurAirports BR)")
     args = ap.parse_args()
 
     conn = get_conn()
     loader = PostgisLoader(conn, aerodrome_coord_sql=AERODROME_COORD_SQL,
                            schema="v2")
 
-    # Resolver de coordenadas: CSV público se não houver lon/lat manual.
     resolver = None
     if not (args.origin_lonlat and args.dest_lonlat):
-        resolver = CsvResolver(args.csv)
-        print(f"Fonte de coordenadas: {os.path.basename(args.csv)} "
-              f"(OurAirports — provisório, dado público)\n")
+        resolver = AdhpsGeomResolver(conn)
+        print("Fonte de coordenadas: adhps.geom (banco oficial)\n")
 
     graph, meta = loader.build_subgraph(
         args.origin, args.dest,
