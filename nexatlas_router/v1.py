@@ -32,6 +32,33 @@ def _v1_rule_satisfied(corridors_used, dep_nodes, arr_nodes, route) -> bool:
     return dep_ok and arr_ok
 
 
+def _is_gateway(name: str) -> bool:
+    n = (name or "").upper()
+    return "PORTÃO" in n or "PORTAO" in n
+
+
+def _route_points(graph: RouteGraph, route) -> list[dict]:
+    pts = []
+    for nid in route.node_ids:
+        node = graph.nodes[nid]
+        pts.append({
+            "id": node.id, "name": node.name, "kind": node.kind,
+            "lon": node.pos.lon, "lat": node.pos.lat, "chart": node.chart,
+        })
+    return pts
+
+
+def _gateways_of(graph: RouteGraph, route) -> dict:
+    """Identifica o portão de ENTRADA (primeiro portão após a origem) e o de
+    SAÍDA (último portão antes do destino) efetivamente usados pela rota."""
+    gate_pts = [graph.nodes[nid] for nid in route.node_ids
+                if _is_gateway(graph.nodes[nid].name)]
+    entry = gate_pts[0].name if gate_pts else None
+    exit_ = gate_pts[-1].name if len(gate_pts) >= 2 else None
+    return {"entry_gateway": entry, "exit_gateway": exit_,
+            "all_gateways": [g.name for g in gate_pts]}
+
+
 @dataclass
 class V1RouteResult:
     points: list[dict]                  # [{id, name, kind, lon, lat}]
@@ -64,13 +91,7 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             "deveria garantir factibilidade; verifique a montagem do grafo."
         )
 
-    points = []
-    for nid in route.node_ids:
-        node = graph.nodes[nid]
-        points.append({
-            "id": node.id, "name": node.name, "kind": node.kind,
-            "lon": node.pos.lon, "lat": node.pos.lat, "chart": node.chart,
-        })
+    points = _route_points(graph, route)
 
     corridors = []
     for e in route.edges:
@@ -135,6 +156,27 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
                     seen_arr.add(e.corridor)
                     arr_available.append(e.corridor)
 
+    # Portões de entrada/saída efetivamente usados pela MELHOR rota
+    gw = _gateways_of(graph, route)
+
+    # Alternativas: as próximas melhores rotas distintas que o GWO descartou
+    alternatives = []
+    for alt in result.alternatives:
+        alt_corridors = []
+        for e in alt.edges:
+            if e.corridor and e.corridor not in alt_corridors:
+                alt_corridors.append(e.corridor)
+        alt_gw = _gateways_of(graph, alt)
+        alternatives.append({
+            "points": _route_points(graph, alt),
+            "total_distance_nm": round(m_to_nm(alt.distance_m), 1),
+            "overhead_nm": round(m_to_nm(alt.distance_m) - direct_nm, 1),
+            "corridors_used": alt_corridors,
+            "entry_gateway": alt_gw["entry_gateway"],
+            "exit_gateway": alt_gw["exit_gateway"],
+            "n_points": len(alt.node_ids),
+        })
+
     return V1RouteResult(
         points=points,
         corridors_used=corridors,
@@ -142,6 +184,10 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
         total_distance_nm=total_nm,
         reason=reason,
         meta={
+            "entry_gateway": gw["entry_gateway"],
+            "exit_gateway": gw["exit_gateway"],
+            "all_gateways": gw["all_gateways"],
+            "alternatives": alternatives,
             "departure_corridor_required": dep_required,
             "arrival_corridor_required": arr_required,
             "departure_corridors_available": dep_available,

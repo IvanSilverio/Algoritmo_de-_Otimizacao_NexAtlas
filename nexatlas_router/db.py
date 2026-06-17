@@ -214,7 +214,9 @@ class PostgisLoader:
                                     is_mandatory=bool(mandatory),
                                     lower_limit=lo, higher_limit=hi))
 
-        g.add_synthetic_edges(origin.id, dest.id, max_link_nm=link_radius_nm)
+        gateway_diag = g.add_synthetic_edges(origin.id, dest.id,
+                                              max_link_nm=link_radius_nm)
 
-        meta = {"charts": charts, "origin_id": origin.id, "dest_id": dest.id}
+        meta = {"charts": charts, "origin_id": origin.id, "dest_id": dest.id,
+                "gateway_diagnostics": gateway_diag}
         return g, meta

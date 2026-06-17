@@ -54,6 +54,7 @@ class GWOConfig:
 @dataclass
 class GWOResult:
     best: DecodedRoute
+    alternatives: list[DecodedRoute] = field(default_factory=list)  # próximas melhores, distintas
     history: list[float] = field(default_factory=list)   # fitness do alfa/iteração
     iterations_run: int = 0
 
@@ -156,11 +157,26 @@ class GWORouter:
         best_route: Optional[DecodedRoute] = None
         stale = 0
 
+        # Arquivo das melhores rotas DISTINTAS encontradas em toda a busca.
+        # Chave = sequência de nós (tupla); valor = a DecodedRoute de menor
+        # fitness com aquela sequência. Guarda só rotas COMPLETAS.
+        best_by_route: dict[tuple, DecodedRoute] = {}
+
+        def _archive(route: DecodedRoute, f: float) -> None:
+            if not route.complete:
+                return
+            key = tuple(route.node_ids)
+            prev = best_by_route.get(key)
+            if prev is None or f < prev.fitness:
+                route.fitness = f
+                best_by_route[key] = route
+
         for it in range(cfg.n_iterations):
             # --- avaliação e hierarquia -------------------------------
             for i in range(cfg.n_wolves):
                 route = self.decode(P[i])
                 f = self.fitness(route)
+                _archive(route, f)
                 if f < alpha_f:
                     delta_f, delta_p = beta_f, beta_p
                     beta_f, beta_p = alpha_f, alpha_p
@@ -177,8 +193,7 @@ class GWORouter:
             history.append(alpha_f)
             stale += 1
             if cfg.patience is not None and stale >= cfg.patience:
-                return GWOResult(best=best_route, history=history,
-                                 iterations_run=it + 1)
+                return self._finish(best_route, best_by_route, history, it + 1)
 
             # No início, beta/delta podem ainda não existir.
             if beta_p is None:
@@ -195,8 +210,24 @@ class GWORouter:
             P = (X1 + X2 + X3) / 3.0
             np.clip(P, 0.0, 1.0, out=P)
 
-        return GWOResult(best=best_route, history=history,
-                         iterations_run=cfg.n_iterations)
+        return self._finish(best_route, best_by_route, history,
+                            cfg.n_iterations)
+
+    def _finish(self, best_route, best_by_route, history, iters) -> GWOResult:
+        """Ordena o arquivo de rotas distintas e separa best + alternativas."""
+        ordered = sorted(best_by_route.values(), key=lambda r: r.fitness)
+        # garante que best_route (alfa) seja o primeiro, mesmo se incompleto
+        alternatives: list[DecodedRoute] = []
+        if best_route is not None:
+            best_key = tuple(best_route.node_ids)
+            for r in ordered:
+                if tuple(r.node_ids) != best_key:
+                    alternatives.append(r)
+        else:
+            best_route = ordered[0] if ordered else None
+            alternatives = ordered[1:]
+        return GWOResult(best=best_route, alternatives=alternatives[:4],
+                         history=history, iterations_run=iters)
 
     def _hunt_step(self, P: np.ndarray, leader: np.ndarray, a: float) -> np.ndarray:
         r1 = self.rng.random(P.shape)

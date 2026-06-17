@@ -159,6 +159,19 @@ def _print_route(origin: str, dest: str, result) -> None:
     print(f"  {DIM}Convergência: {iters} iterações GWO{RST}")
     print()
 
+    # ── portões de entrada/saída efetivamente usados ──────────────────────
+    entry_gw = result.meta.get("entry_gateway")
+    exit_gw = result.meta.get("exit_gateway")
+    if entry_gw or exit_gw:
+        print(f"  {GRN}{BLD}✓ Portões utilizados:{RST}")
+        if entry_gw:
+            print(f"    • Entrada (saída do aeródromo): {BLD}{entry_gw}{RST}")
+        if exit_gw:
+            print(f"    • Saída (chegada ao destino):   {BLD}{exit_gw}{RST}")
+        elif entry_gw:
+            print(f"    {DIM}(saída/chegada não foi por portão distinto){RST}")
+        print()
+
     # ── corredores visuais ────────────────────────────────────────────────
     if corridors:
         print(f"  {GRN}{BLD}✓ Corredores visuais utilizados:{RST}")
@@ -201,6 +214,29 @@ def _print_route(origin: str, dest: str, result) -> None:
                             initial_indent="  ", subsequent_indent="  ")
     print(DIM + wrapped + RST)
     print()
+
+    # ── alternativas descartadas ──────────────────────────────────────────
+    alternatives = result.meta.get("alternatives", [])
+    if alternatives:
+        print(f"  {BLD}Alternativas avaliadas (descartadas):{RST}")
+        print(f"  {DIM}A rota escolhida acima é a de menor distância. As "
+              f"próximas melhores foram:{RST}")
+        for i, alt in enumerate(alternatives, 1):
+            gw_in = alt.get("entry_gateway") or "—"
+            gw_out = alt.get("exit_gateway") or "—"
+            ov = alt['overhead_nm']
+            ov_str = f"+{ov:.1f}" if ov >= 0 else f"{ov:.1f}"
+            print(f"    {i}. {BLD}{alt['total_distance_nm']:.1f} NM{RST} "
+                  f"{DIM}({ov_str}){RST}  "
+                  f"entrada: {gw_in} | saída: {gw_out}  "
+                  f"{DIM}({alt['n_points']} pontos){RST}")
+            # sequência resumida (nomes), recuada
+            seq = " → ".join(p["name"] for p in alt["points"])
+            seq_wrapped = textwrap.fill(seq, width=58,
+                                        initial_indent="       ",
+                                        subsequent_indent="       ")
+            print(f"{DIM}{seq_wrapped}{RST}")
+        print()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
