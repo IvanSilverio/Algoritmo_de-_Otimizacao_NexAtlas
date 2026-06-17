@@ -38,12 +38,12 @@ class DecodedRoute:
 class GWOConfig:
     n_wolves: int = 30
     n_iterations: int = 150
-    max_hops: int = 30
+    max_hops: int = 80                     # AUMENTADO: de 30 para 80 para suportar rotas longas com múltiplos TMAs
     seed: Optional[int] = None
     # Penalidades (calibradas como múltiplos da distância direta)
     incomplete_base_factor: float = 10.0   # M = fator * distância direta
     incomplete_dist_factor: float = 2.0    # λ
-    mandatory_factor: float = 5.0          # μ = fator * distância direta
+    mandatory_factor: float = 20.0         # AUMENTADO: Penalidade extrema para evitar o bypass (fallback) do grafo
     # Regra V1 (piloto orientador): corredor existente => passagem obrigatória
     enforce_corridor_rule: bool = True
     corridor_radius_nm: float = 30.0       # raio de "corredor aplicável"
@@ -73,7 +73,6 @@ class GWORouter:
         self.mu = self.cfg.mandatory_factor * self.direct_m
 
         # Regra V1: corredor aplicável => uso obrigatório.
-        # Conjuntos de waypoints de corredores reais ao redor de cada âncora.
         if self.cfg.enforce_corridor_rule:
             r = self.cfg.corridor_radius_nm
             self.dep_corridor_nodes = graph.corridor_nodes_near(origin_id, r)
@@ -122,24 +121,15 @@ class GWORouter:
 
         if route.complete:
             # Nós de corredor REAL efetivamente percorridos pela rota
-            # (atravessar uma aresta sintética não conta como usar corredor).
             used = {nid for e in route.edges if not e.synthetic
                     for nid in (e.source, e.target)}
 
-            # Regra V1: existe corredor na saída? então é obrigatório usá-lo.
+            # Regra V1: existe corredor na saída/chegada? então é obrigatório usá-lo.
             if self.dep_corridor_nodes and not (self.dep_corridor_nodes & used):
                 f += self.mu
-            # Idem para a chegada.
+            
             if self.arr_corridor_nodes and not (self.arr_corridor_nodes & used):
                 f += self.mu
-
-            # OBSERVAÇÃO (pendente de confirmação com o piloto orientador):
-            # is_mandatory NÃO entra no fitness por enquanto. O dicionário v2
-            # descreve o campo como "obrigado a REPORTAR o ponto" (fonia ATC),
-            # que é diferente de "obrigado a PASSAR". Se for só reporte, o
-            # campo pertence à camada de apresentação (anotação na rota), não
-            # ao custo do grafo. A obrigação de passagem já é coberta pela
-            # regra geral de corredor acima.
 
         return f
 
@@ -148,7 +138,6 @@ class GWORouter:
         cfg = self.cfg
         N = self.g.n
 
-        # Matriz de posições: cada linha é um lobo, cada coluna um nó.
         P = self.rng.random((cfg.n_wolves, N))
 
         history: list[float] = []
@@ -157,9 +146,6 @@ class GWORouter:
         best_route: Optional[DecodedRoute] = None
         stale = 0
 
-        # Arquivo das melhores rotas DISTINTAS encontradas em toda a busca.
-        # Chave = sequência de nós (tupla); valor = a DecodedRoute de menor
-        # fitness com aquela sequência. Guarda só rotas COMPLETAS.
         best_by_route: dict[tuple, DecodedRoute] = {}
 
         def _archive(route: DecodedRoute, f: float) -> None:
@@ -172,7 +158,6 @@ class GWORouter:
                 best_by_route[key] = route
 
         for it in range(cfg.n_iterations):
-            # --- avaliação e hierarquia -------------------------------
             for i in range(cfg.n_wolves):
                 route = self.decode(P[i])
                 f = self.fitness(route)
@@ -183,7 +168,7 @@ class GWORouter:
                     alpha_f, alpha_p = f, P[i].copy()
                     route.fitness = f
                     best_route = route
-                    stale = -1  # melhora nesta iteração
+                    stale = -1  
                 elif f < beta_f:
                     delta_f, delta_p = beta_f, beta_p
                     beta_f, beta_p = f, P[i].copy()
@@ -195,14 +180,12 @@ class GWORouter:
             if cfg.patience is not None and stale >= cfg.patience:
                 return self._finish(best_route, best_by_route, history, it + 1)
 
-            # No início, beta/delta podem ainda não existir.
             if beta_p is None:
                 beta_p, beta_f = alpha_p, alpha_f
             if delta_p is None:
                 delta_p, delta_f = beta_p, beta_f
 
-            # --- movimento (equações originais de Mirjalili, 2014) ----
-            a = 2.0 - 2.0 * it / cfg.n_iterations  # decai 2 -> 0
+            a = 2.0 - 2.0 * it / cfg.n_iterations 
 
             X1 = self._hunt_step(P, alpha_p, a)
             X2 = self._hunt_step(P, beta_p, a)
@@ -214,9 +197,7 @@ class GWORouter:
                             cfg.n_iterations)
 
     def _finish(self, best_route, best_by_route, history, iters) -> GWOResult:
-        """Ordena o arquivo de rotas distintas e separa best + alternativas."""
         ordered = sorted(best_by_route.values(), key=lambda r: r.fitness)
-        # garante que best_route (alfa) seja o primeiro, mesmo se incompleto
         alternatives: list[DecodedRoute] = []
         if best_route is not None:
             best_key = tuple(best_route.node_ids)
@@ -232,7 +213,7 @@ class GWORouter:
     def _hunt_step(self, P: np.ndarray, leader: np.ndarray, a: float) -> np.ndarray:
         r1 = self.rng.random(P.shape)
         r2 = self.rng.random(P.shape)
-        A = 2.0 * a * r1 - a          # |A|>1 -> exploração; |A|<1 -> cerco
+        A = 2.0 * a * r1 - a          
         C = 2.0 * r2
         D = np.abs(C * leader - P)
         return leader - A * D

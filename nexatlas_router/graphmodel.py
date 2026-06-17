@@ -68,10 +68,10 @@ class RouteGraph:
     def _gateway_waypoints(self) -> set[str]:
         """IDs de waypoints que são PORTÕES conectados à malha.
 
-        Portão = waypoint cujo nome contém 'PORTÃO'/'PORTAO'. Conectado =
-        participa de ao menos uma aresta REAL de corredor (como origem ou
-        destino). Portões isolados (sem corredor) NÃO entram — entrar neles
-        seria um beco sem saída.
+        Correção: Removemos a dependência da string 'PORTÃO'. Qualquer nó 
+        que participe de uma aresta real de corredor é agora considerado um 
+        'Gateway Virtual' em potencial. A restrição de uso será feita pela 
+        distância geográfica na hora de criar as pontes.
         """
         connected: set[str] = set()
         for src, edges in self.adj.items():
@@ -85,19 +85,15 @@ class RouteGraph:
         for nid, node in self.nodes.items():
             if node.kind != "waypoint":
                 continue
-            name = (node.name or "").upper()
-            is_gate = "PORTÃO" in name or "PORTAO" in name
-            if is_gate and nid in connected:
+            
+            # Se faz parte da malha de corredores, ele é um portão válido.
+            if nid in connected:
                 gateways.add(nid)
+                
         return gateways
 
     def _region_has_corridor(self, anchor_pos, radius_nm: float) -> bool:
-        """A região do âncora é ESTRUTURADA? (tem corredor real por perto)
-
-        True se existe qualquer waypoint de corredor real dentro do raio —
-        indica TMA estruturada, onde a entrada deve ser por portão. False
-        indica região livre (cidade média), onde a rota direta é legítima.
-        """
+        """A região do âncora é ESTRUTURADA? (tem corredor real por perto)"""
         radius_m = radius_nm * 1852.0
         connected: set[str] = set()
         for edges in self.adj.values():
@@ -118,68 +114,92 @@ class RouteGraph:
         free_entry_nm: float = 15.0,
         gateways_only: bool = True,
     ) -> dict:
-        """Liga os aeródromos à malha conforme o tipo de espaço aéreo.
-
-        Dois cenários (regra aeronáutica):
-        - TMA ESTRUTURADA (há corredor na região do extremo): entrada/saída
-          SÓ por portão conectado, dentro de `max_link_nm`. Pode exigir
-          desvio (quebra da linha reta) para interceptar o portão.
-        - REGIÃO LIVRE (sem corredor por perto): navegação direta legítima;
-          liga origem↔destino sem portão (cidade média, ingresso via APP).
-
-        Retorna um diagnóstico por extremo, para a camada de saída poder
-        avisar se um destino ESTRUTURADO ficou sem portão viável (caso que
-        merece atenção, não um fallback silencioso).
-        """
+        """Liga os aeródromos à malha e cria as pontes de cruzeiro unidirecionais."""
         origin = self.nodes[origin_id]
         dest = self.nodes[dest_id]
         max_link_m = max_link_nm * 1852.0
 
         gateways = self._gateway_waypoints() if gateways_only else None
 
-        # A região de cada extremo é estruturada?
         dep_structured = self._region_has_corridor(origin.pos, max_link_nm)
         arr_structured = self._region_has_corridor(dest.pos, max_link_nm)
 
         linked_dep = 0
         linked_arr = 0
+        
+        # 1. Liga Aeroportos aos Portões/Nós Visuais da sua própria TMA
         for nid, node in self.nodes.items():
             if node.kind != "waypoint":
                 continue
             if gateways is not None and nid not in gateways:
                 continue
+            
             d_o = haversine_m(origin.pos, node.pos)
             if d_o <= max_link_m:
                 self.add_edge(Edge(origin_id, nid, d_o, synthetic=True))
                 linked_dep += 1
+                
             d_d = haversine_m(node.pos, dest.pos)
             if d_d <= max_link_m:
                 self.add_edge(Edge(nid, dest_id, d_d, synthetic=True))
                 linked_arr += 1
 
-        # Classifica cada extremo:
-        #   'gateway'  → estruturada e achou portão (entrada correta por portão)
-        #   'free'     → região livre, rota direta legítima
-        #   'no_gate'  → ESTRUTURADA mas sem portão viável no raio (ALERTA)
         def classify(structured, linked):
-            if structured and linked > 0:
-                return "gateway"
-            if not structured:
-                return "free"
+            if structured and linked > 0: return "gateway"
+            if not structured: return "free"
             return "no_gate"
 
         dep_status = classify(dep_structured, linked_dep)
         arr_status = classify(arr_structured, linked_arr)
+        
+        gateways_list = list(gateways) if gateways else []
 
-        # Rota direta: legítima quando algum extremo é LIVRE; também usada como
-        # último recurso quando um extremo estruturado ficou sem portão (mas
-        # nesse caso o status 'no_gate' sinaliza que a rota pode ser inválida).
-        need_direct = (dep_status in ("free", "no_gate")
-                       or arr_status in ("free", "no_gate"))
-        if need_direct:
+        # 2. PARTIÇÃO DE NÓS (Evita o Efeito Ping-Pong)
+        # Classifica se o portão pertence à malha de saída ou à malha de chegada
+        # baseado em quem ele está fisicamente mais próximo.
+        dep_gateways = [g for g in gateways_list if haversine_m(self.nodes[g].pos, origin.pos) < haversine_m(self.nodes[g].pos, dest.pos)]
+        arr_gateways = [g for g in gateways_list if haversine_m(self.nodes[g].pos, dest.pos) < haversine_m(self.nodes[g].pos, origin.pos)]
+
+        # 3. PONTE DE CRUZEIRO UNIDIRECIONAL
+        
+        # Cenário A: Partida Estruturada -> Destino Livre
+        if dep_status == "gateway" and arr_status in ("free", "no_gate"):
+            for gid in dep_gateways:
+                node_g = self.nodes[gid]
+                d = haversine_m(node_g.pos, dest.pos)
+                self.add_edge(Edge(gid, dest_id, d, synthetic=True))
+
+        # Cenário B: Partida Livre -> Destino Estruturado
+        elif dep_status in ("free", "no_gate") and arr_status == "gateway":
+            for gid in arr_gateways:
+                node_g = self.nodes[gid]
+                d = haversine_m(origin.pos, node_g.pos)
+                self.add_edge(Edge(origin_id, gid, d, synthetic=True))
+
+        # Cenário C: Ambos Estruturados (Ex: SP -> Manaus, SP -> RJ)
+        elif dep_status == "gateway" and arr_status == "gateway":
+            for gid_dep in dep_gateways:
+                node_dep = self.nodes[gid_dep]
+                for gid_arr in arr_gateways:
+                    node_arr = self.nodes[gid_arr]
+                    
+                    # A aresta agora é estritamente unidirecional: Origem -> Destino
+                    d = haversine_m(node_dep.pos, node_arr.pos)
+                    if d > (max_link_m * 1.5): # Só cria ponte se a distância for viável
+                        self.add_edge(Edge(gid_dep, gid_arr, d, synthetic=True))
+
+        # Cenário D: Ambos Livres (Interior -> Interior)
+        elif dep_status in ("free", "no_gate") and arr_status in ("free", "no_gate"):
             self.add_edge(
-                Edge(origin_id, dest_id,
-                     haversine_m(origin.pos, dest.pos), synthetic=True)
+                Edge(origin_id, dest_id, haversine_m(origin.pos, dest.pos), synthetic=True)
+            )
+
+        # [Fallback de Segurança]: Garante que o grafo nunca fique 100% desconexo.
+        # A penalidade severa no GWO (mandatory_factor = 20) vai impedir que o 
+        # otimizador use esta aresta a menos que seja a única saída possível.
+        if dep_status in ("gateway", "no_gate") or arr_status in ("gateway", "no_gate"):
+            self.add_edge(
+                Edge(origin_id, dest_id, haversine_m(origin.pos, dest.pos), synthetic=True)
             )
 
         return {
@@ -203,19 +223,12 @@ class RouteGraph:
         return haversine_m(self.nodes[origin_id].pos, self.nodes[dest_id].pos)
 
     def corridor_nodes_near(self, anchor_id: str, radius_nm: float) -> set[str]:
-        """Waypoints participantes de corredores REAIS num raio do âncora.
-
-        Usado para decidir se existe corredor visual aplicável à saída
-        (âncora = origem) ou à chegada (âncora = destino). Regra do escopo
-        V1 + orientação do piloto: se existir, a passagem é OBRIGATÓRIA.
-        """
         anchor = self.nodes[anchor_id]
         radius_m = radius_nm * 1852.0
         out: set[str] = set()
         for edges in self.adj.values():
             for e in edges:
-                if e.synthetic:
-                    continue
+                if e.synthetic: continue
                 for nid in (e.source, e.target):
                     node = self.nodes[nid]
                     if haversine_m(node.pos, anchor.pos) <= radius_m:
@@ -223,20 +236,11 @@ class RouteGraph:
         return out
 
     def mandatory_arrival_nodes(self, dest_id: str, radius_nm: float = 15.0) -> set[str]:
-        """Heurística V1 para is_mandatory na chegada.
-
-        Retorna os nós-alvo de conexões obrigatórias cujo target está a até
-        radius_nm do destino. Se o conjunto não for vazio, a rota deve
-        passar por pelo menos um deles antes de pousar — caso contrário o
-        fitness aplica penalidade. Refinar na V2 com a semântica oficial
-        de corredor obrigatório por carta.
-        """
         dest = self.nodes[dest_id]
         out: set[str] = set()
         for edges in self.adj.values():
             for e in edges:
-                if not e.is_mandatory or e.synthetic:
-                    continue
+                if not e.is_mandatory or e.synthetic: continue
                 tgt = self.nodes[e.target]
                 if haversine_m(tgt.pos, dest.pos) <= radius_nm * 1852.0:
                     out.add(e.target)
