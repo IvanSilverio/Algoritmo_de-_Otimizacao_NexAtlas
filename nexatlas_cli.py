@@ -91,7 +91,6 @@ def _connect() -> "psycopg2.extensions.connection":
         password=os.environ["NEXATLAS_DB_PASSWORD"],
     )
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 def _print_route(origin: str, dest: str, result) -> None:
     points      = result.points
