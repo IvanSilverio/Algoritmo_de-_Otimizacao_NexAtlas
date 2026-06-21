@@ -99,6 +99,16 @@ class RouteGraph:
         direto, análogo ao caso SWPI no lado da chegada)."""
         return any(not e.synthetic for e in self.adj.get(node_id, []))
 
+    def _has_real_incoming(self, node_id: str) -> bool:
+        """O nó é ALCANÇADO por algum corredor real? (chega-se nele voando REA).
+
+        Usado na saída ao destino: só se sai de uma TMA por um nó em que se
+        ENTROU por corredor — evita usar um waypoint isolado/sem corredor de
+        entrada como mero degrau de saída (pular a malha). Quando é PERMITIDO
+        usar a saída é decidido pela fase 'owes' no caminho mínimo."""
+        return any((not e.synthetic) and e.target == node_id
+                   for src in self.adj for e in self.adj[src])
+
     def _nearest_rea_m(self, pos, rea_nodes) -> float:
         """Distância (m) do ponto ao nó REA mais próximo (inf se não houver)."""
         if not rea_nodes:
@@ -200,24 +210,28 @@ class RouteGraph:
             self.add_edge(Edge(origin_id, nid, w(d), corridor="DIRETO", synthetic=True))
             linked_in += 1
 
-        # 2) SAÍDA: REA -> destino, COM TRAVA DE CONTINUIDADE.
-        #    Em TMA: só dos k mais próximos DA CARTA do destino. Fora: de todos.
+        # 2) SAÍDA: REA -> destino.
+        #    A saída sai de um nó ALCANÇADO por corredor (tem corredor de entrada);
+        #    QUANDO ela pode ser usada é decidido pela fase 'owes' no caminho mínimo
+        #    (só num terminal natural, owes_real==0). Não há mais trava estática:
+        #    a antiga trava bloqueava nós com corredor obrigatório de saída — mas
+        #    é justamente o caso de um PORTÃO (ex.: DUTRA) cujo corredor volta para
+        #    dentro da TMA; ele é a saída natural rumo ao destino e deve poder sair.
         if dest_in_tma:
-            exit_pool = [n for n in rea_nodes if self.nodes[n].chart == dest_chart]
+            exit_pool = [n for n in rea_nodes
+                         if self.nodes[n].chart == dest_chart and self._has_real_incoming(n)]
             exit_sources = self._k_nearest(dest.pos, exit_pool or rea_nodes, entry_exit_k)
         else:
-            exit_sources = rea_nodes
+            exit_sources = [n for n in rea_nodes if self._has_real_incoming(n)] or rea_nodes
         exit_candidates = [(haversine_m(self.nodes[nid].pos, dest.pos), nid)
                            for nid in exit_sources]
         for d, nid in exit_candidates:
-            if self._has_mandatory_real_exit(nid):     # TRAVA
-                locked_out += 1
-                continue
             self.add_edge(Edge(nid, dest_id, w(d), corridor="DIRETO", synthetic=True))
             linked_out += 1
         exits_safety_valve = 0
-        if linked_out == 0 and exit_candidates:        # válvula de saída
-            d, nid = min(exit_candidates, key=lambda t: t[0])
+        if linked_out == 0 and rea_nodes:              # válvula de saída (último recurso)
+            d, nid = min(((haversine_m(self.nodes[n].pos, dest.pos), n) for n in rea_nodes),
+                         key=lambda t: t[0])
             self.add_edge(Edge(nid, dest_id, w(d), corridor="DIRETO", synthetic=True))
             linked_out += 1; exits_safety_valve = 1
 
