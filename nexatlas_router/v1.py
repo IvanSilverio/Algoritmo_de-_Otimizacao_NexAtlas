@@ -1,40 +1,42 @@
-"""Orquestração da V1 — Rota lateral VFR com corredores visuais.
+"""Orquestração da V1 — Rota lateral VFR por corredores REA.
 
-Produz exatamente a saída exigida pelo documento de escopo:
+Saída:
   • Lista ordenada de pontos da rota.
-  • Indicação de corredores visuais utilizados.
+  • Corredores REA utilizados, classificados [Obrigatório] / [Opcional].
   • Distância direta entre origem e destino.
   • Distância total da rota sugerida.
-  • Indicação simples do motivo da escolha da rota.
+  • Motivo simples da escolha.
+
+A antiga regra de "portão obrigatório" (string PORTÃO) e as penalidades de
+corredor foram removidas. A entrada na malha REA agora se dá por qualquer nó
+válido, e a obrigatoriedade é uma propriedade por-corredor (is_mandatory),
+garantida topologicamente pela Trava de Continuidade.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from .geo import m_to_nm
+from .geo import m_to_nm, haversine_m
 from .graphmodel import RouteGraph
 from .gwo import GWOConfig, GWORouter
+from .dijkstra import dijkstra, shortest_route
 
 
-def _v1_rule_satisfied(corridors_used, dep_nodes, arr_nodes, route) -> bool:
-    """A regra V1 foi cumprida?
+def _real_distance_m(graph: RouteGraph, route) -> float:
+    """Distância REAL (geográfica) da rota.
 
-    Regra: se havia corredor aplicável na saída (dep_nodes não vazio), a rota
-    deve ter tocado ALGUM nó de corredor; idem para a chegada. Não importa
-    QUAL corredor — o algoritmo escolhe o melhor. Se não havia corredor
-    aplicável, a regra é trivialmente satisfeita (rota direta permitida).
+    Os trechos sintéticos "DIRETO" carregam um peso de OTIMIZAÇÃO levemente
+    inflado (preferência por corredor); aqui recomputamos a distância
+    geográfica verdadeira para o relatório, sem a penalidade.
     """
-    used_nodes = {nid for e in route.edges if not e.synthetic
-                  for nid in (e.source, e.target)}
-    dep_ok = (not dep_nodes) or bool(dep_nodes & used_nodes)
-    arr_ok = (not arr_nodes) or bool(arr_nodes & used_nodes)
-    return dep_ok and arr_ok
-
-
-def _is_gateway(name: str) -> bool:
-    n = (name or "").upper()
-    return "PORTÃO" in n or "PORTAO" in n
+    tot = 0.0
+    for e in route.edges:
+        if e.synthetic:
+            tot += haversine_m(graph.nodes[e.source].pos, graph.nodes[e.target].pos)
+        else:
+            tot += e.weight_m
+    return tot
 
 
 def _route_points(graph: RouteGraph, route) -> list[dict]:
@@ -48,21 +50,30 @@ def _route_points(graph: RouteGraph, route) -> list[dict]:
     return pts
 
 
-def _gateways_of(graph: RouteGraph, route) -> dict:
-    """Identifica o portão de ENTRADA (primeiro portão após a origem) e o de
-    SAÍDA (último portão antes do destino) efetivamente usados pela rota."""
-    gate_pts = [graph.nodes[nid] for nid in route.node_ids
-                if _is_gateway(graph.nodes[nid].name)]
-    entry = gate_pts[0].name if gate_pts else None
-    exit_ = gate_pts[-1].name if len(gate_pts) >= 2 else None
-    return {"entry_gateway": entry, "exit_gateway": exit_,
-            "all_gateways": [g.name for g in gate_pts]}
+def _corridors_used(route) -> list[dict]:
+    """Corredores REA reais percorridos, na ordem, com flag de obrigatoriedade.
+
+    Um corredor é [Obrigatório] se QUALQUER aresta real usada nele tiver
+    is_mandatory=True; caso contrário, [Opcional]. Trechos sintéticos "DIRETO"
+    são ignorados (não são corredores REA).
+    """
+    order: list[str] = []
+    mandatory: dict[str, bool] = {}
+    for e in route.edges:
+        if e.synthetic or not e.corridor or e.corridor == "DIRETO":
+            continue
+        if e.corridor not in mandatory:
+            order.append(e.corridor)
+            mandatory[e.corridor] = False
+        if e.is_mandatory:
+            mandatory[e.corridor] = True
+    return [{"name": c, "is_mandatory": mandatory[c]} for c in order]
 
 
 @dataclass
 class V1RouteResult:
-    points: list[dict]                  # [{id, name, kind, lon, lat}]
-    corridors_used: list[str]
+    points: list[dict]
+    corridors_used: list[dict]          # [{name, is_mandatory}]
     direct_distance_nm: float
     total_distance_nm: float
     reason: str
@@ -81,99 +92,80 @@ class V1RouteResult:
 
 def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
                   config: Optional[GWOConfig] = None) -> V1RouteResult:
-    router = GWORouter(graph, origin_id, dest_id, config)
-    result = router.run()
-    route = result.best
+    # Regra REA: se alguma ponta está em TMA REA, a rota é OBRIGADA a usar
+    # >=1 corredor real (graph.requires_corridor, definido em add_synthetic_edges).
+    require = bool(getattr(graph, "requires_corridor", False))
+
+    # FASE 1 — MALHA PRIMEIRO. shortest_route é EXATO/DETERMINÍSTICO e codifica
+    # a regra de fase das TMAs (voar os corredores de cada TMA antes de saltar).
+    # O GWO roda só para popular ALTERNATIVAS — ele não conhece a regra de fase,
+    # então NÃO pode sobrepor a rota exata quando uma ponta está em TMA.
+    mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=require)
+
+    result = GWORouter(graph, origin_id, dest_id, config).run()
+    gwo_route = result.best
+
+    used_direct_fallback = False
+
+    if require:
+        # Uma ponta está em TMA: a rota com fase é a autoridade (ótima e correta).
+        route = mesh
+        route_source = "dijkstra-fase"
+    else:
+        # Nenhuma ponta em TMA: distância pura, direto permitido; GWO pode ajudar.
+        done = [r for r in (gwo_route, mesh) if r is not None and r.complete]
+        route = min(done, key=lambda r: r.distance_m) if done else None
+        route_source = "dijkstra" if route is mesh else "gwo"
+
+    # FASE 2 — FALLBACK DIRETO: a malha REA realmente não conecta com corredor
+    # (mesmo com a válvula de ponte). Só então liberamos o atalho direto.
+    if route is None:
+        if graph.add_direct_fallback(origin_id, dest_id):
+            used_direct_fallback = True
+        mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=False)
+        gwo_route = GWORouter(graph, origin_id, dest_id, config).run().best
+        done = [r for r in (gwo_route, mesh) if r is not None and r.complete]
+        route = min(done, key=lambda r: r.distance_m) if done else None
+        route_source = "dijkstra" if route is mesh else "gwo"
 
     if route is None or not route.complete:
         raise RuntimeError(
-            "GWO não encontrou rota completa — a aresta direta sintética "
-            "deveria garantir factibilidade; verifique a montagem do grafo."
+            "Sem rota completa mesmo com o fallback direto; "
+            "verifique a montagem do grafo (origem/destino válidos?)."
         )
 
     points = _route_points(graph, route)
+    corridors = _corridors_used(route)
 
-    corridors = []
-    for e in route.edges:
-        if e.corridor and e.corridor not in corridors:
-            corridors.append(e.corridor)
-
-    direct_nm = m_to_nm(router.direct_m)
-    total_nm = m_to_nm(route.distance_m)
-
-    dep_required = bool(router.dep_corridor_nodes)
-    arr_required = bool(router.arr_corridor_nodes)
+    direct_nm = m_to_nm(graph.direct_distance_m(origin_id, dest_id))
+    total_nm = m_to_nm(_real_distance_m(graph, route))   # distância REAL (sem penalidade)
+    overhead = total_nm - direct_nm
 
     if corridors:
-        overhead = total_nm - direct_nm
-        partes = []
-        if dep_required:
-            partes.append("saída")
-        if arr_required:
-            partes.append("chegada")
-        ctx = (f" Havia corredor visual aplicável na {' e na '.join(partes)}, "
-               f"e a rota usa corredor conforme exigido pela regra VFR."
-               if partes else "")
-        reason = (
-            f"Rota usa o(s) corredor(es) visual(is) {', '.join(corridors)}, "
-            f"com acréscimo de {overhead:.1f} NM sobre a rota direta "
-            f"({direct_nm:.1f} NM) — menor distância total entre as "
-            f"alternativas de corredor disponíveis.{ctx}"
+        names = ", ".join(
+            f"{c['name']} [{'Obrigatório' if c['is_mandatory'] else 'Opcional'}]"
+            for c in corridors
         )
-    elif dep_required or arr_required:
         reason = (
-            "ALERTA: existem corredores visuais aplicáveis, mas a rota gerada "
-            "não os utilizou — verifique a convergência do otimizador ou os "
-            "parâmetros de penalidade."
+            f"Rota usa o(s) corredor(es) REA {names}, com acréscimo de "
+            f"{overhead:.1f} NM sobre a rota direta ({direct_nm:.1f} NM) — "
+            f"menor distância total entre as alternativas disponíveis."
         )
     else:
         reason = (
-            f"Nenhum corredor visual aplicável à saída ou à chegada; "
-            f"rota direta de {direct_nm:.1f} NM autorizada pela regra V1."
+            f"Nenhum corredor REA relevante no caminho; rota direta de "
+            f"{direct_nm:.1f} NM autorizada."
         )
 
-    # Corredores DISPONÍVEIS na região (têm nós no raio da origem/destino).
-    # NÃO são individualmente obrigatórios — são as ALTERNATIVAS entre as
-    # quais o algoritmo escolhe. A regra V1 exige usar ALGUM deles quando o
-    # conjunto não é vazio, não todos. (dep_required/arr_required guardam o
-    # "havia alternativa?"; corridors_used guarda "qual foi escolhido".)
-    dep_available: list[str] = []
-    arr_available: list[str] = []
-    seen_dep: set[str] = set()
-    seen_arr: set[str] = set()
-    for edges in graph.adj.values():
-        for e in edges:
-            if e.synthetic or not e.corridor:
-                continue
-            if (e.source in router.dep_corridor_nodes or
-                    e.target in router.dep_corridor_nodes):
-                if e.corridor not in seen_dep:
-                    seen_dep.add(e.corridor)
-                    dep_available.append(e.corridor)
-            if (e.source in router.arr_corridor_nodes or
-                    e.target in router.arr_corridor_nodes):
-                if e.corridor not in seen_arr:
-                    seen_arr.add(e.corridor)
-                    arr_available.append(e.corridor)
-
-    # Portões de entrada/saída efetivamente usados pela MELHOR rota
-    gw = _gateways_of(graph, route)
-
-    # Alternativas: as próximas melhores rotas distintas que o GWO descartou
+    # Alternativas: próximas melhores rotas distintas que o GWO arquivou.
     alternatives = []
     for alt in result.alternatives:
-        alt_corridors = []
-        for e in alt.edges:
-            if e.corridor and e.corridor not in alt_corridors:
-                alt_corridors.append(e.corridor)
-        alt_gw = _gateways_of(graph, alt)
+        alt_real_nm = m_to_nm(_real_distance_m(graph, alt))
         alternatives.append({
             "points": _route_points(graph, alt),
-            "total_distance_nm": round(m_to_nm(alt.distance_m), 1),
-            "overhead_nm": round(m_to_nm(alt.distance_m) - direct_nm, 1),
-            "corridors_used": alt_corridors,
-            "entry_gateway": alt_gw["entry_gateway"],
-            "exit_gateway": alt_gw["exit_gateway"],
+            "total_distance_nm": round(alt_real_nm, 1),
+            "overhead_nm": round(alt_real_nm - direct_nm, 1),
+            "corridors_used": _corridors_used(alt),
             "n_points": len(alt.node_ids),
         })
 
@@ -184,19 +176,11 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
         total_distance_nm=total_nm,
         reason=reason,
         meta={
-            "entry_gateway": gw["entry_gateway"],
-            "exit_gateway": gw["exit_gateway"],
-            "all_gateways": gw["all_gateways"],
             "alternatives": alternatives,
-            "departure_corridor_required": dep_required,
-            "arrival_corridor_required": arr_required,
-            "departure_corridors_available": dep_available,
-            "arrival_corridors_available": arr_available,
-            "rule_satisfied": _v1_rule_satisfied(
-                corridors, router.dep_corridor_nodes, router.arr_corridor_nodes,
-                route),
             "iterations_run": result.iterations_run,
             "final_fitness_m": route.fitness,
+            "used_direct_fallback": used_direct_fallback,
+            "route_source": route_source,
             "fitness_history": result.history,
         },
     )

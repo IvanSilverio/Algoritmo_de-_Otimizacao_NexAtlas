@@ -1,23 +1,19 @@
-"""Runner V1 de ponta a ponta contra o banco real.
+"""Runner V1 de ponta a ponta contra o banco real (esquema published).
 
 Conecta via variáveis de ambiente (NUNCA credenciais no código), monta o
-subgrafo regional, roda o GWO, imprime o JSON da V1 e salva a plotagem.
+subgrafo regional REA, roda o GWO, imprime o JSON da V1 e salva a plotagem.
 
 Setup (uma vez):
     pip install psycopg2-binary numpy matplotlib
-    export NEXATLAS_DB_HOST=assistant.nexatlas.com
+    export NEXATLAS_DB_HOST=jetstream.nexatlas.com
     export NEXATLAS_DB_PORT=5433
-    export NEXATLAS_DB_NAME=jetstream_replica
-    export NEXATLAS_DB_USER=seu_usuario
+    export NEXATLAS_DB_NAME=jetstream
+    export NEXATLAS_DB_USER=ivansilverio
     export NEXATLAS_DB_PASSWORD=sua_senha
 
 Uso:
-    # Coordenadas lidas automaticamente de adhps.geom:
-    python run_v1.py SBMT SBJD
-
-    # Override manual (lon lat) — sobrepõe o banco para um aeródromo sem geom:
-    python run_v1.py SBMT SBJD --origin-lonlat -46.6377 -23.5092 \
-                               --dest-lonlat   -46.9436 -23.1817
+    # Coordenadas lidas automaticamente de published.adhps.geom:
+    python run_v1.py SBBH SBMT
 """
 from __future__ import annotations
 
@@ -35,64 +31,58 @@ from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.plot_route import plot_v1_route
-from nexatlas_router.resolver import AdhpsGeomResolver
-
-AERODROME_COORD_SQL: str | None = None
 
 
 def get_conn():
-    return psycopg2.connect(
-        host=os.environ["NEXATLAS_DB_HOST"],
-        port=os.environ.get("NEXATLAS_DB_PORT", "5432"),
-        dbname=os.environ["NEXATLAS_DB_NAME"],
-        user=os.environ["NEXATLAS_DB_USER"],
+    # Defaults do esquema published (jetstream:5433); sobrescrevíveis por env.
+    conn = psycopg2.connect(
+        host=os.environ.get("NEXATLAS_DB_HOST", "jetstream.nexatlas.com"),
+        port=os.environ.get("NEXATLAS_DB_PORT", "5433"),
+        dbname=os.environ.get("NEXATLAS_DB_NAME", "jetstream"),
+        user=os.environ.get("NEXATLAS_DB_USER", "ivansilverio"),
         password=os.environ["NEXATLAS_DB_PASSWORD"],
     )
+    with conn.cursor() as cur:
+        cur.execute("SET search_path TO published, public;")
+    conn.commit()
+    return conn
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Rota V1 (VFR) com GWO")
-    ap.add_argument("origin", help="ICAO de origem (ex: SBMT)")
-    ap.add_argument("dest", help="ICAO de destino (ex: SBJD)")
-    ap.add_argument("--origin-lonlat", nargs=2, type=float, metavar=("LON", "LAT"))
-    ap.add_argument("--dest-lonlat", nargs=2, type=float, metavar=("LON", "LAT"))
+    ap = argparse.ArgumentParser(description="Rota V1 (VFR REA) com GWO — published")
+    ap.add_argument("origin", help="ICAO de origem (ex: SBBH)")
+    ap.add_argument("dest", help="ICAO de destino (ex: SBMT)")
     ap.add_argument("--chart-radius-nm", type=float, default=60.0)
     ap.add_argument("--link-radius-nm", type=float, default=30.0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--iterations", type=int, default=200)
     ap.add_argument("--wolves", type=int, default=30)
+    ap.add_argument("--max-hops", type=int, default=80)
     ap.add_argument("--plot", default=None, help="caminho do PNG de saída")
     args = ap.parse_args()
 
     conn = get_conn()
-    loader = PostgisLoader(conn, aerodrome_coord_sql=AERODROME_COORD_SQL,
-                           schema="v2")
-
-    resolver = None
-    if not (args.origin_lonlat and args.dest_lonlat):
-        resolver = AdhpsGeomResolver(conn)
-        print("Fonte de coordenadas: adhps.geom (banco oficial)\n")
+    # Loader resolve aeródromos direto de published.adhps.geom (sem resolver externo).
+    loader = PostgisLoader(conn)
 
     graph, meta = loader.build_subgraph(
         args.origin, args.dest,
-        origin_lonlat=tuple(args.origin_lonlat) if args.origin_lonlat else None,
-        dest_lonlat=tuple(args.dest_lonlat) if args.dest_lonlat else None,
-        resolver=resolver,
         chart_radius_nm=args.chart_radius_nm,
         link_radius_nm=args.link_radius_nm,
     )
     n_real = sum(1 for es in graph.adj.values() for e in es if not e.synthetic)
     print(f"Cartas: {meta['charts']}")
-    print(f"Subgrafo: {graph.n} nós, {n_real} arestas de corredor\n")
+    print(f"Subgrafo: {graph.n} nós, {n_real} arestas de corredor REA")
+    print(f"Sintéticas: {meta['synthetic_diagnostics']}\n")
 
     result = plan_v1_route(
         graph, meta["origin_id"], meta["dest_id"],
         GWOConfig(seed=args.seed, n_iterations=args.iterations,
-                  n_wolves=args.wolves, max_hops=40),
+                  n_wolves=args.wolves, max_hops=args.max_hops),
     )
 
     payload = result.to_dict()
-    payload["meta"].pop("fitness_history")
+    payload["meta"].pop("fitness_history", None)
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
     plot_path = args.plot or f"rota_{args.origin}_{args.dest}.png"

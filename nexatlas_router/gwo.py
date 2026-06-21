@@ -9,10 +9,15 @@ Mundo discreto (onde a rota existe):
     sucessor de maior prioridade. Toda rota decodificada é topologicamente
     válida por construção.
 
-Fitness (minimização):
+Fitness (minimização) — SIMPLIFICADO:
     f = distância_total
         + [incompleta] * (M + λ * distância_restante_até_o_destino)
-        + μ * violações_de_corredor_obrigatório
+
+    As antigas penalidades rígidas de "portão de entrada/corredor obrigatório"
+    foram REMOVIDAS. A topologia correta agora é garantida no grafo pela
+    Trava de Continuidade (graphmodel.add_synthetic_edges): nós com trecho
+    obrigatório pendente não recebem saída sintética, então o GWO só precisa
+    minimizar distância.
 """
 from __future__ import annotations
 
@@ -37,16 +42,12 @@ class DecodedRoute:
 @dataclass
 class GWOConfig:
     n_wolves: int = 30
-    n_iterations: int = 150
-    max_hops: int = 80                     # AUMENTADO: de 30 para 80 para suportar rotas longas com múltiplos TMAs
+    n_iterations: int = 200
+    max_hops: int = 80                     # suporta rotas longas com múltiplas TMAs
     seed: Optional[int] = None
-    # Penalidades (calibradas como múltiplos da distância direta)
+    # Penalidade só para rota INCOMPLETA (mantida — garante preferência por rota fechada)
     incomplete_base_factor: float = 10.0   # M = fator * distância direta
     incomplete_dist_factor: float = 2.0    # λ
-    mandatory_factor: float = 20.0         # AUMENTADO: Penalidade extrema para evitar o bypass (fallback) do grafo
-    # Regra V1 (piloto orientador): corredor existente => passagem obrigatória
-    enforce_corridor_rule: bool = True
-    corridor_radius_nm: float = 30.0       # raio de "corredor aplicável"
     # Critério de parada antecipada: iterações sem melhora do alfa
     patience: Optional[int] = 50
 
@@ -54,8 +55,8 @@ class GWOConfig:
 @dataclass
 class GWOResult:
     best: DecodedRoute
-    alternatives: list[DecodedRoute] = field(default_factory=list)  # próximas melhores, distintas
-    history: list[float] = field(default_factory=list)   # fitness do alfa/iteração
+    alternatives: list[DecodedRoute] = field(default_factory=list)
+    history: list[float] = field(default_factory=list)
     iterations_run: int = 0
 
 
@@ -70,16 +71,8 @@ class GWORouter:
 
         self.direct_m = graph.direct_distance_m(origin_id, dest_id)
         self.M = self.cfg.incomplete_base_factor * self.direct_m
-        self.mu = self.cfg.mandatory_factor * self.direct_m
-
-        # Regra V1: corredor aplicável => uso obrigatório.
-        if self.cfg.enforce_corridor_rule:
-            r = self.cfg.corridor_radius_nm
-            self.dep_corridor_nodes = graph.corridor_nodes_near(origin_id, r)
-            self.arr_corridor_nodes = graph.corridor_nodes_near(dest_id, r)
-        else:
-            self.dep_corridor_nodes = set()
-            self.arr_corridor_nodes = set()
+        # Nenhuma penalidade de corredor: a Trava de Continuidade no grafo
+        # já impede o atalho indevido. O GWO foca apenas na distância.
 
     # ------------------------------------------------------------- decoding
     def decode(self, priorities: np.ndarray) -> DecodedRoute:
@@ -111,26 +104,13 @@ class GWORouter:
 
     # -------------------------------------------------------------- fitness
     def fitness(self, route: DecodedRoute) -> float:
+        # Fitness = distância. Único acréscimo: penalidade por rota incompleta.
         f = route.distance_m
-
         if not route.complete:
             last = self.g.nodes[route.node_ids[-1]]
             dest = self.g.nodes[self.dest]
             remaining = haversine_m(last.pos, dest.pos)
             f += self.M + self.cfg.incomplete_dist_factor * remaining
-
-        if route.complete:
-            # Nós de corredor REAL efetivamente percorridos pela rota
-            used = {nid for e in route.edges if not e.synthetic
-                    for nid in (e.source, e.target)}
-
-            # Regra V1: existe corredor na saída/chegada? então é obrigatório usá-lo.
-            if self.dep_corridor_nodes and not (self.dep_corridor_nodes & used):
-                f += self.mu
-            
-            if self.arr_corridor_nodes and not (self.arr_corridor_nodes & used):
-                f += self.mu
-
         return f
 
     # ----------------------------------------------------------------- core
@@ -168,7 +148,7 @@ class GWORouter:
                     alpha_f, alpha_p = f, P[i].copy()
                     route.fitness = f
                     best_route = route
-                    stale = -1  
+                    stale = -1
                 elif f < beta_f:
                     delta_f, delta_p = beta_f, beta_p
                     beta_f, beta_p = f, P[i].copy()
@@ -185,7 +165,7 @@ class GWORouter:
             if delta_p is None:
                 delta_p, delta_f = beta_p, beta_f
 
-            a = 2.0 - 2.0 * it / cfg.n_iterations 
+            a = 2.0 - 2.0 * it / cfg.n_iterations
 
             X1 = self._hunt_step(P, alpha_p, a)
             X2 = self._hunt_step(P, beta_p, a)
@@ -193,8 +173,7 @@ class GWORouter:
             P = (X1 + X2 + X3) / 3.0
             np.clip(P, 0.0, 1.0, out=P)
 
-        return self._finish(best_route, best_by_route, history,
-                            cfg.n_iterations)
+        return self._finish(best_route, best_by_route, history, cfg.n_iterations)
 
     def _finish(self, best_route, best_by_route, history, iters) -> GWOResult:
         ordered = sorted(best_by_route.values(), key=lambda r: r.fitness)
@@ -213,7 +192,7 @@ class GWORouter:
     def _hunt_step(self, P: np.ndarray, leader: np.ndarray, a: float) -> np.ndarray:
         r1 = self.rng.random(P.shape)
         r2 = self.rng.random(P.shape)
-        A = 2.0 * a * r1 - a          
+        A = 2.0 * a * r1 - a
         C = 2.0 * r2
         D = np.abs(C * leader - P)
         return leader - A * D

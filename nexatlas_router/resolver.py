@@ -1,96 +1,64 @@
-"""Resolução de ICAO -> coordenada (ponto terminal da rota).
+"""Resolução de ICAO -> coordenada — MÓDULO DEPRECIADO.
 
-A tabela `adhps` tem a coluna `geom GEOMETRY(Point, 4326) NULLABLE`.
-Aeródromos sem coordenada (poucos, privados/pequenos) levantam LookupError.
+Com o esquema **published**, a coluna ``adhps.geom`` é nativa e o
+``PostgisLoader.fetch_aerodrome`` (db.py) resolve os aeródromos diretamente
+via ST_X(geom)/ST_Y(geom). Não há mais necessidade de um resolver externo.
 
-DESENHO: interface AerodromeResolver com implementações plugáveis.
-Trocar a fonte = trocar a instância passada ao motor. Nenhuma outra parte do
-código muda.
-
+``AdhpsGeomResolver`` é mantido apenas como casca de compatibilidade e emite
+um DeprecationWarning. Os demais resolvers (CSV/manual) seguem disponíveis
+para usos offline/standalone (ex.: plot_national sem acesso a adhps).
 """
 from __future__ import annotations
 
-from typing import Any, Optional, Protocol
+import warnings
+from typing import Any, Protocol
 
 from .geo import LonLat
 from .graphmodel import Node
 
 
 class AerodromeResolver(Protocol):
-    """Contrato: dado um ICAO, devolve o nó terminal com coordenada."""
     def resolve(self, icao: str) -> Node: ...
 
 
-# ---------------------------------------------------------------------------
-# Backends REAIS (prontos, aguardando a fonte de dados existir)
-# ---------------------------------------------------------------------------
-
 class AdhpsGeomResolver:
-    """Lê a coordenada da `adhps.geom` (GEOMETRY(Point, 4326) NULLABLE).
+    """DEPRECIADO. Use ``PostgisLoader.fetch_aerodrome`` (db.py) diretamente.
 
-    Aeródromos pequenos/privados podem ter geom NULL (ETL não capturou).
-    Nesses casos levanta LookupError com mensagem explicativa.
+    Mantido só para não quebrar imports antigos. Internamente delega a leitura
+    a published.adhps.geom, mas o caminho recomendado é o loader.
     """
+
     def __init__(self, conn: Any, geom_col: str = "geom") -> None:
+        warnings.warn(
+            "AdhpsGeomResolver está depreciado: o PostgisLoader já resolve "
+            "aeródromos via published.adhps.geom. Use loader.fetch_aerodrome().",
+            DeprecationWarning, stacklevel=2,
+        )
         self.conn = conn
         self.geom_col = geom_col
 
     def resolve(self, icao: str) -> Node:
-        sql = f"""
-            SELECT icao, ST_X({self.geom_col}) AS lon, ST_Y({self.geom_col}) AS lat
-            FROM adhps WHERE icao = %(code)s LIMIT 1;
-        """
+        # Delegação mínima para compatibilidade (esquema published).
+        sql = (f"SELECT icao, ST_X({self.geom_col}) AS lon, "
+               f"ST_Y({self.geom_col}) AS lat "
+               f"FROM published.adhps WHERE icao = %(code)s LIMIT 1;")
         with self.conn.cursor() as cur:
             cur.execute(sql, {"code": icao})
             row = cur.fetchone()
         if not row:
-            raise LookupError(f"Aeródromo '{icao}' não encontrado na adhps.")
+            raise LookupError(f"Aeródromo '{icao}' não encontrado em published.adhps.")
         code, lon, lat = row
         if lon is None or lat is None:
-            raise LookupError(
-                f"'{icao}' existe na adhps mas sem coordenada "
-                "(aeródromo pequeno/privado — geom não ingerida pelo ETL)."
-            )
-        return Node(id=f"ADHP:{code}", name=code,
-                    pos=LonLat(lon, lat), kind="aerodrome")
-
-
-class OwnTableResolver:
-    """Lê de uma tabela própria de aeródromos (ex.: importada do DECEA/AISWEB).
-
-    Use se o admin autorizar criar uma fonte própria enquanto a oficial não
-    fica pronta. Espera uma tabela com colunas (icao, geom Point).
-    """
-    def __init__(self, conn: Any, table: str = "adhps_coords",
-                 geom_col: str = "geom") -> None:
-        self.conn = conn
-        self.table = table
-        self.geom_col = geom_col
-
-    def resolve(self, icao: str) -> Node:
-        sql = f"""
-            SELECT icao, ST_X({self.geom_col}) AS lon, ST_Y({self.geom_col}) AS lat
-            FROM {self.table} WHERE icao = %(code)s LIMIT 1;
-        """
-        with self.conn.cursor() as cur:
-            cur.execute(sql, {"code": icao})
-            row = cur.fetchone()
-        if not row:
-            raise LookupError(f"Aeródromo '{icao}' não encontrado em {self.table}.")
-        code, lon, lat = row
-        return Node(id=f"ADHP:{code}", name=code,
-                    pos=LonLat(lon, lat), kind="aerodrome")
+            raise LookupError(f"'{icao}' existe mas sem coordenada (geom nula).")
+        return Node(id=f"ADHP:{code}", name=code, pos=LonLat(lon, lat),
+                    kind="aerodrome")
 
 
 class CsvResolver:
-    """Lê coordenadas de um CSV (icao, name, lon, lat, ...).
+    """Lê coordenadas de um CSV (icao,name,lon,lat[,...]).
 
-    PROVISÓRIO mas com dado REAL: o CSV padrão é derivado do OurAirports
-    (base pública, domínio público, davidmegginson/ourairports-data),
-    filtrado para ICAOs brasileiros. NÃO é dado inventado — é fonte pública
-    rastreável, usada só até a coordenada oficial existir no banco interno.
-
-    Cabeçalho esperado: icao,name,lon,lat[,type,municipality]
+    Útil para execuções offline (ex.: plot_national de demonstração) sem
+    acesso ao banco. Fonte pública rastreável (OurAirports).
     """
     def __init__(self, csv_path: str) -> None:
         import csv
@@ -108,27 +76,20 @@ class CsvResolver:
     def resolve(self, icao: str) -> Node:
         key = icao.strip().upper()
         if key not in self.table:
-            raise LookupError(
-                f"Aeródromo '{icao}' não está no CSV de coordenadas "
-                f"(fonte pública OurAirports). Verifique o código ICAO.")
+            raise LookupError(f"Aeródromo '{icao}' não está no CSV de coordenadas.")
         name, lon, lat = self.table[key]
-        return Node(id=f"ADHP:{key}", name=name,
-                    pos=LonLat(lon, lat), kind="aerodrome")
+        return Node(id=f"ADHP:{key}", name=name, pos=LonLat(lon, lat),
+                    kind="aerodrome")
 
 
 class ManualResolver:
-    """Coordenada informada explicitamente na chamada (origin_lonlat/dest_lonlat).
-
-    É o que usamos no teste SBMT->SBJD: a coordenada veio do usuário, não de
-    dado inventado. Útil quando o piloto fornece as pontas manualmente.
-    """
+    """Coordenada informada explicitamente: {"SBMT": (lon, lat), ...}."""
     def __init__(self, coords: dict[str, tuple[float, float]]) -> None:
-        # coords: {"SBMT": (lon, lat), ...}  — fornecido por quem chama
         self.coords = coords
 
     def resolve(self, icao: str) -> Node:
         if icao not in self.coords:
             raise LookupError(f"Coordenada de '{icao}' não foi fornecida.")
         lon, lat = self.coords[icao]
-        return Node(id=f"ADHP:{icao}", name=icao,
-                    pos=LonLat(lon, lat), kind="aerodrome")
+        return Node(id=f"ADHP:{icao}", name=icao, pos=LonLat(lon, lat),
+                    kind="aerodrome")
