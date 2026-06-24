@@ -48,6 +48,7 @@ class Edge:
     lower_limit: Optional[int] = None
     higher_limit: Optional[int] = None
     synthetic: bool = False             # True para arestas "DIRETO" criadas em runtime
+    geom: Optional[tuple] = None        # traçado real do corredor: ((lon,lat), ...) — só nas arestas reais
 
 
 class RouteGraph:
@@ -74,17 +75,7 @@ class RouteGraph:
             )
         self.adj[edge.source].append(edge)
 
-    # ------------------------------------------------------ TRAVA DE CONTINUIDADE
-    def _has_mandatory_real_exit(self, node_id: str) -> bool:
-        """TRAVA DE CONTINUIDADE: o nó tem alguma aresta REAL de saída obrigatória?
-
-        Se sim, ele NÃO pode receber pontes sintéticas de saída (para o destino
-        ou para outra TMA): a aeronave precisa seguir o trecho obrigatório até o
-        fim. Arestas sintéticas são ignoradas neste teste.
-        """
-        return any((not e.synthetic) and e.is_mandatory
-                   for e in self.adj.get(node_id, []))
-
+    # ------------------------------------------------------ consultas de topologia
     def _has_real_edge(self, src: str, tgt: str) -> bool:
         """Já existe um corredor REAL entre estes dois nós? (evita duplicar com ponte)."""
         return any((not e.synthetic) and e.target == tgt
@@ -133,6 +124,66 @@ class RouteGraph:
                 if e.target not in seen:
                     seen.add(e.target)
                     stack.append(e.target)
+        return False
+
+    # ----------------------------------------------- portão geométrico (V2: cruzamento)
+    # PROBLEMA: um trecho sintético "DIRETO" é uma reta que só conhece suas duas
+    # pontas. Ela pode passar POR CIMA de um corredor REA obrigatório que a rota
+    # não voa — algo proibido (cortar o espaço protegido de um corredor). A fase
+    # 'owes' resolve a topologia ("entrar obriga a voar"), mas NÃO a geometria.
+    # Aqui adicionamos um teste geométrico na CONSTRUÇÃO do grafo: a aresta
+    # sintética que cruzar um corredor obrigatório de uma carta RELEVANTE não é
+    # criada. Assim o caminho mínimo de fase é forçado a entrar pelo portal certo.
+    @staticmethod
+    def _proper_cross(p1, p2, p3, p4) -> bool:
+        """True se os segmentos p1p2 e p3p4 se cruzam no INTERIOR (cruzamento
+        próprio). Toque em extremidade compartilhada (ex.: portal) ou colinear
+        NÃO conta — todas as orientações precisam ser estritamente não-nulas."""
+        def o(a, b, c) -> float:
+            return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+        d1, d2 = o(p3, p4, p1), o(p3, p4, p2)
+        d3, d4 = o(p1, p2, p3), o(p1, p2, p4)
+        if d1 == 0 or d2 == 0 or d3 == 0 or d4 == 0:
+            return False
+        return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+    def _mandatory_segments(self, charts: set) -> list[tuple]:
+        """Sub-segmentos (p1,p2) dos corredores REAIS OBRIGATÓRIOS das cartas
+        relevantes. Usa o traçado real (Edge.geom) quando há; senão, a reta
+        entre os dois nós. Trabalha em lon/lat planar — para a escala de uma TMA
+        o cruzamento é invariante (um reescalonamento de longitude é afim)."""
+        segs: list[tuple] = []
+        if not charts:
+            return segs
+        for src, edges in self.adj.items():
+            for e in edges:
+                if e.synthetic or not e.is_mandatory:
+                    continue
+                if self.nodes[e.source].chart not in charts:
+                    continue
+                if e.geom and len(e.geom) >= 2:
+                    pts = e.geom
+                else:
+                    a, b = self.nodes[e.source].pos, self.nodes[e.target].pos
+                    pts = ((a.lon, a.lat), (b.lon, b.lat))
+                for i in range(len(pts) - 1):
+                    segs.append((pts[i], pts[i + 1]))
+        return segs
+
+    def _crosses_mandatory(self, a_pos, b_pos, segs: list) -> bool:
+        """A reta a->b cruza algum corredor obrigatório (interior)? Ignora o
+        sub-segmento que compartilha extremidade com a reta (toque no portal)."""
+        if not segs:
+            return False
+        p1, p2 = (a_pos.lon, a_pos.lat), (b_pos.lon, b_pos.lat)
+        eps = 1e-6
+        def _touch(p, q) -> bool:
+            return abs(p[0] - q[0]) < eps and abs(p[1] - q[1]) < eps
+        for q1, q2 in segs:
+            if _touch(p1, q1) or _touch(p1, q2) or _touch(p2, q1) or _touch(p2, q2):
+                continue
+            if self._proper_cross(p1, p2, q1, q2):
+                return True
         return False
 
     def add_synthetic_edges(
@@ -194,6 +245,20 @@ class RouteGraph:
         origin_chart = _local_chart(origin.pos) if origin_in_tma else None
         dest_chart = _local_chart(dest.pos) if dest_in_tma else None
 
+        # PORTÃO GEOMÉTRICO: só atua contra os corredores OBRIGATÓRIOS das cartas
+        # RELEVANTES (carta da origem e/ou do destino quando a ponta está em TMA).
+        # Sem ponta em TMA => conjunto vazio => portão é no-op (preserva os casos
+        # "Nenhuma REA" e "REA não relevante": o DIRETO continua liberado).
+        relevant_charts = set()
+        if origin_in_tma and origin_chart:
+            relevant_charts.add(origin_chart)
+        if dest_in_tma and dest_chart:
+            relevant_charts.add(dest_chart)
+        mand_segs = self._mandatory_segments(relevant_charts)
+        self._gate_charts = relevant_charts          # cartas que o portão protege
+        entries_gated = exits_gated = bridges_gated = 0
+        entries_relaxed = exits_relaxed = 0
+
         # 1) ENTRADA: origem -> REA.
         #    Em TMA: liga aos k nós-portal (com corredor de saída) mais próximos
         #    DA PRÓPRIA CARTA da origem — entrar já obriga a voar o corredor
@@ -205,7 +270,13 @@ class RouteGraph:
             entry_targets = self._k_nearest(origin.pos, portals or rea_nodes, entry_exit_k)
         else:
             entry_targets = rea_nodes
-        for nid in entry_targets:
+        # portão: descarta entradas cuja reta cruza um corredor obrigatório.
+        kept_entries = [nid for nid in entry_targets
+                        if not self._crosses_mandatory(origin.pos, self.nodes[nid].pos, mand_segs)]
+        entries_gated = len(entry_targets) - len(kept_entries)
+        if not kept_entries and entry_targets:   # válvula: não isolar a origem
+            kept_entries, entries_gated, entries_relaxed = entry_targets, 0, 1
+        for nid in kept_entries:
             d = haversine_m(origin.pos, self.nodes[nid].pos)
             self.add_edge(Edge(origin_id, nid, w(d), corridor="DIRETO", synthetic=True))
             linked_in += 1
@@ -225,7 +296,13 @@ class RouteGraph:
             exit_sources = [n for n in rea_nodes if self._has_real_incoming(n)] or rea_nodes
         exit_candidates = [(haversine_m(self.nodes[nid].pos, dest.pos), nid)
                            for nid in exit_sources]
-        for d, nid in exit_candidates:
+        # portão: descarta saídas cuja reta até o destino cruza corredor obrigatório.
+        kept_exits = [(d, nid) for d, nid in exit_candidates
+                      if not self._crosses_mandatory(self.nodes[nid].pos, dest.pos, mand_segs)]
+        exits_gated = len(exit_candidates) - len(kept_exits)
+        if not kept_exits and exit_candidates:    # válvula: não isolar o destino
+            kept_exits, exits_gated, exits_relaxed = exit_candidates, 0, 1
+        for d, nid in kept_exits:
             self.add_edge(Edge(nid, dest_id, w(d), corridor="DIRETO", synthetic=True))
             linked_out += 1
         exits_safety_valve = 0
@@ -262,6 +339,10 @@ class RouteGraph:
                     cands.append((d, b))
             cands.sort(key=lambda t: t[0])
             for d, b in cands[:bridge_k]:
+                # portão: a ponte não pode cortar um corredor obrigatório relevante.
+                if self._crosses_mandatory(pa, self.nodes[b].pos, mand_segs):
+                    bridges_gated += 1
+                    continue
                 self.add_edge(Edge(a, b, w(d), corridor="DIRETO", synthetic=True))
                 bridges += 1
 
@@ -317,6 +398,11 @@ class RouteGraph:
             "exits_safety_valve": exits_safety_valve,
             "inter_tma_bridges": bridges,
             "bridges_safety_valve": bridges_safety_valve,
+            "entries_gated_crossing": entries_gated,
+            "exits_gated_crossing": exits_gated,
+            "bridges_gated_crossing": bridges_gated,
+            "entries_relaxed_crossing": entries_relaxed,
+            "exits_relaxed_crossing": exits_relaxed,
             "direct_created": direct_created,
             "requires_corridor": self.requires_corridor,
             "n_rea_nodes": len(rea_nodes),

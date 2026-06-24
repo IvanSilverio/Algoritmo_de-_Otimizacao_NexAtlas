@@ -27,10 +27,29 @@ constante GEOM_EXPR abaixo, que centraliza essa escolha em um único ponto.
 """
 from __future__ import annotations
 
-from typing import Any, Iterable
+import json
+from typing import Any, Iterable, Optional
 
 from .geo import LonLat
 from .graphmodel import Edge, Node, RouteGraph
+
+
+def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
+    """GeoJSON (LineString) -> tupla ((lon,lat), ...) para o portão geométrico.
+
+    Aceita None/tipo inesperado e devolve None (a aresta funciona sem traçado;
+    o portão cai na reta nó->nó). Pontos isolados ou vazios também viram None.
+    """
+    if not geom_json:
+        return None
+    try:
+        coords = json.loads(geom_json).get("coordinates")
+    except (ValueError, AttributeError):
+        return None
+    if not coords or not isinstance(coords, list):
+        return None
+    pts = tuple((float(c[0]), float(c[1])) for c in coords if len(c) >= 2)
+    return pts if len(pts) >= 2 else None
 
 # ---------------------------------------------------------------------------
 # Esquema published (única fonte da verdade; v2 removido)
@@ -86,6 +105,7 @@ SELECT c.id,
        c.higher_limit,
        c.heading,
        c.class                      AS airspace_class,
+       ST_AsGeoJSON({GEOM_EXPR('c.geom')}) AS geom_json,             -- traçado real do corredor
        COALESCE(
            ST_Length({GEOM_EXPR('c.geom')}::geography),                 -- corredor real (curvas)
            ST_DistanceSphere({GEOM_EXPR('o.geom')}, {GEOM_EXPR('d.geom')})  -- fallback: reta entre nós
@@ -189,16 +209,19 @@ class PostgisLoader:
                                 kind="waypoint", chart=chart))
 
             for (_id, src, tgt, corridor, mandatory, lo, hi,
-                 heading, cls, w) in self._rows(
+                 heading, cls, geom_json, w) in self._rows(
                 SQL_CONNECTIONS_BY_CHARTS, {"charts": charts}
             ):
                 if src in g.nodes and tgt in g.nodes:
-                    # Edge recebe corridor (name) e is_mandatory — usados pela
-                    # Trava de Continuidade e pela classificação visual.
+                    # Edge recebe corridor (name), is_mandatory e o traçado real
+                    # (geom) — usados pela classificação visual e pelo portão
+                    # geométrico (anti-cruzamento) em add_synthetic_edges.
+                    geom = _parse_linestring(geom_json)
                     g.add_edge(Edge(src, tgt, float(w), corridor=corridor,
                                     connection_id=_id,
                                     is_mandatory=bool(mandatory),
-                                    lower_limit=lo, higher_limit=hi))
+                                    lower_limit=lo, higher_limit=hi,
+                                    geom=geom))
 
         diag = g.add_synthetic_edges(origin.id, dest.id)
 

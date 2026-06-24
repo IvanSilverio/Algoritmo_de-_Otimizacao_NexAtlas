@@ -92,17 +92,16 @@ def _print_route(origin: str, dest: str, result) -> None:
     print(f"{BLD}  ROTA VFR  {CYN}{origin}{RST}{BLD} → {CYN}{dest}{RST}")
     print(_hr("═")); print()
 
-    # tabela de pontos
-    W = [4, 28, 11, 12, 12]; SEP = "  "
-    def _row(*cells):
-        return SEP + SEP.join(str(c).ljust(w) for c, w in zip(cells, W))
-    print(BLD + _row("#", "Nome", "Tipo", "Latitude", "Longitude") + RST)
-    print(DIM + "  " + "─" * (sum(W) + len(SEP) * len(W)) + RST)
-    for i, p in enumerate(points, 1):
-        tipo = "Aeródromo" if p["kind"] == "aerodrome" else "Waypoint"
-        cor = YLW if p["kind"] == "aerodrome" else RST
-        print(cor + _row(i, p["name"][:28], tipo,
-                         f"{p['lat']:+.5f}°", f"{p['lon']:+.5f}°") + RST)
+    # rota trecho a trecho — formato dos casos de referência:
+    #   ORIGEM -> DESTINO: CORREDOR   (ou DIRETO quando não há corredor REA)
+    print(f"  {BLD}Rota (trecho a trecho):{RST}")
+    for lg in result.legs:
+        if lg["corridor"] == "DIRETO":
+            label = f"{DIM}DIRETO{RST}"
+        else:
+            color = GRN if lg["is_mandatory"] else CYN
+            label = f"{color}{lg['corridor']}{RST}"
+        print(f"    {lg['from']} {DIM}->{RST} {lg['to']}: {label}")
     print()
 
     # array JSON

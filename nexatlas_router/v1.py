@@ -20,7 +20,7 @@ from typing import Any, Optional
 from .geo import m_to_nm, haversine_m
 from .graphmodel import RouteGraph
 from .gwo import GWOConfig, GWORouter
-from .dijkstra import dijkstra, shortest_route
+from .dijkstra import shortest_route
 
 
 def _real_distance_m(graph: RouteGraph, route) -> float:
@@ -70,10 +70,30 @@ def _corridors_used(route) -> list[dict]:
     return [{"name": c, "is_mandatory": mandatory[c]} for c in order]
 
 
+def _route_legs(graph: RouteGraph, route) -> list[dict]:
+    """Rota trecho a trecho, no formato dos casos de referência.
+
+    Para cada aresta da rota (alinhada a node_ids[i] -> node_ids[i+1]), devolve
+    de onde vem, para onde vai e por qual corredor REA passa — ou "DIRETO"
+    quando o trecho é sintético (entrada/saída da malha ou salto entre TMAs).
+    """
+    legs: list[dict] = []
+    for e in route.edges:
+        is_direto = e.synthetic or not e.corridor or e.corridor == "DIRETO"
+        legs.append({
+            "from": graph.nodes[e.source].name,
+            "to": graph.nodes[e.target].name,
+            "corridor": "DIRETO" if is_direto else e.corridor,
+            "is_mandatory": (not is_direto) and e.is_mandatory,
+        })
+    return legs
+
+
 @dataclass
 class V1RouteResult:
     points: list[dict]
     corridors_used: list[dict]          # [{name, is_mandatory}]
+    legs: list[dict]                    # [{from, to, corridor, is_mandatory}]
     direct_distance_nm: float
     total_distance_nm: float
     reason: str
@@ -83,6 +103,7 @@ class V1RouteResult:
         return {
             "points": self.points,
             "corridors_used": self.corridors_used,
+            "legs": self.legs,
             "direct_distance_nm": round(self.direct_distance_nm, 1),
             "total_distance_nm": round(self.total_distance_nm, 1),
             "reason": self.reason,
@@ -136,6 +157,7 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
 
     points = _route_points(graph, route)
     corridors = _corridors_used(route)
+    legs = _route_legs(graph, route)
 
     direct_nm = m_to_nm(graph.direct_distance_m(origin_id, dest_id))
     total_nm = m_to_nm(_real_distance_m(graph, route))   # distância REAL (sem penalidade)
@@ -172,6 +194,7 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
     return V1RouteResult(
         points=points,
         corridors_used=corridors,
+        legs=legs,
         direct_distance_nm=direct_nm,
         total_distance_nm=total_nm,
         reason=reason,

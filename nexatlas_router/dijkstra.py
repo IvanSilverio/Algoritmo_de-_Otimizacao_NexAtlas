@@ -106,9 +106,6 @@ def shortest_route(graph: RouteGraph, origin_id: str, dest_id: str,
                 return 1
         return 0
 
-    def owes_at(v: str) -> int:        # compat.
-        return owes_real(v)
-
     need_used = 1 if require_real_edge else 0
     start = (origin_id, 0, 0)
     dist: dict[tuple, float] = {start: 0.0}
