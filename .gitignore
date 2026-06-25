@@ -3,6 +3,7 @@
 .env
 *.env
 CLAUDE.md
+amostra_nexatlas_completa.json
 # Ambiente virtual
 .venv/
 venv/
