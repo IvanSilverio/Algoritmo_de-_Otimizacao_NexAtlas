@@ -20,7 +20,7 @@ from typing import Any, Optional
 from .geo import m_to_nm, haversine_m
 from .graphmodel import RouteGraph
 from .gwo import GWOConfig, GWORouter
-from .dijkstra import shortest_route
+from .dijkstra import shortest_route, k_shortest_routes
 
 
 def _real_distance_m(graph: RouteGraph, route) -> float:
@@ -117,37 +117,26 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
     # >=1 corredor real (graph.requires_corridor, definido em add_synthetic_edges).
     require = bool(getattr(graph, "requires_corridor", False))
 
-    # FASE 1 — MALHA PRIMEIRO. shortest_route é EXATO/DETERMINÍSTICO e codifica
-    # a regra de fase das TMAs (voar os corredores de cada TMA antes de saltar).
-    # O GWO roda só para popular ALTERNATIVAS — ele não conhece a regra de fase,
-    # então NÃO pode sobrepor a rota exata quando uma ponta está em TMA.
+    # AUTORIDADE: shortest_route (Dijkstra com ESTADO DE FASE) — exato e
+    # determinístico, codifica a regra das TMAs. As alternativas também vêm do
+    # Dijkstra (k-shortest/Yen, mais abaixo), não do GWO: assim TODAS as rotas
+    # exibidas respeitam a mesma regra de validade. O GWO segue no código,
+    # reservado ao V2/V3 multiobjetivo (ele nunca superava o Dijkstra em distância).
+    used_direct_fallback = False
     mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=require)
 
-    result = GWORouter(graph, origin_id, dest_id, config).run()
-    gwo_route = result.best
-
-    used_direct_fallback = False
-
-    if require:
-        # Uma ponta está em TMA: a rota com fase é a autoridade (ótima e correta).
+    if mesh is not None and mesh.complete:
         route = mesh
-        route_source = "dijkstra-fase"
+        eff_require = require
+        route_source = "dijkstra-fase" if require else "dijkstra"
     else:
-        # Nenhuma ponta em TMA: distância pura, direto permitido; GWO pode ajudar.
-        done = [r for r in (gwo_route, mesh) if r is not None and r.complete]
-        route = min(done, key=lambda r: r.distance_m) if done else None
-        route_source = "dijkstra" if route is mesh else "gwo"
-
-    # FASE 2 — FALLBACK DIRETO: a malha REA realmente não conecta com corredor
-    # (mesmo com a válvula de ponte). Só então liberamos o atalho direto.
-    if route is None:
+        # FALLBACK DIRETO: a malha REA realmente não conecta com corredor
+        # (mesmo com a válvula de ponte/escala longa). Só então liberamos o direto.
         if graph.add_direct_fallback(origin_id, dest_id):
             used_direct_fallback = True
-        mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=False)
-        gwo_route = GWORouter(graph, origin_id, dest_id, config).run().best
-        done = [r for r in (gwo_route, mesh) if r is not None and r.complete]
-        route = min(done, key=lambda r: r.distance_m) if done else None
-        route_source = "dijkstra" if route is mesh else "gwo"
+        route = shortest_route(graph, origin_id, dest_id, require_real_edge=False)
+        eff_require = False
+        route_source = "dijkstra"
 
     if route is None or not route.complete:
         raise RuntimeError(
@@ -179,9 +168,16 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             f"{direct_nm:.1f} NM autorizada."
         )
 
-    # Alternativas: próximas melhores rotas distintas que o GWO arquivou.
+    # Alternativas: as próximas melhores rotas DISTINTAS e VÁLIDAS, geradas pelo
+    # k-shortest (algoritmo de Yen) sobre o mesmo grafo com fase — não pelo GWO.
+    # Todas respeitam owes/used. Pego k=5 e descarto a 1ª (== rota principal).
+    k_routes = k_shortest_routes(graph, origin_id, dest_id, k=5,
+                                 require_real_edge=eff_require)
+    main_seq = list(route.node_ids)
     alternatives = []
-    for alt in result.alternatives:
+    for alt in k_routes:
+        if list(alt.node_ids) == main_seq:
+            continue
         alt_real_nm = m_to_nm(_real_distance_m(graph, alt))
         alternatives.append({
             "points": _route_points(graph, alt),
@@ -190,6 +186,8 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             "corridors_used": _corridors_used(alt),
             "n_points": len(alt.node_ids),
         })
+        if len(alternatives) >= 4:
+            break
 
     return V1RouteResult(
         points=points,
@@ -200,10 +198,9 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
         reason=reason,
         meta={
             "alternatives": alternatives,
-            "iterations_run": result.iterations_run,
+            "n_alternatives": len(alternatives),
             "final_fitness_m": route.fitness,
             "used_direct_fallback": used_direct_fallback,
             "route_source": route_source,
-            "fitness_history": result.history,
         },
     )

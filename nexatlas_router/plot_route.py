@@ -129,7 +129,99 @@ def plot_v1_route(graph: RouteGraph, result: V1RouteResult,
     ax.legend(handles=handles, loc="upper right", facecolor=LAND,
               edgecolor="white", labelcolor="white")
 
-    ax.set_title(title or "Malha Aérea VFR — Rota V1 (GWO)",
+    ax.set_title(title or "Malha Aérea VFR — Rota V1",
+                 color="white", fontsize=16, pad=15)
+    ax.set_xlabel("Longitude", color="white")
+    ax.set_ylabel("Latitude", color="white")
+    ax.tick_params(colors="white")
+    plt.tight_layout()
+    plt.savefig(output_path, facecolor=fig.get_facecolor(),
+                edgecolor="none", dpi=300)
+    plt.close(fig)
+    return output_path
+
+# Paleta das rotas candidatas (distinta de rota/origem/destino/corredor)
+ALT_COLORS = ["#c084fc", "#f97316", "#e879f9", "#fde047", "#5eead4"]
+
+
+def plot_v1_alternatives(graph: RouteGraph, result: V1RouteResult,
+                         output_path: str = "rota_v1_alternativas.png",
+                         title: Optional[str] = None,
+                         margin_deg: float = 0.12) -> Optional[str]:
+    """Mapa dedicado às rotas CANDIDATAS (k-shortest): malha ao fundo atenuada,
+    cada alternativa numa cor distinta (fina, semitransparente, com a distância
+    na legenda) e a rota principal em verde por cima. Mantém o mapa principal
+    limpo. Retorna None (sem gerar arquivo) se não houver alternativas.
+    """
+    alternatives = result.meta.get("alternatives", [])
+    if not alternatives:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 12), dpi=300)
+    ax.set_facecolor(OCEAN)
+    fig.patch.set_facecolor(OCEAN)
+    _try_plot_brazil(ax)
+
+    # malha REA ao fundo (atenuada)
+    for edges in graph.adj.values():
+        for e in edges:
+            if e.synthetic:
+                continue
+            a, b = graph.nodes[e.source].pos, graph.nodes[e.target].pos
+            if e.is_mandatory:
+                ax.plot([a.lon, b.lon], [a.lat, b.lat], color=MANDATORY_EDGE,
+                        linewidth=1.2, alpha=0.35, zorder=2)
+            else:
+                ax.plot([a.lon, b.lon], [a.lat, b.lat], color=OPTIONAL_EDGE,
+                        linewidth=0.8, alpha=0.3, linestyle="--", zorder=2)
+
+    wlon = [n.pos.lon for n in graph.nodes.values() if n.kind == "waypoint"]
+    wlat = [n.pos.lat for n in graph.nodes.values() if n.kind == "waypoint"]
+    ax.scatter(wlon, wlat, color=NODE, s=8, zorder=3, alpha=0.4)
+
+    alt_handles = []
+    for i, alt in enumerate(alternatives):
+        color = ALT_COLORS[i % len(ALT_COLORS)]
+        lon = [p["lon"] for p in alt["points"]]
+        lat = [p["lat"] for p in alt["points"]]
+        ax.plot(lon, lat, color=color, linewidth=1.8, alpha=0.85, zorder=4,
+                solid_capstyle="round")
+        ax.scatter(lon[1:-1], lat[1:-1], color=color, s=18, zorder=5,
+                   edgecolors=OCEAN, linewidths=0.6, alpha=0.85)
+        alt_handles.append(Line2D([0], [0], color=color, lw=2.2,
+                           label=f"Alt {i + 1} — {alt['total_distance_nm']:.1f} NM"))
+
+    # rota principal por cima de tudo
+    rlon = [p["lon"] for p in result.points]
+    rlat = [p["lat"] for p in result.points]
+    ax.plot(rlon, rlat, color=ROUTE, linewidth=3.2, zorder=6,
+            solid_capstyle="round")
+    ax.scatter([rlon[0]], [rlat[0]], marker="^", s=220, color=ORIGIN_MK,
+               zorder=7, edgecolors=OCEAN, linewidths=1.5)
+    ax.scatter([rlon[-1]], [rlat[-1]], marker="*", s=340, color=DEST_MK,
+               zorder=7, edgecolors=OCEAN, linewidths=1.5)
+
+    all_lon = list(wlon) + rlon
+    all_lat = list(wlat) + rlat
+    for alt in alternatives:
+        all_lon += [p["lon"] for p in alt["points"]]
+        all_lat += [p["lat"] for p in alt["points"]]
+    ax.set_xlim(min(all_lon) - margin_deg, max(all_lon) + margin_deg)
+    ax.set_ylim(min(all_lat) - margin_deg, max(all_lat) + margin_deg)
+
+    handles = (
+        [Line2D([0], [0], color=ROUTE, lw=3,
+                label=f"Principal — {result.total_distance_nm:.1f} NM")]
+        + alt_handles
+        + [Line2D([0], [0], marker="^", color="none", markerfacecolor=ORIGIN_MK,
+                  markersize=12, label=f"Origem ({result.points[0]['name']})"),
+           Line2D([0], [0], marker="*", color="none", markerfacecolor=DEST_MK,
+                  markersize=16, label=f"Destino ({result.points[-1]['name']})")]
+    )
+    ax.legend(handles=handles, loc="upper right", facecolor=LAND,
+              edgecolor="white", labelcolor="white", fontsize=9)
+
+    ax.set_title(title or "Malha Aérea VFR — Rotas candidatas",
                  color="white", fontsize=16, pad=15)
     ax.set_xlabel("Longitude", color="white")
     ax.set_ylabel("Latitude", color="white")

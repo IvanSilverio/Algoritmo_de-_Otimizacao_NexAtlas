@@ -126,6 +126,60 @@ class RouteGraph:
                     stack.append(e.target)
         return False
 
+    # --------------------------------------- portões de corredor (MÍNIMO-LOCAL)
+    # Um DIRETO (entrada da origem, saída ao destino, salto entre TMAs) só pode
+    # encostar na malha por um PORTÃO — uma PONTA de corredor voltada à referência —
+    # nunca pelo MEIO. A regra é UMA só, agnóstica a grau (ACEITA ENTRONCAMENTO):
+    #   MÍNIMO-LOCAL: o nó é portão se NENHUM vizinho de corredor está mais perto da
+    #   referência que ele. Se um vizinho está mais perto, entrar/sair por ele
+    #   "voaria por cima" desse vizinho — i.e. entraria no MEIO do corredor.
+    # A referência é a ORIGEM (entrada), o DESTINO (saída) ou o NÓ-FONTE do salto
+    # (ponte). NÃO se podam candidatos com folha, dominância nem k-mais-próximos:
+    # os candidatos são AMPLOS (todos os mínimos-locais) e o CAMINHO MÍNIMO + fase
+    # 'owes' escolhem a melhor entre todas as possibilidades. As podas anteriores
+    # descartavam candidatos válidos e davam rotas válidas porém mais longas — ex.:
+    # a dominância na ponte excluía CAMBUÍ e forçava SBBH->SBMT pelo desvio da Dutra
+    # (313 NM) em vez da ponte por CAMBUÍ (~287 NM). Por que mínimo-local basta:
+    #   • impede o "pula-CEASA" (FLORES tem CEASA mais perto da origem -> fora);
+    #   • aceita entroncamento (CAMPO MOURÃO, nó-fim de dois corredores em SBRF);
+    #   • admite alternativas (CHARQUEADAS é mínimo-local e ENTRA na lista, mas o
+    #     caminho mínimo escolhe TEUTÔNIA porque a rota por ela é a mais curta).
+    def _corridor_neighbors(self) -> dict:
+        """node_id -> conjunto de vizinhos por corredor REAL (não-direcionado)."""
+        from collections import defaultdict
+        neigh: dict = defaultdict(set)
+        for src, edges in self.adj.items():
+            for e in edges:
+                if e.synthetic:
+                    continue
+                neigh[e.source].add(e.target)
+                neigh[e.target].add(e.source)
+        return neigh
+
+    def _skips_closer_corridor_node(self, node_id: str, ref_pos,
+                                    neighbors: dict, eps_m: float = 1.0) -> bool:
+        """MÍNIMO-LOCAL negado: o DIRETO de ref_pos até node_id passa por cima de
+        um nó de corredor MAIS PRÓXIMO de ref_pos? (existe vizinho de corredor
+        mais perto -> node_id não é a ponta mais próxima -> 'pula' alguém)."""
+        d_node = haversine_m(self.nodes[node_id].pos, ref_pos)
+        for m in neighbors.get(node_id, ()):
+            if haversine_m(self.nodes[m].pos, ref_pos) < d_node - eps_m:
+                return True
+        return False
+
+    def _is_gateway(self, node_id: str, ref_pos, neighbors: dict,
+                    need_outgoing: bool = True) -> bool:
+        """Portão de corredor (regra ÚNICA, aceita entroncamento): o nó toca a malha
+        real e é MÍNIMO-LOCAL em relação a ref_pos (nenhum vizinho de corredor mais
+        perto de ref_pos). Vale para entrada (ref=origem, need_outgoing), saída
+        (ref=destino, need_outgoing=False -> exige corredor de entrada) e ponte
+        (ref=nó-fonte). Sem folha, sem dominância, sem k: candidatos amplos."""
+        ok = self._has_real_outgoing(node_id) if need_outgoing \
+            else self._has_real_incoming(node_id)
+        if not ok:
+            return False
+        return not self._skips_closer_corridor_node(node_id, ref_pos, neighbors)
+
     # ----------------------------------------------- portão geométrico (V2: cruzamento)
     # PROBLEMA: um trecho sintético "DIRETO" é uma reta que só conhece suas duas
     # pontas. Ela pode passar POR CIMA de um corredor REA obrigatório que a rota
@@ -231,6 +285,12 @@ class RouteGraph:
 
         rea_nodes = [nid for nid, n in self.nodes.items() if n.kind == "waypoint"]
 
+        # Base da regra de PORTÃO (única, ampla): MÍNIMO-LOCAL em relação à
+        # referência. Entrada -> ref=origem; saída -> ref=destino; ponte -> ref=fonte
+        # do salto. Aceita entroncamento; candidatos amplos (sem folha/dominância/k);
+        # o caminho mínimo + fase 'owes' escolhem.
+        corridor_neigh = self._corridor_neighbors()
+
         # Está a ponta DENTRO de uma TMA REA? (define a regra de obrigatoriedade)
         origin_in_tma = self._nearest_rea_m(origin.pos, rea_nodes) <= tma_radius_m
         dest_in_tma = self._nearest_rea_m(dest.pos, rea_nodes) <= tma_radius_m
@@ -258,18 +318,31 @@ class RouteGraph:
         self._gate_charts = relevant_charts          # cartas que o portão protege
         entries_gated = exits_gated = bridges_gated = 0
         entries_relaxed = exits_relaxed = 0
+        entries_non_gateway_dropped = entries_gateway_relaxed = 0
+        bridges_non_gateway_dropped = 0
 
-        # 1) ENTRADA: origem -> REA.
-        #    Em TMA: liga aos k nós-portal (com corredor de saída) mais próximos
-        #    DA PRÓPRIA CARTA da origem — entrar já obriga a voar o corredor
-        #    daquela TMA (a fase 'owes' do caminho restrito cuida do resto).
-        #    Fora de TMA: liga a todos (voo livre longo até a malha da chegada).
+        # 1) ENTRADA: origem -> REA, por PORTÃO de corredor (MÍNIMO-LOCAL, amplo).
+        #    Referência na ORIGEM. Origem EM TMA restringe à carta da origem; FORA de
+        #    TMA usa toda a malha. Admite TODOS os mínimos-locais (sem folha, sem
+        #    corte de k) — inclusive entroncamentos e portões alternativos (CEASA E
+        #    MANNESMANN no SBBH). FLORES/JUATUBA caem (têm vizinho mais perto da
+        #    origem). O caminho mínimo escolhe por onde entrar. Válvula: se nenhum
+        #    mínimo-local servir, relaxa (não isolar a origem).
         if origin_in_tma:
-            portals = [n for n in rea_nodes
-                       if self._has_real_outgoing(n) and self.nodes[n].chart == origin_chart]
-            entry_targets = self._k_nearest(origin.pos, portals or rea_nodes, entry_exit_k)
+            in_chart = [n for n in rea_nodes if self.nodes[n].chart == origin_chart]
+            gateways = [n for n in in_chart
+                        if self._is_gateway(n, origin.pos, corridor_neigh)]
+            portals_legacy = [n for n in in_chart if self._has_real_outgoing(n)]
+            entries_non_gateway_dropped = max(0, len(portals_legacy) - len(gateways))
+            entries_gateway_relaxed = 0 if gateways else 1
+            entry_targets = gateways or portals_legacy or rea_nodes   # amplo + válvula
         else:
-            entry_targets = rea_nodes
+            out_nodes = [n for n in rea_nodes if self._has_real_outgoing(n)]
+            gateways = [n for n in out_nodes
+                        if self._is_gateway(n, origin.pos, corridor_neigh)]
+            entries_non_gateway_dropped = max(0, len(out_nodes) - len(gateways))
+            entries_gateway_relaxed = 0 if gateways else 1
+            entry_targets = gateways or out_nodes or rea_nodes     # válvula
         # portão: descarta entradas cuja reta cruza um corredor obrigatório.
         kept_entries = [nid for nid in entry_targets
                         if not self._crosses_mandatory(origin.pos, self.nodes[nid].pos, mand_segs)]
@@ -281,19 +354,34 @@ class RouteGraph:
             self.add_edge(Edge(origin_id, nid, w(d), corridor="DIRETO", synthetic=True))
             linked_in += 1
 
-        # 2) SAÍDA: REA -> destino.
-        #    A saída sai de um nó ALCANÇADO por corredor (tem corredor de entrada);
-        #    QUANDO ela pode ser usada é decidido pela fase 'owes' no caminho mínimo
-        #    (só num terminal natural, owes_real==0). Não há mais trava estática:
-        #    a antiga trava bloqueava nós com corredor obrigatório de saída — mas
-        #    é justamente o caso de um PORTÃO (ex.: DUTRA) cujo corredor volta para
-        #    dentro da TMA; ele é a saída natural rumo ao destino e deve poder sair.
+        # 2) SAÍDA: REA -> destino. DIFERENTE da entrada: a saída NÃO é a ponta mais
+        #    próxima do destino — é a ponta de corredor VOLTADA ao destino, e o
+        #    trajeto voado decide qual (em SBPA, a mais perto é BEIRA-RIO a 5,5 NM,
+        #    mas a saída certa é PÓLO NORTE a 15,3 NM via POLO). Regra: MÍNIMO-LOCAL
+        #    ao destino — nenhum vizinho de corredor está mais perto do destino que o
+        #    nó. Isto ACEITA ENTRONCAMENTO (o nó-fim de dois corredores em SBRF passa,
+        #    pois seus vizinhos, mais fundos nos corredores, estão mais longe do
+        #    destino) e exclui o MEIO de corredor (tem vizinho mais perto do destino).
+        #    São vários candidatos; o caminho mínimo escolhe qual, e a fase 'owes'
+        #    decide QUANDO sair (só num terminal natural, owes_real==0) — é isso que
+        #    impede sair no meio mesmo que um nó-de-vale interno passe no mínimo-local.
+        #    Sem trava estática (o PORTÃO tipo DUTRA, cujo corredor volta para dentro,
+        #    precisa poder sair). Usar mínimo-local (não k-mais-próximos) garante que
+        #    a ponta certa entre mesmo fora das k mais perto (PÓLO NORTE é a 8ª).
         if dest_in_tma:
-            exit_pool = [n for n in rea_nodes
-                         if self.nodes[n].chart == dest_chart and self._has_real_incoming(n)]
-            exit_sources = self._k_nearest(dest.pos, exit_pool or rea_nodes, entry_exit_k)
+            in_chart = [n for n in rea_nodes
+                        if self.nodes[n].chart == dest_chart and self._has_real_incoming(n)]
+            exit_gateways = [n for n in in_chart
+                             if not self._skips_closer_corridor_node(
+                                 n, dest.pos, corridor_neigh)]   # MÍNIMO-LOCAL ao destino
+            exits_non_gateway_dropped = max(0, len(in_chart) - len(exit_gateways))
+            exits_gateway_relaxed = 0 if exit_gateways else 1
+            # válvula: nenhuma ponta serve -> cai nos k-mais-próximos (antigo).
+            exit_sources = exit_gateways or self._k_nearest(
+                dest.pos, in_chart or rea_nodes, entry_exit_k)
         else:
             exit_sources = [n for n in rea_nodes if self._has_real_incoming(n)] or rea_nodes
+            exits_non_gateway_dropped = exits_gateway_relaxed = 0
         exit_candidates = [(haversine_m(self.nodes[nid].pos, dest.pos), nid)
                            for nid in exit_sources]
         # portão: descarta saídas cuja reta até o destino cruza corredor obrigatório.
@@ -331,14 +419,19 @@ class RouteGraph:
             for b in rea_nodes:
                 if self.nodes[b].chart == chart_a or d_dest[b] >= d_dest[a]:
                     continue
-                # alvo da ponte deve poder VOAR um corredor depois (não beco)
-                if not self._has_real_outgoing(b):
+                # alvo da ponte = PORTÃO de entrada da próxima TMA por MÍNIMO-LOCAL
+                # em relação ao nó-fonte do salto: nenhum vizinho de corredor do alvo
+                # está mais perto da fonte. Impede pousar no MEIO de um corredor, mas
+                # ACEITA ENTRONCAMENTO (ex.: CAMPO MOURÃO). Amplo: admite TODOS os
+                # alvos mínimo-locais alcançáveis (sem dominância, sem corte de k) —
+                # foi a dominância que excluía CAMBUÍ e forçava o desvio pela Dutra.
+                if not self._is_gateway(b, pa, corridor_neigh):
+                    bridges_non_gateway_dropped += 1
                     continue
                 d = haversine_m(pa, self.nodes[b].pos)
                 if d <= inter_tma_m and not self._has_real_edge(a, b):
                     cands.append((d, b))
-            cands.sort(key=lambda t: t[0])
-            for d, b in cands[:bridge_k]:
+            for d, b in cands:        # amplo: sem corte de k (o caminho mínimo escolhe)
                 # portão: a ponte não pode cortar um corredor obrigatório relevante.
                 if self._crosses_mandatory(pa, self.nodes[b].pos, mand_segs):
                     bridges_gated += 1
@@ -350,6 +443,7 @@ class RouteGraph:
         #     (Trava bloqueou todas as pontes possíveis), força as melhores
         #     pontes progressivas IGNORANDO a Trava, até conectar.
         bridges_safety_valve = 0
+        bridges_long_haul = 0
         if len(charts) > 1 and rea_nodes and not self._reaches(origin_id, dest_id):
             def _forced_pairs(require_outgoing: bool):
                 out = []
@@ -377,6 +471,47 @@ class RouteGraph:
                 if self._reaches(origin_id, dest_id):
                     break
 
+            # 3c) ESCALA DE ROTA LONGA: se nem as pontes curtas (<=inter_tma_m)
+            #     conectaram, as TMAs estão a MAIS de inter_tma_nm uma da outra
+            #     (ex.: BH<->Londrina, 366 NM) e NÃO há REA ligando-as. A rota certa
+            #     NÃO é a reta que pula tudo, nem um corredor contínuo inexistente:
+            #     é [corredor de saída da TMA origem][DIRETO longo entre PORTÕES]
+            #     [corredor de chegada da TMA destino]. Liberamos pontes ACIMA do teto,
+            #     mas SÓ portão->portão (mínimo-local via _is_gateway, relativo ao
+            #     nó-fonte do salto) e SÓ se a reta não cruzar corredor obrigatório
+            #     (portão geométrico). Progressivas ao destino, da mais curta à mais
+            #     longa, parando assim que conectar — a perna de ligação é mínima.
+            #     A fase 'owes' do dijkstra garante que os corredores das duas pontas
+            #     sejam voados; aqui só damos a aresta de ligação que faltava.
+            #     SÓ quando AMBAS as pontas estão em TMA (as duas travadas em corredor):
+            #     se uma ponta está fora, a própria entrada/saída por voo livre já
+            #     atravessa o vão (e _reaches já seria verdadeiro), e os casos "Nenhuma
+            #     REA"/"REA não relevante" continuam caindo no DIRETO sem ponte longa.
+            if origin_in_tma and dest_in_tma and not self._reaches(origin_id, dest_id):
+                long_pairs = []
+                for a in rea_nodes:
+                    ca = self.nodes[a].chart
+                    pa = self.nodes[a].pos
+                    for b in rea_nodes:
+                        if self.nodes[b].chart == ca or d_dest[b] >= d_dest[a]:
+                            continue
+                        if self._has_real_edge(a, b):
+                            continue
+                        d = haversine_m(pa, self.nodes[b].pos)
+                        if d <= inter_tma_m:          # já tentadas acima
+                            continue
+                        if not self._is_gateway(b, pa, corridor_neigh):
+                            continue                  # não pousar no meio de corredor
+                        if self._crosses_mandatory(pa, self.nodes[b].pos, mand_segs):
+                            continue                  # não cortar corredor obrigatório
+                        long_pairs.append((d, a, b))
+                long_pairs.sort(key=lambda t: t[0])
+                for d, a, b in long_pairs:
+                    if self._reaches(origin_id, dest_id):
+                        break
+                    self.add_edge(Edge(a, b, w(d), corridor="DIRETO", synthetic=True))
+                    bridges += 1; bridges_long_haul += 1
+
         # 4) DIRETO origem->destino: SÓ se NENHUMA ponta está em TMA REA.
         direct_created = False
         if not origin_in_tma and not dest_in_tma:
@@ -398,11 +533,17 @@ class RouteGraph:
             "exits_safety_valve": exits_safety_valve,
             "inter_tma_bridges": bridges,
             "bridges_safety_valve": bridges_safety_valve,
+            "bridges_long_haul": bridges_long_haul,
             "entries_gated_crossing": entries_gated,
             "exits_gated_crossing": exits_gated,
             "bridges_gated_crossing": bridges_gated,
             "entries_relaxed_crossing": entries_relaxed,
             "exits_relaxed_crossing": exits_relaxed,
+            "entries_non_gateway_dropped": entries_non_gateway_dropped,
+            "entries_gateway_relaxed": entries_gateway_relaxed,
+            "exits_non_gateway_dropped": exits_non_gateway_dropped,
+            "exits_gateway_relaxed": exits_gateway_relaxed,
+            "bridges_non_gateway_dropped": bridges_non_gateway_dropped,
             "direct_created": direct_created,
             "requires_corridor": self.requires_corridor,
             "n_rea_nodes": len(rea_nodes),

@@ -30,7 +30,7 @@ except ImportError:
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
-from nexatlas_router.plot_route import plot_v1_route
+from nexatlas_router.plot_route import plot_v1_route, plot_v1_alternatives
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 RST = "\033[0m"; BLD = "\033[1m"; DIM = "\033[2m"
@@ -83,7 +83,7 @@ def _connect() -> "psycopg2.extensions.connection":
 def _print_route(origin: str, dest: str, result) -> None:
     points = result.points
     corridors = result.corridors_used          # [{name, is_mandatory}]
-    iters = result.meta.get("iterations_run", "?")
+    src = result.meta.get("route_source", "dijkstra")
     direct_nm = result.direct_distance_nm
     total_nm = result.total_distance_nm
     delta = total_nm - direct_nm
@@ -118,7 +118,9 @@ def _print_route(origin: str, dest: str, result) -> None:
     print(f"  {BLD}Distância direta :{RST} {direct_nm:.1f} NM")
     print(f"  {BLD}Distância da rota:{RST} {total_nm:.1f} NM  "
           f"{DIM}({sign}{delta:.1f} NM sobre a direta){RST}")
-    print(f"  {DIM}Convergência: {iters} iterações GWO{RST}")
+    metodo = ("Dijkstra com estado de fase (exato)" if src == "dijkstra-fase"
+              else "Dijkstra (caminho mínimo exato)")
+    print(f"  {DIM}Método: {metodo}{RST}")
     print()
 
     # corredores REA usados, com obrigatoriedade [Obrigatório]/[Opcional]
@@ -142,7 +144,7 @@ def _print_route(origin: str, dest: str, result) -> None:
     # alternativas
     alternatives = result.meta.get("alternatives", [])
     if alternatives:
-        print(f"  {BLD}Alternativas avaliadas (descartadas):{RST}")
+        print(f"  {BLD}Próximas melhores rotas (alternativas):{RST}")
         for i, alt in enumerate(alternatives, 1):
             ov = alt["overhead_nm"]
             ov_str = f"+{ov:.1f}" if ov >= 0 else f"{ov:.1f}"
@@ -266,6 +268,19 @@ def main() -> None:
             _open_image(plot_path)
         except Exception as e:
             print(f"  {RED}✗ Erro na plotagem:{RST} {e}")
+
+        # 2º mapa: rotas candidatas (só se houver alternativas)
+        alt_path = f"rota_{origin}_{dest}_alternativas.png"
+        try:
+            saved = plot_v1_alternatives(
+                graph, result, alt_path,
+                title=f"Rotas candidatas — {origin} → {dest}")
+            if saved:
+                print(f"  {GRN}✓ Mapa de candidatas:{RST} "
+                      f"{os.path.abspath(alt_path)}")
+                _open_image(alt_path)
+        except Exception as e:
+            print(f"  {RED}✗ Erro na plotagem das candidatas:{RST} {e}")
         print()
 
     conn.close()
