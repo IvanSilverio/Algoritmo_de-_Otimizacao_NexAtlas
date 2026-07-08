@@ -4,6 +4,7 @@
 *.env
 CLAUDE.md
 amostra_nexatlas_limite_500.json
+amostra_nexatlas_porto_alegre.json
 # Ambiente virtual
 .venv/
 venv/

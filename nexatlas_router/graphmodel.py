@@ -35,6 +35,7 @@ class Node:
     pos: LonLat
     kind: str               # 'aerodrome' | 'waypoint'
     chart: Optional[str] = None
+    border_score: float = 1.0   # PONTO 3: 1=fronteira/ultrapassa a borda da TMA; ~0=miolo
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,26 @@ class Edge:
     higher_limit: Optional[int] = None
     synthetic: bool = False             # True para arestas "DIRETO" criadas em runtime
     geom: Optional[tuple] = None        # traçado real do corredor: ((lon,lat), ...) — só nas arestas reais
+
+
+# PONTO 3 — score de fronteira da malha (proximidade à borda da TMA da carta).
+# Usado SÓ para ponderar as pontes de voo direto entre cartas (nunca a entrada/
+# saída do aeródromo, que seguem por mínimo-local). Score alto = provável PORTÃO
+# de fronteira (perto ou além da borda); score baixo = miolo da TMA.
+BORDER_DREF_NM = 25.0          # dentro da TMA, o score zera a partir desta distância (miolo)
+BRIDGE_BORDER_PMAX_NM = 20.0   # força da penalidade na ponte (robusta na faixa ~10–80 NM)
+
+
+def border_score(dist_border_nm: Optional[float], inside: Optional[bool]) -> float:
+    """Nota de 'portão de fronteira' de um waypoint pela posição relativa à borda
+    da TMA da sua carta. Fonte ÚNICA da fórmula (db.py e validação usam esta):
+    sem TMA (dist None) -> 1.0 (neutro, não penaliza); ultrapassa a borda
+    (inside False) -> 1.0; dentro -> decresce linearmente até 0 no miolo."""
+    if dist_border_nm is None:
+        return 1.0
+    if not inside:
+        return 1.0
+    return max(0.0, 1.0 - dist_border_nm / BORDER_DREF_NM)
 
 
 class RouteGraph:
@@ -125,6 +146,34 @@ class RouteGraph:
                     seen.add(e.target)
                     stack.append(e.target)
         return False
+
+    def _real_chart_reachability(self) -> dict:
+        """Para cada carta, o conjunto de cartas alcançáveis navegando SÓ
+        corredores REAIS (direcionado). Base do PONTO 2: suprimir a ponte
+        sintética entre cartas que a malha real já conecta — a REA deve ser
+        VOADA, não furada por um atalho. O grafo carta->carta é minúsculo
+        (poucas arestas inter-carta em toda a base); o BFS é trivial."""
+        cadj: dict[str, set] = {}
+        for src in self.adj:
+            ca = self.nodes[src].chart
+            for e in self.adj[src]:
+                if e.synthetic:                       # só corredor real conta
+                    continue
+                cb = self.nodes[e.target].chart
+                if ca and cb and ca != cb:            # aresta inter-carta real
+                    cadj.setdefault(ca, set()).add(cb)
+        reach: dict[str, set] = {}
+        for c in cadj:                                # fecho transitivo (BFS)
+            seen: set = set()
+            stack = list(cadj[c])
+            while stack:
+                u = stack.pop()
+                if u in seen:
+                    continue
+                seen.add(u)
+                stack.extend(cadj.get(u, ()))
+            reach[c] = seen
+        return reach
 
     # --------------------------------------- portões de corredor (MÍNIMO-LOCAL)
     # Um DIRETO (entrada da origem, saída ao destino, salto entre TMAs) só pode
@@ -283,6 +332,16 @@ class RouteGraph:
         def w(d: float) -> float:
             return d * synth_penalty   # peso de otimização do trecho sintético
 
+        # PONTO 3: peso das pontes de voo direto ENTRE cartas. Soma ao peso uma
+        # penalidade proporcional a quão INTERIOR são as pontas (1 - border_score):
+        # sair/entrar pela borda ~ penalidade 0; sair do miolo ~ penalidade cheia.
+        # Aditiva e limitada (não desconecta; só reordena a preferência).
+        border_pmax_m = BRIDGE_BORDER_PMAX_NM * 1852.0
+        def wb(a: str, b: str, d: float) -> float:
+            pen = border_pmax_m * ((1.0 - self.nodes[a].border_score)
+                                   + (1.0 - self.nodes[b].border_score))
+            return w(d) + pen
+
         rea_nodes = [nid for nid, n in self.nodes.items() if n.kind == "waypoint"]
 
         # Base da regra de PORTÃO (única, ampla): MÍNIMO-LOCAL em relação à
@@ -290,6 +349,12 @@ class RouteGraph:
         # do salto. Aceita entroncamento; candidatos amplos (sem folha/dominância/k);
         # o caminho mínimo + fase 'owes' escolhem.
         corridor_neigh = self._corridor_neighbors()
+        # PONTO 2: alcançabilidade entre cartas SÓ por corredores reais (uma vez).
+        real_reach = self._real_chart_reachability()
+        # sonda estrutural: quantos pares de cartas A->B a malha já liga por corredor
+        # (pontes entre eles são suprimidas). Estável para o banco, independe da rota.
+        real_linked_chart_pairs = sum(1 for a, tg in real_reach.items()
+                                      for b in tg if a != b)
 
         # Está a ponta DENTRO de uma TMA REA? (define a regra de obrigatoriedade)
         origin_in_tma = self._nearest_rea_m(origin.pos, rea_nodes) <= tma_radius_m
@@ -415,9 +480,18 @@ class RouteGraph:
             # nó tenha corredor obrigatório. Travar aqui descartava esses saltos.
             chart_a = self.nodes[a].chart
             pa = self.nodes[a].pos
+            # PONTO 2: cartas que chart_a já alcança por corredor REAL. Uma ponte
+            # a->b com destino nessas cartas é redundante — a malha deve ser VOADA,
+            # não furada por atalho. Decisão por CARTA, não por nó: o nó-fonte de
+            # uma ponte é justamente um que NÃO alcança o destino pela malha
+            # (ex.: ITAQUERA, um beco), e por isso salta.
+            linked_targets = real_reach.get(chart_a, ())
             cands = []
             for b in rea_nodes:
-                if self.nodes[b].chart == chart_a or d_dest[b] >= d_dest[a]:
+                chart_b = self.nodes[b].chart
+                if chart_b == chart_a or d_dest[b] >= d_dest[a]:
+                    continue
+                if chart_b in linked_targets:     # PONTO 2: par ligado por corredor -> sem ponte
                     continue
                 # alvo da ponte = PORTÃO de entrada da próxima TMA por MÍNIMO-LOCAL
                 # em relação ao nó-fonte do salto: nenhum vizinho de corredor do alvo
@@ -436,7 +510,7 @@ class RouteGraph:
                 if self._crosses_mandatory(pa, self.nodes[b].pos, mand_segs):
                     bridges_gated += 1
                     continue
-                self.add_edge(Edge(a, b, w(d), corridor="DIRETO", synthetic=True))
+                self.add_edge(Edge(a, b, wb(a, b, d), corridor="DIRETO", synthetic=True))
                 bridges += 1
 
         # 3b) VÁLVULA DE PONTE: se a malha ainda não conecta origem->destino
@@ -466,7 +540,7 @@ class RouteGraph:
                 for d, a, b in _forced_pairs(require_out):
                     if self._reaches(origin_id, dest_id):
                         break
-                    self.add_edge(Edge(a, b, w(d), corridor="DIRETO", synthetic=True))
+                    self.add_edge(Edge(a, b, wb(a, b, d), corridor="DIRETO", synthetic=True))
                     bridges += 1; bridges_safety_valve += 1
                 if self._reaches(origin_id, dest_id):
                     break
@@ -509,7 +583,7 @@ class RouteGraph:
                 for d, a, b in long_pairs:
                     if self._reaches(origin_id, dest_id):
                         break
-                    self.add_edge(Edge(a, b, w(d), corridor="DIRETO", synthetic=True))
+                    self.add_edge(Edge(a, b, wb(a, b, d), corridor="DIRETO", synthetic=True))
                     bridges += 1; bridges_long_haul += 1
 
         # 4) DIRETO origem->destino: SÓ se NENHUMA ponta está em TMA REA.
@@ -544,6 +618,9 @@ class RouteGraph:
             "exits_non_gateway_dropped": exits_non_gateway_dropped,
             "exits_gateway_relaxed": exits_gateway_relaxed,
             "bridges_non_gateway_dropped": bridges_non_gateway_dropped,
+            "real_linked_chart_pairs": real_linked_chart_pairs,
+            "waypoints_interior": sum(1 for n in self.nodes.values()
+                                      if n.kind == "waypoint" and n.border_score < 1.0),
             "direct_created": direct_created,
             "requires_corridor": self.requires_corridor,
             "n_rea_nodes": len(rea_nodes),

@@ -31,7 +31,7 @@ import json
 from typing import Any, Iterable, Optional
 
 from .geo import LonLat
-from .graphmodel import Edge, Node, RouteGraph
+from .graphmodel import Edge, Node, RouteGraph, border_score
 
 
 def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
@@ -58,6 +58,7 @@ SCHEMA = "published"
 WP_TABLE = f"{SCHEMA}.special_routes_waypoints"
 CONN_TABLE = f"{SCHEMA}.special_routes_connections"
 ADHP_TABLE = f"{SCHEMA}.adhps"
+AIRSPACE_TABLE = f"{SCHEMA}.airspaces"       # polígonos das TMAs (score de fronteira, PONTO 3)
 
 # Ponto único para alternar entre coluna geometry nativa e GeoJSON.
 # Coluna geometry nativa (especificação):   "{col}"
@@ -82,13 +83,29 @@ WHERE w.type = 'REA'                                   -- filtro REA (ignora IFR
 """
 
 # Waypoints REA das cartas selecionadas.
+# O LEFT JOIN com a TMA da carta (camadas unidas) traz, por waypoint, a distância
+# à borda (NM) e se está dentro — base do score de fronteira (PONTO 3). Cartas sem
+# TMA em airspaces devolvem NULL (score neutro; comportamento antigo preservado).
 SQL_WAYPOINTS_BY_CHARTS = f"""
+WITH tma AS (
+    SELECT 'REA ' || regexp_replace(a.name, '\\s+\\d+$', '') AS chart,
+           ST_Union({GEOM_EXPR('a.geom')})                   AS geom
+    FROM {AIRSPACE_TABLE} a
+    WHERE a.type = 'tma'
+    GROUP BY 1
+)
 SELECT w.id,
        w.name,
        w.chart,
        ST_X({GEOM_EXPR('w.geom')}) AS lon,
-       ST_Y({GEOM_EXPR('w.geom')}) AS lat
+       ST_Y({GEOM_EXPR('w.geom')}) AS lat,
+       CASE WHEN t.geom IS NULL THEN NULL
+            ELSE ST_Distance({GEOM_EXPR('w.geom')}::geography,
+                             ST_Boundary(t.geom)::geography) / 1852.0
+       END                                                   AS dist_border_nm,
+       (t.geom IS NOT NULL AND ST_Contains(t.geom, {GEOM_EXPR('w.geom')})) AS inside
 FROM {WP_TABLE} w
+LEFT JOIN tma t ON t.chart = w.chart
 WHERE w.type = 'REA'                                   -- filtro REA
   AND w.chart = ANY(%(charts)s);
 """
@@ -202,11 +219,14 @@ class PostgisLoader:
         charts = self.discover_charts([origin.pos, dest.pos], chart_radius_nm)
 
         if charts:
-            for _id, name, chart, lon, lat in self._rows(
+            for _id, name, chart, lon, lat, dist_border_nm, inside in self._rows(
                 SQL_WAYPOINTS_BY_CHARTS, {"charts": charts}
             ):
+                bs = border_score(
+                    float(dist_border_nm) if dist_border_nm is not None else None,
+                    bool(inside) if inside is not None else None)
                 g.add_node(Node(id=_id, name=name, pos=LonLat(lon, lat),
-                                kind="waypoint", chart=chart))
+                                kind="waypoint", chart=chart, border_score=bs))
 
             for (_id, src, tgt, corridor, mandatory, lo, hi,
                  heading, cls, geom_json, w) in self._rows(
