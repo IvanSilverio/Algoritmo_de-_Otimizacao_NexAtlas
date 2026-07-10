@@ -1,7 +1,7 @@
 """Extração do subgrafo regional — esquema **published** (jetstream).
 
 Mudança de arquitetura (v2 DESCONTINUADO):
-  - published.adhps(id, icao, type, geom Point)            <- AGORA TEM geom!
+  - published.adhps(id, designator_icao, type, geom Point)  <- icao renomeado p/ designator_icao
   - published.special_routes_waypoints(id, name, type, chart, geom Point)
   - published.special_routes_connections(id, source_id, target_id, name,
         type, is_mandatory, heading, lower_limit, higher_limit,
@@ -141,17 +141,17 @@ GROUP BY c.id, c.source_id, c.target_id, c.name, c.is_mandatory,
 
 # Aeródromo direto de published.adhps — sem JOIN externo, geom é nativo.
 SQL_AERODROME = f"""
-SELECT a.icao,
-       a.icao            AS name,
+SELECT a.designator_icao AS icao,
+       a.designator_icao AS name,
        ST_X({GEOM_EXPR('a.geom')}) AS lon,
        ST_Y({GEOM_EXPR('a.geom')}) AS lat
 FROM {ADHP_TABLE} a
-WHERE a.icao = %(code)s
+WHERE a.designator_icao = %(code)s
 LIMIT 1;
 """
 
 # Lista de ICAOs (para autocomplete da CLI).
-SQL_LIST_ICAOS = f"SELECT icao FROM {ADHP_TABLE} ORDER BY icao;"
+SQL_LIST_ICAOS = f"SELECT designator_icao FROM {ADHP_TABLE} ORDER BY designator_icao;"
 
 
 class PostgisLoader:
@@ -166,9 +166,17 @@ class PostgisLoader:
         self.conn = conn
 
     def _rows(self, sql: str, params: dict) -> list[tuple]:
-        with self.conn.cursor() as cur:
-            cur.execute(sql, params)
-            return cur.fetchall()
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(sql, params)
+                return cur.fetchall()
+        except Exception:
+            # Sem isto, uma query que falha deixa a transação abortada e TODA
+            # query seguinte vira "current transaction is aborted", mascarando o
+            # erro real. O rollback limpa a transação; o raise propaga o erro
+            # ORIGINAL (ex.: "column ... does not exist"), que é o diagnosticável.
+            self.conn.rollback()
+            raise
 
     # ------------------------------------------------------------- aerodrome
     def fetch_aerodrome(self, icao_code: str) -> Node:

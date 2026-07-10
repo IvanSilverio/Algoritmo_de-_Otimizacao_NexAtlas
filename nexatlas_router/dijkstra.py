@@ -68,10 +68,22 @@ def _make_owes(graph: RouteGraph, dest_id: str):
              corredor real (não pode pegar DIRETO agora).
       used : 1 se já voou >=1 corredor real (exigido se uma ponta está em TMA).
 
-    owes_real  -> chegou por CORREDOR: deve 1 se há corredor de saída que AVANÇA
-                  rumo ao destino; senão 0 (terminal natural -> pode sair).
-    owes_synth -> chegou por trecho SINTÉTICO (entrou/saltou numa TMA): deve 1 se
-                  v tem QUALQUER corredor real de saída (entrar obriga a voar).
+    A obrigação de fase existe para FORÇAR completar corredores OBRIGATÓRIOS
+    (is_mandatory). Corredor OPCIONAL, por definição de carta, pode ser pulado —
+    logo NÃO gera obrigação. Ignorar essa distinção era o que fazia um portão com
+    apenas corredores opcionais de saída (ex.: ITUPORANGA, só BELA VISTA/MADRE
+    PAULINA) inventar owes=1, gerando o laço (ITUPORANGA<->SALSEIRO, para
+    'descarregar' a obrigação) e o overshoot (fugir para outro portão que não
+    dispara owes). Por isso as duas funções abaixo olham SÓ corredores obrigatórios.
+
+    owes_real  -> chegou por CORREDOR: deve 1 se há corredor OBRIGATÓRIO de saída
+                  que AVANÇA rumo ao destino (completar o obrigatório em curso);
+                  senão 0 (terminal natural -> pode sair).
+    owes_synth -> chegou por trecho SINTÉTICO (entrou/saltou numa TMA): deve 1 se,
+                  seguindo SÓ corredores OBRIGATÓRIOS a partir de v, dá para
+                  ALCANÇAR um nó mais perto do destino. Assim navega um corredor
+                  obrigatório serpenteante, mas não inventa obrigação onde só há
+                  opcionais nem entra num beco obrigatório que só afasta.
     """
     nodes = graph.nodes
     dpos = nodes[dest_id].pos
@@ -79,15 +91,37 @@ def _make_owes(graph: RouteGraph, dest_id: str):
 
     def owes_real(v: str) -> int:
         for e in graph.adj.get(v, []):
-            if (not e.synthetic) and d_dest[e.target] < d_dest[v] - 1.0:
+            if (not e.synthetic) and e.is_mandatory and d_dest[e.target] < d_dest[v] - 1.0:
                 return 1
         return 0
 
+    _synth_cache: dict[str, int] = {}
+
     def owes_synth(v: str) -> int:
-        for e in graph.adj.get(v, []):
-            if not e.synthetic:
-                return 1
-        return 0
+        # Entrar/saltar numa TMA obriga a voar corredor SÓ se a malha de corredores
+        # OBRIGATÓRIOS a partir de v permite alcançar um nó mais perto do destino.
+        # Um portão que só oferece corredores OPCIONAIS (ex.: ITUPORANGA) devolve 0
+        # -> pode ir direto ao destino/ponte, sem laço nem overshoot.
+        cached = _synth_cache.get(v)
+        if cached is not None:
+            return cached
+        seen = {v}
+        stack = [v]
+        res = 0
+        while stack:
+            u = stack.pop()
+            for e in graph.adj.get(u, []):
+                if e.synthetic or not e.is_mandatory:
+                    continue
+                if d_dest[e.target] < d_dest[v] - 1.0:
+                    res = 1
+                    stack = []
+                    break
+                if e.target not in seen:
+                    seen.add(e.target)
+                    stack.append(e.target)
+        _synth_cache[v] = res
+        return res
 
     return owes_real, owes_synth
 
