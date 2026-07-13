@@ -30,7 +30,7 @@ except ImportError:
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
-from nexatlas_router.plot_route import plot_v1_route, plot_v1_alternatives
+from nexatlas_router.plot_route import plot_v1_combined
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 RST = "\033[0m"; BLD = "\033[1m"; DIM = "\033[2m"
@@ -260,27 +260,14 @@ def main() -> None:
 
         _print_route(origin, dest, result)
 
-        plot_path = f"rota_{origin}_{dest}.png"
+        plot_path = f"{origin}_{dest}.png"
         try:
-            plot_v1_route(graph, result, plot_path,
-                          title=f"Malha Aérea VFR — {origin} → {dest}")
+            plot_v1_combined(graph, result, plot_path,
+                             title=f"Malha Aérea VFR — {origin} → {dest}")
             print(f"  {GRN}✓ Mapa salvo:{RST} {os.path.abspath(plot_path)}")
             _open_image(plot_path)
         except Exception as e:
             print(f"  {RED}✗ Erro na plotagem:{RST} {e}")
-
-        # 2º mapa: rotas candidatas (só se houver alternativas)
-        alt_path = f"rota_{origin}_{dest}_alternativas.png"
-        try:
-            saved = plot_v1_alternatives(
-                graph, result, alt_path,
-                title=f"Rotas candidatas — {origin} → {dest}")
-            if saved:
-                print(f"  {GRN}✓ Mapa de candidatas:{RST} "
-                      f"{os.path.abspath(alt_path)}")
-                _open_image(alt_path)
-        except Exception as e:
-            print(f"  {RED}✗ Erro na plotagem das candidatas:{RST} {e}")
         print()
 
     conn.close()
