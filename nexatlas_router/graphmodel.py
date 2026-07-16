@@ -289,6 +289,27 @@ class RouteGraph:
                 return True
         return False
 
+    def _overshoots_dest(self, src_pos, tgt_pos, dest_pos,
+                         margin_nm: float = 2.0) -> bool:
+        """True se `tgt` fica ALÉM de `dest` na direção `src->dest` — a ponta da
+        ponte ultrapassa o destino. Projeta `tgt` no eixo `src->dest` (plano local
+        em NM); se a projeção passa do destino além da folga, o alvo está do outro
+        lado do campo. A direção `src->dest` é a real do salto (src é o nó de onde
+        se salta), por isso a medida é confiável — ao contrário da SAÍDA, cuja
+        direção de chegada é ambígua e não se resolve estaticamente."""
+        import math
+        lat0 = math.radians(src_pos.lat)
+        def _loc(p):
+            return ((p.lon - src_pos.lon) * math.cos(lat0) * 60.0,
+                    (p.lat - src_pos.lat) * 60.0)
+        ux, uy = _loc(dest_pos)
+        L = math.hypot(ux, uy)
+        if L < 1e-9:
+            return False
+        ux, uy = ux / L, uy / L
+        bx, by = _loc(tgt_pos)
+        return (bx * ux + by * uy) > L + margin_nm
+
     def add_synthetic_edges(
         self,
         origin_id: str,
@@ -385,6 +406,7 @@ class RouteGraph:
         entries_relaxed = exits_relaxed = 0
         entries_non_gateway_dropped = entries_gateway_relaxed = 0
         bridges_non_gateway_dropped = 0
+        bridges_overshoot_dropped = 0
 
         # 1) ENTRADA: origem -> REA, por PORTÃO de corredor (MÍNIMO-LOCAL, amplo).
         #    Referência na ORIGEM. Origem EM TMA restringe à carta da origem; FORA de
@@ -492,6 +514,15 @@ class RouteGraph:
                 if chart_b == chart_a or d_dest[b] >= d_dest[a]:
                     continue
                 if chart_b in linked_targets:     # PONTO 2: par ligado por corredor -> sem ponte
+                    continue
+                # TRAVA DE ULTRAPASSAGEM: a ponte não pode entrar na TMA de destino
+                # por um nó que fica ALÉM do destino na direção do salto (a->dest).
+                # Ex.: SBNT->SBFZ saltava para BARRA (6 NM do campo, mas do outro
+                # lado, ultrapassando SBFZ) em vez de entrar por CAPONGA e voar a
+                # malha. Só aqui, no bloco de pontes normais; as válvulas abaixo
+                # não aplicam, para nunca isolar o destino.
+                if self._overshoots_dest(pa, self.nodes[b].pos, dest.pos):
+                    bridges_overshoot_dropped += 1
                     continue
                 # alvo da ponte = PORTÃO de entrada da próxima TMA por MÍNIMO-LOCAL
                 # em relação ao nó-fonte do salto: nenhum vizinho de corredor do alvo
@@ -618,6 +649,7 @@ class RouteGraph:
             "exits_non_gateway_dropped": exits_non_gateway_dropped,
             "exits_gateway_relaxed": exits_gateway_relaxed,
             "bridges_non_gateway_dropped": bridges_non_gateway_dropped,
+            "bridges_overshoot_dropped": bridges_overshoot_dropped,
             "real_linked_chart_pairs": real_linked_chart_pairs,
             "waypoints_interior": sum(1 for n in self.nodes.values()
                                       if n.kind == "waypoint" and n.border_score < 1.0),

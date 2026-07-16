@@ -60,6 +60,15 @@ def dijkstra(graph: RouteGraph, origin_id: str, dest_id: str) -> Optional[Decode
 # Núcleo com estado de fase (nó, owes, used) — compartilhado por shortest_route
 # e pelos sub-caminhos 'spur' do Yen.
 # --------------------------------------------------------------------------
+# Margem (metros) para o BFS de owes_synth. Ao procurar, pela malha OBRIGATÓRIA,
+# um nó mais perto do destino, o BFS não atravessa nós que afastam do ponto de
+# entrada além desta folga. Sem isso, numa região densa (ex.: BH) quase sempre
+# existe algum nó mais perto lá adiante, e a obrigação de "entrar no corredor"
+# era acionada por um progresso que só vem após um desvio grande — a rota tocava
+# o corredor e voltava (vai-e-volta CEASA->FLORES->CEASA em SBBH->SBCF). 5 NM.
+OWES_SYNTH_REACH_MARGIN_M = 5 * 1852
+
+
 def _make_owes(graph: RouteGraph, dest_id: str):
     """Constrói as duas funções de obrigação de fase (owes). Fatorado para o
     k-shortest reaproveitar EXATAMENTE a mesma regra da rota principal.
@@ -117,7 +126,13 @@ def _make_owes(graph: RouteGraph, dest_id: str):
                     res = 1
                     stack = []
                     break
-                if e.target not in seen:
+                # Só atravessa vizinhos que NÃO afastam do ponto de entrada v
+                # além da margem. Um corredor que serpenteia rumo ao destino
+                # (oscila pouco) continua sendo navegado; um esporão obrigatório
+                # que vai para longe (ex.: CEASA->FLORES->JUATUBA, afastando 12 NM)
+                # antes de alcançar um nó mais perto NÃO dispara a obrigação, que
+                # é o que gerava o vai-e-volta CEASA->FLORES->CEASA.
+                if e.target not in seen and d_dest[e.target] <= d_dest[v] + OWES_SYNTH_REACH_MARGIN_M:
                     seen.add(e.target)
                     stack.append(e.target)
         _synth_cache[v] = res

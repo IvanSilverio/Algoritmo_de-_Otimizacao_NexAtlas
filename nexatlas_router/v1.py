@@ -125,6 +125,31 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
     used_direct_fallback = False
     mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=require)
 
+    # ANTI-ESPORÃO OBRIGATÓRIO: exigir corredor (require) pode produzir um
+    # vai-e-volta quando a origem/destino está numa TMA REA mas o destino fica no
+    # próprio PORTÃO de entrada, e o corredor obrigatório desse portão AFASTA do
+    # destino. A rota então entra no corredor e volta pelo MESMO portão só para
+    # cumprir a cota "usou >=1 corredor real" (ex.: SBGO->SBNV:
+    # ...TRINDADE->ABADIA->TRINDADE...; SBBH->SBCF: ...CEASA->FLORES->CEASA...).
+    # A exigência não faz sentido para esse par. Detecção robusta: a rota com
+    # require repete um nó (laço por ID). Nesse caso relaxamos o require e ficamos
+    # com a rota curta, DESDE QUE ela ainda ENTRE na REA (toque >=1 waypoint) e
+    # não tenha laço. Corredores obrigatórios que PROGRIDEM não são afetados: com
+    # eles a rota-com-require é monotônica (sem laço), então a condição não
+    # dispara e a travessia é preservada (ex.: SBCG->SDTS mantém ZULU/BRAVO).
+    # A margem do owes_synth (ver dijkstra._make_owes) é o outro lado desta
+    # correção: sem ela o owes forçaria o mesmo esporão mesmo com require=False.
+    if (require and mesh is not None and mesh.complete
+            and len(set(mesh.node_ids)) != len(mesh.node_ids)):
+        relaxed = shortest_route(graph, origin_id, dest_id,
+                                 require_real_edge=False)
+        if (relaxed is not None and relaxed.complete
+                and len(set(relaxed.node_ids)) == len(relaxed.node_ids)
+                and any(graph.nodes[n].kind == "waypoint"
+                        for n in relaxed.node_ids)):
+            mesh = relaxed
+            require = False        # alternativas (Yen) seguem o mesmo critério
+
     if mesh is not None and mesh.complete:
         route = mesh
         eff_require = require
