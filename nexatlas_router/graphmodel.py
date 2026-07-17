@@ -317,7 +317,6 @@ class RouteGraph:
         tma_radius_nm: float = 60.0,
         entry_exit_k: int = 6,
         inter_tma_nm: float = 300.0,
-        bridge_k: int = 6,
         synth_penalty: float = 1.0,
     ) -> dict:
         """Liga aeródromos e TMAs por trechos 'DIRETO', seguindo a regra REA.
@@ -381,7 +380,7 @@ class RouteGraph:
         origin_in_tma = self._nearest_rea_m(origin.pos, rea_nodes) <= tma_radius_m
         dest_in_tma = self._nearest_rea_m(dest.pos, rea_nodes) <= tma_radius_m
 
-        linked_in = linked_out = locked_out = bridges = 0
+        linked_in = linked_out = bridges = 0
 
         # Carta local de cada ponta (a TMA em que o aeródromo está).
         def _local_chart(pos):
@@ -401,7 +400,6 @@ class RouteGraph:
         if dest_in_tma and dest_chart:
             relevant_charts.add(dest_chart)
         mand_segs = self._mandatory_segments(relevant_charts)
-        self._gate_charts = relevant_charts          # cartas que o portão protege
         entries_gated = exits_gated = bridges_gated = 0
         entries_relaxed = exits_relaxed = 0
         entries_non_gateway_dropped = entries_gateway_relaxed = 0
@@ -634,7 +632,6 @@ class RouteGraph:
             "dest_in_tma": dest_in_tma,
             "entries_linked": linked_in,
             "exits_linked": linked_out,
-            "exits_locked_by_continuity": locked_out,
             "exits_safety_valve": exits_safety_valve,
             "inter_tma_bridges": bridges,
             "bridges_safety_valve": bridges_safety_valve,

@@ -76,6 +76,9 @@ python3 run_v1.py SBBH SBMT
 
 # 4. diagnóstico de por que uma rota cai no fallback direto
 python3 diagnose_route.py SBBH SBMT
+
+# 5. regressão OFFLINE (sem banco), sobre o dump gerado por dump_nexatlas.py
+python3 test_regressao.py            # exit 0 se tudo passa, 1 se algo regrediu
 ```
 
 Credenciais via ambiente (defaults do `published`/`jetstream`, sobrescrevíveis):
@@ -162,10 +165,13 @@ Dijkstra de fixação de rótulos sobre o estado `(nó, owes, used)`:
 
 A obrigação depende de **como** se chega ao nó (assimetria essencial):
 
-- chegou por **corredor real** → `owes=1` só se há corredor de saída que
-  **progride** rumo ao destino; senão `owes=0` (terminal natural, pode sair);
-- chegou por **trecho sintético** (entrada/ponte/saída) → `owes=1` se o nó tem
-  **qualquer** corredor de saída (entrar obriga a voar).
+- chegou por **corredor real** → `owes=1` só se há corredor **obrigatório** de
+  saída que **progride** rumo ao destino; senão `owes=0` (terminal natural);
+- chegou por **trecho sintético** (entrada/ponte/saída) → `owes=1` se, por BFS
+  **só por corredores obrigatórios** e sem atravessar nós que afastam além de
+  `OWES_SYNTH_REACH_MARGIN_M` (5 NM), alcança um nó mais perto do destino.
+
+Só corredores `is_mandatory` geram obrigação (corredor opcional pode ser pulado).
 
 Objetivo: `(destino, owes=0, used≥need)`. Isso reproduz, exata e
 deterministicamente, toda a regra de negócio acima — inclusive nas rotas longas:
@@ -173,6 +179,15 @@ quando uma ponte (curta ou longa) **pousa** num portão da TMA destino, isso con
 como entrada por trecho sintético e dispara `owes=1`, obrigando a voar o corredor
 de chegada. A escala de rota longa só fornece a aresta de ligação do vão; voar os
 corredores das duas pontas é a fase quem garante.
+
+**Vai-e-volta (esporão).** Rota curta cuja única forma de cumprir a cota de
+corredor (`requires_corridor` → `used≥1`) seria entrar num corredor obrigatório
+que afasta e voltar pelo mesmo portão (…→TRINDADE→ABADIA→TRINDADE→…). Dois
+gatilhos, dois freios: a margem do `owes_synth` (acima) e, em `plan_v1_route`,
+uma 2ª passada que relaxa `require` **só quando a rota repete um nó (laço por
+ID)** — preservando os corredores que progridem (que não geram laço). Laço é
+detectado por **ID**, nunca por nome (há waypoints homônimos, ex.: dois "TREVO"
+a 1563 NM).
 
 Internamente, `shortest_route` delega a um núcleo genérico `_phase_shortest`
 (aceita estado inicial de fase, custo inicial, e conjuntos de arestas/nós
@@ -225,10 +240,10 @@ Dependências: `numpy`, `matplotlib`, `psycopg2-binary` (e `geopandas` só para
    obrigatório, mas segmentar/validar o espaço aéreo do vão (vento, NOTAM,
    terreno, airspaces) é responsabilidade da V2 — a V1 resolve a **topologia**,
    não a validação do trajeto livre.
-2. **Código morto / docstrings defasadas (graphmodel).**
-   `graphmodel` ainda expõe o contador `exits_locked_by_continuity` (sempre 0,
-   resquício da antiga "Trava de Continuidade", hoje inativa) e o docstring do
-   topo do módulo ainda pode descrevê-la como ativa. Limpeza pendente.
+2. **Código morto — limpo nesta iteração.** Removidos `exits_locked_by_continuity`
+   (sempre 0), `bridge_k` e `_gate_charts` (não usados) no `graphmodel`, o import
+   `GWORouter` no `v1` e cores não usadas no CLI. A regressão `test_regressao.py`
+   confirmou 24/24 antes e depois.
 3. **`_has_real_incoming` é O(E) por chamada** dentro de laços de montagem
    (O(V·E) no total). Tolerável no subgrafo regional; trivial pré-computar um
    conjunto de nós com corredor de entrada uma única vez.

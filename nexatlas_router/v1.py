@@ -19,7 +19,7 @@ from typing import Any, Optional
 
 from .geo import m_to_nm, haversine_m
 from .graphmodel import RouteGraph
-from .gwo import GWOConfig, GWORouter
+from .gwo import GWOConfig
 from .dijkstra import shortest_route, k_shortest_routes
 
 

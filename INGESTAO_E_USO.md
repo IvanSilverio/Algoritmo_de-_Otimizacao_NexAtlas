@@ -1,113 +1,125 @@
 # Ingestão e uso dos dados — Motor de Rotas V1
 
-Como cada entidade (waypoints, rotas/corredores e aeródromos) sai do banco,
-é transformada e entra no algoritmo de roteamento.
+Como cada entidade (waypoints, corredores, aeródromos, TMAs) sai do banco
+`jetstream` / esquema `published`, é transformada e entra no motor. **Este
+documento substitui a versão que descrevia o esquema `_v2`, o
+`CsvResolver`/OurAirports e o GWO como motor — tudo obsoleto** (ver `CLAUDE.md`).
 
 ---
 
 ## Visão geral do pipeline
 
+Dois caminhos, com a MESMA lógica de grafo e o MESMO solver:
+
 ```
-  BANCO (PostGIS)                EXTRAÇÃO (db.py)            GRAFO (memória)
-  ───────────────                ────────────────            ───────────────
-  special_routes_waypoints_v2 ─► nós com ST_X/ST_Y(geom)  ─► RouteGraph.nodes
-  special_routes_connections_v2─► arestas + ST_Length     ─► RouteGraph.adj
-  adhps + CSV OurAirports     ─► origem/destino (resolver)─► nós terminais
-                                                              │
-                                                              ▼
-                                                      GWO (gwo.py) → rota
+PRODUÇÃO (online, contra o banco)
+  published (PostGIS) ──db.PostgisLoader.build_subgraph──► RouteGraph ──► Dijkstra c/ fase (+Yen)
+
+TESTES (offline, sem banco)
+  published ──dump_nexatlas.py──► 3 JSONs ──build_sub (test_regressao.py)──► RouteGraph ──► idem
+```
+
+O dump é uma fotografia da base para testes internos rápidos e reprodutíveis; a
+produção lê o banco direto. Os dois montam o mesmo grafo e chamam o mesmo solver
+(`dijkstra.shortest_route` + `k_shortest_routes`).
+
+---
+
+## 1. Waypoints (nós da malha REA)
+
+**Origem:** `special_routes_waypoints` (`WHERE type='REA'` → 550 nós; a tabela
+também tem REH/VAC/REUL, não usados na V1).
+
+**Coordenada:** `ST_X(geom)`=lon, `ST_Y(geom)`=lat (PostGIS guarda `[lon,lat]`);
+o código padroniza como `LonLat` num único ponto (`geo.py`) para nunca inverter.
+
+**Fronteira (`db`/`in`):** distância à borda da TMA e se está dentro, calculadas
+contra a UNIÃO dos setores da TMA da carta (`ST_Distance` ao `ST_Boundary`,
+`ST_Contains`). Alimentam o `border_score`, usado só para ponderar as pontes de
+voo direto — nunca a entrada/saída, que vão por mínimo-local.
+
+**Subgrafo regional:** nunca se carrega a malha nacional. `build_subgraph`
+descobre por raio (`chart_radius_nm=60`, `ST_DWithin`) só as cartas perto de
+origem e destino; só os waypoints dessas cartas viram nós.
+
+---
+
+## 2. Corredores (arestas REA)
+
+**Origem:** `special_routes_connections` (`type='REA'` → 1.040 arestas).
+
+**JOIN duplo:** cruza `source_id` e `target_id` com os waypoints para as duas
+pontas. Peso = `ST_Length(geom::geography)` (comprimento real, com curvas);
+fallback `ST_DistanceSphere` entre nós se a LineString for nula.
+
+**Direção:** digrafo. Cada linha é mão única (`source→target`); ida e volta são
+linhas distintas, com piso/teto/classe próprios (invariante do PORTÃO RESTINGA —
+nunca espelhar arestas).
+
+**Atributos de trecho:** `is_mandatory` (gera obrigação de fase — ver `CLAUDE.md`,
+princípio 3), `lower_limit`/`higher_limit`, `class`, `heading`, `frequency`
+(array). A V1 usa `is_mandatory` e o peso; os demais são carregados para exibição
+e reservados à V2.
+
+---
+
+## 3. Aeródromos (nós terminais)
+
+**Origem:** `adhps` (6.021 registros; coluna `designator_icao`, renomeada de
+`icao`). **Tem geometria** — lida com `ST_X/ST_Y(geom)` (registros sem coordenada
+são `NULL` e ignorados). O antigo `CsvResolver`/OurAirports e o
+`AdhpsGeomResolver` estão **descontinuados**: o loader resolve direto do banco.
+
+**Entrada no grafo:** o usuário informa só o ICAO. O loader cria o nó terminal e
+`add_synthetic_edges` liga origem/destino à malha por arestas sintéticas
+(entrada/saída/ponte).
+
+> **Próxima etapa:** os portões de aeródromo do documento **IAC** substituem a
+> estimativa geométrica de entrada/saída por dado publicado — ver `CLAUDE.md`,
+> "Decisões abertas" nº 4. São distintos dos portões da malha REA.
+
+---
+
+## 4. TMAs (`airspaces`)
+
+**Origem:** `airspaces` (`type='tma'` → 53 polígonos). No dump saem como GeoJSON
+(`MultiPolygon`) com todas as colunas. Uso na V1: calcular `db`/`in` dos
+waypoints (item 1) e validar geograficamente portões por point-in-polygon.
+
+Nem toda REA tem TMA cadastrada: **Parintins, Ribeirão Preto e Tabatinga** não
+têm, e seus waypoints ficam sem `db`/`in` (score neutro) — roteiam normalmente.
+É lacuna do banco, não do dump; preencher as TMAs faltantes resolve.
+
+---
+
+## 5. Como tudo se junta (Dijkstra com fase — NÃO GWO)
+
+1. **Monta o subgrafo:** waypoints das cartas próximas + aeródromos + corredores
+   reais + arestas sintéticas (`add_synthetic_edges`). `requires_corridor` fica
+   `True` se alguma ponta está em TMA.
+2. **Rota principal:** `dijkstra.shortest_route` — caminho mínimo EXATO sobre o
+   estado `(nó, owes, used)` (ver `CLAUDE.md`). Determinístico.
+3. **Anti-esporão:** `v1.plan_v1_route` aplica a 2ª passada se a rota repetir nó.
+4. **Alternativas:** `dijkstra.k_shortest_routes` (Yen) — as K melhores válidas.
+5. **Saída (`V1RouteResult`):** pontos, corredores usados, distâncias, `reason`,
+   `meta` (`route_source`, alternativas). O GWO NÃO participa (reservado à V3).
+
+---
+
+## 6. Gerar o dump / rodar a regressão
+
+```bash
+source .env.sh
+python3 dump_nexatlas.py .        # gera nexatlas_rea_malha/aerodromos/airspaces.json
+python3 test_regressao.py         # regressão offline sobre o dump (exit 0/1)
 ```
 
 ---
 
-## 1. Waypoints (os nós da malha)
+## 7. Visualização
 
-**Origem:** tabela `special_routes_waypoints_v2` (1.033 pontos: 550 REA,
-401 REH, 76 VAC, 6 REUL).
-
-**Como são lidos:** a query em `db.py` extrai a coordenada com
-`ST_X(geom)` (longitude) e `ST_Y(geom)` (latitude). Isso resolve a
-"armadilha do X/Y": o PostGIS guarda `[lon, lat]`, e o código padroniza
-internamente como `LonLat(lon, lat)` para nunca inverter.
-
-**Como são filtrados:** o motor NÃO carrega os 1.033 de uma vez. A função
-`discover_charts()` usa `ST_DWithin` para achar só as cartas próximas da
-origem e do destino (ex.: a rota SBMT→SBJD ativou 5 cartas: REA São Paulo,
-REH Campinas, REH Sorocaba, REH São José dos Campos, REH São Paulo). Só os
-waypoints dessas cartas viram nós. É o princípio do **subgrafo regional** —
-processar a malha nacional inteira seria desperdício.
-
-**Como são usados:** cada waypoint vira um índice no vetor de prioridades do
-GWO. O algoritmo atribui uma "nota" a cada nó, e o decodificador caminha
-pela malha escolhendo o vizinho de maior nota.
-
----
-
-## 2. Rotas / corredores (as arestas)
-
-**Origem:** tabela `special_routes_connections_v2` (~2.100 conexões).
-
-**Como são lidas:** a query faz o **JOIN duplo obrigatório** — cruza
-`source_id` e `target_id` com a tabela de waypoints para resgatar a
-geometria das duas pontas. O peso de cada aresta vem de
-`ST_Length(c.geom::geography)`, que mede o comprimento REAL do corredor
-(a LineString, com curvas), com fallback para `ST_DistanceSphere` entre os
-nós se a LineString for nula.
-
-**Direção:** o grafo é DIRECIONADO. Cada linha da tabela é uma aresta de
-mão única (`source → target`), respeitando a proa magnética do corredor.
-Conexões de ida e volta são linhas distintas com piso/teto/classe próprios.
-
-**Como são usadas:** as arestas definem por onde o decodificador pode
-caminhar. O peso (distância) é o que o GWO minimiza. Corredores com
-`is_mandatory` ou aplicáveis à saída/chegada acionam a regra de
-obrigatoriedade (penalidade no fitness se ignorados).
-
----
-
-## 3. Aeródromos (os nós terminais)
-
-**Origem do código:** tabela `adhps` (5.956 registros) — fornece o código
-ICAO válido e o tipo (AD/HP), mas **NÃO tem geometria**.
-
-**Origem da coordenada (PROVISÓRIA):** como a `adhps` não guarda posição e
-nenhuma outra tabela do banco a tem (confirmado por diagnóstico), as
-coordenadas vêm de `data/aerodromos_br_ourairports.csv` — derivado da base
-pública OurAirports (domínio público), filtrada para 4.677 aeródromos
-brasileiros. Validada contra a `adhps`: SBMT resolve em (-46.6378, -23.5091).
-
-**Como entram no grafo:** o usuário informa só o ICAO (ex.: "SBMT"). O
-`CsvResolver` (resolver.py) traduz ICAO → coordenada e cria o nó terminal.
-Depois, `add_synthetic_edges()` liga esse aeródromo aos waypoints próximos
-(raio de 30 NM) com arestas sintéticas, e cria também a aresta direta
-origem→destino (garante que sempre existe uma solução possível).
-
-**Caminho definitivo (futuro):** quando o banco interno tiver a coordenada
-oficial, troca-se o `CsvResolver` pelo `AdhpsGeomResolver` em uma linha —
-o resto do motor não muda. Ver `PERGUNTA_ADMIN_BANCO.md`.
-
----
-
-## 4. Como tudo se junta no algoritmo (GWO)
-
-1. **Monta o subgrafo:** nós (waypoints das cartas próximas) + nós terminais
-   (aeródromos resolvidos) + arestas (corredores reais com peso geodésico +
-   arestas sintéticas de ligação).
-2. **GWO otimiza prioridades:** cada "lobo" é um vetor de notas sobre os nós.
-3. **Decodificador gera a rota:** caminha da origem ao destino seguindo as
-   notas, sempre por arestas válidas do digrafo.
-4. **Fitness avalia:** soma das distâncias + penalidades (rota incompleta,
-   corredor obrigatório ignorado).
-5. **Saída V1:** lista ordenada de pontos, corredores usados, distância
-   direta, distância total e justificativa.
-
----
-
-## 5. Visualização
-
-- `plot_route.py` → zoom REGIONAL no subgrafo da rota (inspeção de perto).
-- `plot_national.py` → malha NACIONAL inteira sobre o contorno do Brasil
-  (padrão do script original), com a rota e os aeródromos destacados.
+- `plot_route.py` → zoom REGIONAL no subgrafo (rota principal + candidatas).
+- `plot_national.py` → malha NACIONAL sobre o contorno do Brasil.
 
 ```bash
 source .env.sh

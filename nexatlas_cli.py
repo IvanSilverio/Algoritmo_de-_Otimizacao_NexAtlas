@@ -34,7 +34,7 @@ from nexatlas_router.plot_route import plot_v1_combined
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 RST = "\033[0m"; BLD = "\033[1m"; DIM = "\033[2m"
-GRN = "\033[32m"; CYN = "\033[36m"; YLW = "\033[33m"; RED = "\033[31m"; MGN = "\033[35m"
+GRN = "\033[32m"; CYN = "\033[36m"; RED = "\033[31m"
 
 
 def _hr(ch: str = "─", width: int = 66) -> str:
