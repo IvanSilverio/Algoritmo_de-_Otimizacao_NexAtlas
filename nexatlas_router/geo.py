@@ -37,3 +37,16 @@ def haversine_m(a: LonLat, b: LonLat) -> float:
 
 def m_to_nm(meters: float) -> float:
     return meters / M_PER_NM
+
+
+def initial_bearing(a: LonLat, b: LonLat) -> float:
+    """Proa VERDADEIRA inicial (great-circle) de a->b, em graus [0,360).
+
+    A conversão para proa MAGNÉTICA (regra par/ímpar da V3) é feita à parte,
+    aplicando a declinação do WMM (ver nexatlas_router.vertical.magnetic).
+    """
+    phi1, phi2 = math.radians(a.lat), math.radians(b.lat)
+    dl = math.radians(b.lon - a.lon)
+    y = math.sin(dl) * math.cos(phi2)
+    x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dl)
+    return (math.degrees(math.atan2(y, x)) + 360.0) % 360.0

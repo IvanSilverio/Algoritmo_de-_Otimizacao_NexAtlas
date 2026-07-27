@@ -249,6 +249,7 @@ class PostgisLoader:
                                     connection_id=_id,
                                     is_mandatory=bool(mandatory),
                                     lower_limit=lo, higher_limit=hi,
+                                    heading=(float(heading) if heading is not None else None),
                                     geom=geom))
 
         diag = g.add_synthetic_edges(origin.id, dest.id)

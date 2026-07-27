@@ -98,6 +98,7 @@ class V1RouteResult:
     total_distance_nm: float
     reason: str
     meta: dict[str, Any] = field(default_factory=dict)
+    route: Any = None                    # DecodedRoute (edges+node_ids) p/ a V3; NÃO serializado
 
     def to_dict(self) -> dict:
         return {
@@ -228,4 +229,5 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             "used_direct_fallback": used_direct_fallback,
             "route_source": route_source,
         },
+        route=route,
     )

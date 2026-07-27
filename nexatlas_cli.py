@@ -30,7 +30,20 @@ except ImportError:
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
-from nexatlas_router.plot_route import plot_v1_combined
+try:
+    from nexatlas_router.plot_route import plot_v1_combined
+    _HAS_LATERAL_PLOT = True
+except Exception:
+    _HAS_LATERAL_PLOT = False
+
+# Camada V3 (vertical) — opcional: se pygeomag não estiver instalado, a V1 segue.
+try:
+    from nexatlas_router.vertical import (Terrain, load_from_db as load_aircraft,
+                                          find as find_aircraft, plan_from_v1,
+                                          plot_vertical_profile)
+    _HAS_V3 = True
+except Exception:
+    _HAS_V3 = False
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 RST = "\033[0m"; BLD = "\033[1m"; DIM = "\033[2m"
@@ -160,6 +173,62 @@ def _print_route(origin: str, dest: str, result) -> None:
         print()
 
 
+def _select_aircraft(catalog):
+    """Lista as aeronaves utilizáveis e lê a escolha (índice ou ICAO). Enter = pular V3."""
+    if not catalog:
+        print(f"  {DIM}Nenhuma aeronave com performance completa em aircraft_models — V3 desativada.{RST}")
+        return None
+    print(f"\n  {BLD}Aeronaves disponíveis (performance completa):{RST}")
+    for i, a in enumerate(catalog, 1):
+        print(f"    {CYN}{i:>2}{RST} {a.icao:<6} {DIM}{a.model}{RST}  "
+              f"{DIM}(teto {a.teto_ft:.0f}ft, cruz {a.speed_cruise_kt:.0f}kt){RST}")
+    try:
+        sel = input(f"  {BLD}Aeronave [nº ou ICAO, Enter p/ pular]:{RST} ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return None
+    if not sel:
+        return None
+    if sel.isdigit() and 1 <= int(sel) <= len(catalog):
+        return catalog[int(sel) - 1]
+    return find_aircraft(catalog, sel)
+
+
+def _print_vertical(perfil) -> None:
+    print(); print(_hr())
+    print(f"  {BLD}Perfil vertical (V3) — {CYN}{perfil.aeronave}{RST}")
+    print(_hr())
+    print(f"  {BLD}Cruzeiro:{RST} {perfil.cruzeiro_ft:.0f} ft"
+          f"{'' if perfil.alcancou_cruzeiro else DIM + '  (rota curta: sem cruzeiro nivelado)' + RST}")
+    print(f"  {DIM}Elevação origem/destino: {perfil.origem_elev_ft:.0f} / {perfil.destino_elev_ft:.0f} ft{RST}")
+    print(f"  {DIM}{perfil.diag.get('fonte_cruzeiro','')}{RST}")
+    print(f"  {BLD}Tempo:{RST} subida {perfil.subida.tempo_min:.0f} min + "
+          f"cruzeiro {perfil.cruzeiro.tempo_min:.0f} min + descida {perfil.descida.tempo_min:.0f} min "
+          f"= {BLD}{perfil.tempo_total_min:.0f} min{RST}")
+    print(f"  {DIM}TOC {perfil.toc_nm:.1f} NM  ·  TOD {perfil.tod_nm:.1f} NM  "
+          f"@ {perfil.cruzeiro_ft:.0f} ft{RST}\n")
+    print(f"  {BLD}Perfil (pontos reais + virtuais):{RST}")
+    prev = None
+    for v in perfil.vertices:
+        seta = "  "
+        if prev is not None:
+            if v.alt_ft > prev + 1:
+                seta = f"{GRN}↑{RST}"
+            elif v.alt_ft < prev - 1:
+                seta = f"{DIM}↓{RST}"
+            else:
+                seta = f"{DIM}={RST}"
+        if v.real:
+            tag = GRN if v.tipo == "corredor" else CYN
+            nome = v.nome or ""
+        else:
+            tag = DIM
+            nome = (f"{DIM}(TOC/TOD){RST}" if v.tipo in ("toc", "tod")
+                    else f"{DIM}(ponto virtual — atinge a altitude aqui){RST}")
+        print(f"    {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{tag}{v.tipo:<8}{RST}] {nome}")
+        prev = v.alt_ft
+    print()
+
+
 def _setup_autocomplete(icao_list: list[str]) -> None:
     if not _HAS_READLINE:
         return
@@ -222,6 +291,16 @@ def main() -> None:
     ]:
         print(f"    {CYN}{orig} → {dest}{RST}  {DIM}{desc}{RST}")
 
+    # V3 (opcional): escolhe a aeronave da sessão (aircraft_models).
+    aircraft = None
+    if _HAS_V3:
+        try:
+            aircraft = _select_aircraft(load_aircraft(conn))
+            if aircraft:
+                print(f"  {GRN}✓ Aeronave:{RST} {aircraft.label}")
+        except Exception as e:
+            print(f"  {DIM}V3 indisponível ({e}); seguindo só com a rota lateral.{RST}")
+
     # max_hops=80 para rotas longas com múltiplas TMAs encadeadas.
     gwo_cfg = GWOConfig(seed=42, n_iterations=200, n_wolves=30, max_hops=80)
 
@@ -260,14 +339,35 @@ def main() -> None:
 
         _print_route(origin, dest, result)
 
+        # V3: perfil vertical sobre a rota lateral (terreno do CDN, injetado).
+        if _HAS_V3 and aircraft is not None:
+            try:
+                perfil = plan_from_v1(graph, result, aircraft, Terrain())
+                _print_vertical(perfil)
+                perfil_png = f"{origin}_{dest}_perfil.png"
+                try:
+                    plot_vertical_profile(perfil, perfil_png,
+                                          titulo=f"Perfil vertical  {origin} → {dest}")
+                    print(f"  {GRN}✓ Perfil salvo:{RST} {os.path.abspath(perfil_png)}")
+                    _open_image(perfil_png)
+                except Exception as e:
+                    print(f"  {DIM}(gráfico do perfil não gerado: {e}){RST}")
+            except Exception as e:
+                print(f"  {RED}✗ Perfil vertical indisponível:{RST} {e} "
+                      f"{DIM}(terreno/CDN?){RST}")
+
         plot_path = f"{origin}_{dest}.png"
-        try:
-            plot_v1_combined(graph, result, plot_path,
-                             title=f"Malha Aérea VFR — {origin} → {dest}")
-            print(f"  {GRN}✓ Mapa salvo:{RST} {os.path.abspath(plot_path)}")
-            _open_image(plot_path)
-        except Exception as e:
-            print(f"  {RED}✗ Erro na plotagem:{RST} {e}")
+        if _HAS_LATERAL_PLOT:
+            try:
+                plot_v1_combined(graph, result, plot_path,
+                                 title=f"Malha Aérea VFR — {origin} → {dest}")
+                print(f"  {GRN}✓ Mapa salvo:{RST} {os.path.abspath(plot_path)}")
+                _open_image(plot_path)
+            except Exception as e:
+                print(f"  {RED}✗ Erro na plotagem:{RST} {e}")
+        else:
+            print(f"  {DIM}(mapa lateral indisponível: plot_v1_combined não encontrado "
+                  f"em plot_route.py){RST}")
         print()
 
     conn.close()

@@ -48,6 +48,7 @@ class Edge:
     is_mandatory: bool = False          # is_mandatory do trecho REA
     lower_limit: Optional[int] = None
     higher_limit: Optional[int] = None
+    heading: Optional[float] = None     # proa MAGNÉTICA do corredor (c.heading); None nas sintéticas
     synthetic: bool = False             # True para arestas "DIRETO" criadas em runtime
     geom: Optional[tuple] = None        # traçado real do corredor: ((lon,lat), ...) — só nas arestas reais
 
