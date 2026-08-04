@@ -37,8 +37,12 @@ Além da rota lateral, aparece o **perfil vertical** (cruzeiro, TOC/TOD, tempo p
 fase e altitude por trecho). Se você der Enter na escolha da aeronave, a V3 é
 pulada e só a rota lateral é exibida.
 
-> Se `pygeomag` não estiver instalado, a CLI detecta e **segue só com a V1**
-> (a V3 é desativada com aviso, sem quebrar nada).
+> `pygeomag` é **obrigatório** para a V3: `magnetic.declination()` não tem mais
+> fallback — se o WMM não estiver disponível, ela **levanta erro** em vez de
+> chutar uma declinação (chutar dá paridade semicircular, e portanto altitude
+> de cruzeiro, errada). A CLI captura esse erro na hora de montar o perfil e
+> **segue só com a V1** (a V3 é desativada com aviso, sem quebrar nada) — mas
+> o correto é instalar o `pygeomag` e ter o cálculo real.
 
 ## Acesso ao CDN de terreno (o que mexer, se precisar)
 
@@ -80,8 +84,15 @@ Em `vertical/rules.py` e nos argumentos de `plan_vertical_profile(...)`:
 - `margem_ft = 1000` — folga de terreno (RBAC 91.119, área habitada).
 - raio de obstáculo `600 m` → `radius_px ≈ 4` em z=10 (~150 m/pixel).
 - `step_nm = 0.5` — passo de amostragem do terreno ao longo da perna.
-- Regra semicircular VFR (ICA 100-12): rumo mag 0–179° → ímpar+500;
-  180–359° → par+500; acima de 3000 ft AGL.
+
+O **enquadramento semicircular** (VFR: milhar ±500 por direção; IFR/RVSM:
+milhar cheia) não vive mais em `rules.py` — está em dois lugares:
+- `cruise.py` (Etapa 3 da spec) enquadra o alvo distância×teto no nível legal.
+- `profile.py::_niveis_legais/_nivel_legal_acima` reenquadra esse resultado
+  quando o **piso de terreno obrigatório** (terreno máximo no trecho en-route
+  + 500 ft) fica acima do cruzeiro sugerido: sobe para o menor nível legal que
+  respeite o piso, ou para o maior nível legal com aviso forte se o piso passar
+  do teto operacional da aeronave.
 
 Para mudar (ex.: 500 ft fora de área habitada):
 ```python

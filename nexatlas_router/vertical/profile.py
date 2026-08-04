@@ -106,6 +106,34 @@ def _longest_free_run(legs) -> tuple[int, int]:
     return best[0], best[1]
 
 
+def _niveis_legais(route_dir: float, teto: float) -> list[float]:
+    """Níveis de cruzeiro legais (regra semicircular, mesma do documento) até o teto.
+    VFR (<14500): milhar ímpar/par + 500 conforme direção; IFR/RVSM: milhar cheio."""
+    east = 0 <= route_dir < 180
+    out: list[float] = []
+    milhar = 1000
+    while milhar + 500 < 14500:                     # faixa VFR: milhar ± 500
+        if ((milhar // 1000) % 2 == 1) == east and (milhar + 500) <= teto + 1e-6:
+            out.append(float(milhar + 500))
+        milhar += 1000
+    m = 15000 if east else 16000                    # faixa IFR/RVSM: milhar cheio
+    while m <= min(int(teto), 41000) + 1e-6:
+        out.append(float(m))
+        m += 2000
+    return sorted(out)
+
+
+def _nivel_legal_acima(piso_ft: float, route_dir: float, teto: float) -> float:
+    """Menor nível legal >= piso; se nenhum couber sob o teto, o mais alto legal."""
+    niveis = _niveis_legais(route_dir, teto)
+    acima = [lv for lv in niveis if lv >= piso_ft - 1e-6]
+    if acima:
+        return acima[0]
+    if niveis:
+        return niveis[-1]
+    return float(int((piso_ft + 499) // 500) * 500)   # teto muito baixo: fallback numérico
+
+
 # --------------------------------------------------------------------------- API
 def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
                           margem_ft: float = rules.CLEARANCE_FT,
@@ -149,6 +177,32 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
     fonte_cruz = (f"spec(dist_en-route {dist_cruz:.0f}NM de {total:.0f} total, rumo "
                   f"{route_dir:.0f}°, teto {ac.teto_ft:.0f}) → {cruise}"
                   if cruise is not None else "spec → None (rota curta)")
+
+    # ---- piso de TERRENO obrigatório no trecho de cruzeiro (folga 500 ft, como
+    #      o documento do Cris). O documento já garante 500 ft acima do aeródromo
+    #      mais alto (Etapas 1/4 do cruise.py); aqui estendemos "o ponto mais alto"
+    #      para incluir a serra EN-ROUTE. Se o cruzeiro cair abaixo, sobe para o
+    #      menor NÍVEL LEGAL (semicircular) que respeite o piso. ----
+    if tem_cruise_stretch and cruise is not None:
+        en_path = [(legs[cs].from_pos.lon, legs[cs].from_pos.lat)]
+        for i in range(cs, ce):
+            en_path.append((legs[i].to_pos.lon, legs[i].to_pos.lat))
+        try:
+            terr_max = float(terreno.max_along(en_path, step_nm=step_nm, radius_px=radius_px))
+            piso = terr_max + 500.0
+            if cruise < piso - 1e-6:
+                novo = _nivel_legal_acima(piso, route_dir, ac.teto_ft)
+                if novo < piso - 1e-6:
+                    avisos.append(f"ATENÇÃO: terreno en-route {terr_max:.0f} ft exige piso "
+                                  f"{piso:.0f} ft, acima do teto ({ac.teto_ft:.0f}); "
+                                  f"cruzeiro no máximo legal {novo:.0f} ft — terreno NÃO liberado.")
+                else:
+                    avisos.append(f"cruzeiro elevado de {cruise:.0f} para {novo:.0f} ft "
+                                  f"(piso de terreno {terr_max:.0f}+500={piso:.0f} ft).")
+                cruise = novo
+                fonte_cruz += f" | piso terreno {piso:.0f} → {novo:.0f}"
+        except Exception as e:
+            avisos.append(f"não foi possível checar o piso de terreno do cruzeiro ({e}).")
 
     # helper: his de corredor (ou None)
     def his(i):

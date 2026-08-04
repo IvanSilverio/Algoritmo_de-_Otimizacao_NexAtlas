@@ -21,18 +21,22 @@ except Exception:            # pragma: no cover
     _GM = None
     _HAS_WMM = False
 
-_FALLBACK_DECL = -21.0       # média p/ Brasil, só se pygeomag ausente (não recomendado)
-
-
 def _decimal_year(date: dt.date | None = None) -> float:
     d = date or dt.date.today()
     return d.year + (d.timetuple().tm_yday - 1) / 365.0
 
 
 def declination(lat: float, lon: float, date: dt.date | None = None) -> float:
-    """Declinação magnética (graus, Oeste negativo) no ponto. Fonte: WMM."""
+    """Declinação magnética (graus, Oeste negativo) no ponto. Fonte: WMM.
+
+    SEM fallback: se o pygeomag não estiver instalado, levanta erro. Chutar a
+    declinação produziria paridade ímpar/par — e portanto nível de cruzeiro —
+    errada; é mais seguro falhar alto do que sugerir uma altitude incorreta.
+    """
     if not _HAS_WMM:
-        return _FALLBACK_DECL
+        raise RuntimeError(
+            "WMM indisponível (pygeomag não instalado): não é possível calcular a "
+            "proa magnética. Instale com `pip install pygeomag`.")
     return _GM.calculate(lat, lon, 0, _decimal_year(date)).d
 
 
