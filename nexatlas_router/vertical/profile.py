@@ -22,13 +22,17 @@ o relevo. Consome apenas o contrato LateralRoute.
 """
 from __future__ import annotations
 
+import datetime as dt
+import time
 from dataclasses import dataclass, field
 from typing import Optional
 
+from ..geo import initial_bearing
 from .aircraft import Aeronave
 from .contract import LateralRoute, LateralLeg
-from .magnetic import magnetic_bearing
+from .magnetic import magnetic_bearing, declination
 from .cruise import suggest_cruise_altitude
+from .wind import Wind, ground_speed
 from . import rules
 
 
@@ -37,6 +41,26 @@ from . import rules
 class FaseTempo:
     dist_nm: float
     tempo_min: float
+
+
+# --------------------------------------------------------------------------- vento
+@dataclass
+class SegmentoVento:
+    """Um trecho vértice-a-vértice recalculado com o triângulo do vento
+    (TAREFA_vento.md §3) — só para diagnóstico/terminal; não afeta a geometria."""
+    x0_nm: float
+    x1_nm: float
+    fase: str                # subida | cruzeiro | descida
+    alt_ft: float             # altitude média do trecho (ponto de amostra do vento)
+    rumo_deg: float           # rumo VERDADEIRO da perna
+    tas_kt: float
+    u_kt: float
+    v_kt: float
+    comp_cauda_kt: float      # + cauda, - proa
+    deriva_deg: float
+    gs_kt: float
+    tempo_min: float           # tempo do trecho COM vento
+    tempo_min_sem_vento: float  # tempo do trecho SEM vento (mesma fórmula, u=v=0)
 
 
 # --------------------------------------------------------------------------- vértices
@@ -73,10 +97,30 @@ class PerfilVertical:
     comb_total: Optional[float] = None
     comb_unit: Optional[str] = None       # unidade de QUANTIDADE (ex.: "l", "us gal", "lb")
     fuel_type: Optional[str] = None       # avgas / jet-a (informativo)
+    # Vento (TAREFA_vento.md, passo 1) — tempo/combustível recalculados por
+    # trecho com o triângulo do vento; None se `wind` não foi passado a
+    # plan_vertical_profile (chamador optou por não calcular). Os campos SEM
+    # vento acima nunca mudam — ficam para comparação.
+    hora_partida_utc: Optional[float] = None
+    segmentos_vento: list = field(default_factory=list)   # list[SegmentoVento]
+    subida_vento: Optional[FaseTempo] = None
+    cruzeiro_vento: Optional[FaseTempo] = None
+    descida_vento: Optional[FaseTempo] = None
+    comb_subida_vento: Optional[float] = None
+    comb_cruzeiro_vento: Optional[float] = None
+    comb_descida_vento: Optional[float] = None
+    comb_total_vento: Optional[float] = None
 
     @property
     def tempo_total_min(self) -> float:
         return self.subida.tempo_min + self.cruzeiro.tempo_min + self.descida.tempo_min
+
+    @property
+    def tempo_total_vento_min(self) -> Optional[float]:
+        if self.subida_vento is None:
+            return None
+        return (self.subida_vento.tempo_min + self.cruzeiro_vento.tempo_min
+                + self.descida_vento.tempo_min)
 
 
 # --------------------------------------------------------------- helpers de geometria
@@ -153,10 +197,12 @@ def _nivel_legal_acima(piso_ft: float, route_dir: float, teto: float) -> float:
 
 
 # --------------------------------------------------------------------------- API
-def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
+def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
+                          wind: Optional[Wind] = None, *,
                           margem_ft: float = rules.CLEARANCE_FT,
                           step_nm: float = rules.STEP_NM,
-                          radius_px: int = rules.RADIUS_PX) -> PerfilVertical:
+                          radius_px: int = rules.RADIUS_PX,
+                          hora_partida_utc: Optional[float] = None) -> PerfilVertical:
     legs = list(lateral.legs)
     avisos: list[str] = []
     ac = aeronave
@@ -508,6 +554,27 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
     # ---- silhueta do terreno (para o gráfico) ----
     terreno_perfil = _terrain_silhouette(lateral, legs, cum, total, terreno, step_nm, avisos)
 
+    # ---- vento: tempo/combustível recalculados por trecho (TAREFA_vento.md,
+    #      passo 1). NÃO toca na geometria acima (vértices já estão prontos);
+    #      wind=None -> campos ficam None (chamador optou por não calcular). ----
+    hora_vento = hora_partida_utc
+    subida_vento = cruzeiro_vento = descida_vento = None
+    comb_subida_vento = comb_cruzeiro_vento = comb_descida_vento = comb_total_vento = None
+    segmentos_vento: list = []
+    if wind is not None:
+        if hora_vento is None:
+            hora_vento = time.time()
+            quando = dt.datetime.fromtimestamp(hora_vento, dt.timezone.utc)
+            avisos.append("hora de partida não informada; usando agora para o "
+                          f"vento ({quando:%Y-%m-%d %H:%M} UTC).")
+        subida_vento, cruzeiro_vento, descida_vento, segmentos_vento = _vento_por_segmento(
+            vertices, legs, cum, ac, wind, hora_vento, avisos)
+        if ac.fuel_ac is not None and ac.fuel_cruise is not None and ac.fuel_dc is not None and ac.fuel_unit:
+            comb_subida_vento = ac.fuel_ac * (subida_vento.tempo_min / 60.0)
+            comb_cruzeiro_vento = ac.fuel_cruise * (cruzeiro_vento.tempo_min / 60.0)
+            comb_descida_vento = ac.fuel_dc * (descida_vento.tempo_min / 60.0)
+            comb_total_vento = comb_subida_vento + comb_cruzeiro_vento + comb_descida_vento
+
     return PerfilVertical(
         aeronave=ac.label,
         cruzeiro_ft=float(cruz_efet), alcancou_cruzeiro=alcancou,
@@ -521,6 +588,10 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
               "corredores_x": [(cum[i], cum[i + 1]) for i in range(n) if legs[i].is_corridor]},
         comb_subida=comb_subida, comb_cruzeiro=comb_cruzeiro, comb_descida=comb_descida,
         comb_total=comb_total, comb_unit=comb_unit, fuel_type=ac.fuel_type,
+        hora_partida_utc=hora_vento, segmentos_vento=segmentos_vento,
+        subida_vento=subida_vento, cruzeiro_vento=cruzeiro_vento, descida_vento=descida_vento,
+        comb_subida_vento=comb_subida_vento, comb_cruzeiro_vento=comb_cruzeiro_vento,
+        comb_descida_vento=comb_descida_vento, comb_total_vento=comb_total_vento,
     )
 
 
@@ -537,6 +608,113 @@ def _interp_pos(lateral, legs, cum, x):
             return (l.from_pos.lon + (l.to_pos.lon - l.from_pos.lon) * f,
                     l.from_pos.lat + (l.to_pos.lat - l.from_pos.lat) * f)
     return (legs[-1].to_pos.lon, legs[-1].to_pos.lat)
+
+
+def _locate(legs, cum, x):
+    """(índice da perna, (lon,lat) interpolado) na distância x — mesma busca
+    de `_interp_pos`, mas também devolve a perna (p/ o rumo verdadeiro do vento)."""
+    if not legs:
+        return 0, (0.0, 0.0)
+    for i, l in enumerate(legs):
+        if x <= cum[i + 1] or i == len(legs) - 1:
+            seg = cum[i + 1] - cum[i]
+            f = 0.0 if seg <= 0 else (x - cum[i]) / seg
+            f = max(0.0, min(1.0, f))
+            return i, (l.from_pos.lon + (l.to_pos.lon - l.from_pos.lon) * f,
+                       l.from_pos.lat + (l.to_pos.lat - l.from_pos.lat) * f)
+    return len(legs) - 1, (legs[-1].to_pos.lon, legs[-1].to_pos.lat)
+
+
+def _leg_true_heading(leg: LateralLeg) -> float:
+    """Rumo VERDADEIRO da perna, para o triângulo do vento (u/v são leste/norte
+    verdadeiros). Corredor: já vem do banco, mas em proa MAGNÉTICA
+    (`corridor_heading_mag`, ver contract.py) — reconverte pra verdadeira somando
+    a declinação WMM no meio da perna (`verdadeiro = magnético + D`, mesma
+    convenção do magnetic.py). DIRETO: sem rumo de carta (é reta geodésica) —
+    calcula da geometria com `initial_bearing`."""
+    if leg.is_corridor and leg.corridor_heading_mag is not None:
+        latm = (leg.from_pos.lat + leg.to_pos.lat) / 2.0
+        lonm = (leg.from_pos.lon + leg.to_pos.lon) / 2.0
+        d = declination(latm, lonm)
+        return (leg.corridor_heading_mag + d) % 360.0
+    return initial_bearing(leg.from_pos, leg.to_pos)
+
+
+def _vento_por_segmento(vertices, legs, cum, ac: Aeronave, wind: Wind,
+                        hora_partida_utc: float, avisos: list):
+    """Percorre os mesmos trechos vértice-a-vértice de `_bucket_time`, recalculando
+    o tempo com o triângulo do vento (TAREFA_vento.md §3). NÃO toca em x/altitude
+    dos vértices — só tempo/combustível.
+
+    ETA de cada trecho = hora_partida_utc + tempo ACUMULADO SEM VENTO até o
+    vértice inicial (evita a circularidade vento->tempo->ETA->vento). `dist/tas`
+    sem vento é matematicamente igual a Δaltitude/razão (a distância de cada
+    trecho de subida/descida foi construída exatamente por essa relação em
+    `start_to`/`_descida_final`), então o acumulado aqui bate com subida.tempo_min
+    etc. — por isso não precisa reaproveitar `_bucket_time` para o sem-vento.
+    """
+    hdg_cache: dict[int, float] = {}
+
+    def heading_da_perna(i):
+        if i not in hdg_cache:
+            hdg_cache[i] = _leg_true_heading(legs[i])
+        return hdg_cache[i]
+
+    sub = cru = des = 0.0
+    sub_d = cru_d = des_d = 0.0
+    t_acum_sem_vento_min = 0.0
+    segmentos: list[SegmentoVento] = []
+    falhas_antes = wind.falhas
+    clamps_gs = 0
+
+    for A, B in zip(vertices, vertices[1:]):
+        d = B.x_nm - A.x_nm
+        if d <= 0:
+            continue
+        dalt = B.alt_ft - A.alt_ft
+        if dalt > 1:
+            fase, tas = "subida", ac.speed_ac_kt
+        elif dalt < -1:
+            fase, tas = "descida", ac.speed_dc_kt
+        else:
+            fase, tas = "cruzeiro", ac.speed_cruise_kt
+
+        t_sem_vento = (d / tas * 60.0) if tas > 0 else 0.0
+        eta = hora_partida_utc + t_acum_sem_vento_min * 60.0
+
+        i, (lon, lat) = _locate(legs, cum, (A.x_nm + B.x_nm) / 2.0)
+        rumo = heading_da_perna(i)
+        alt_mid = (A.alt_ft + B.alt_ft) / 2.0
+        u, v = wind.vento_em(lon, lat, alt_mid, eta)
+        gs, comp_cauda, deriva = ground_speed(rumo, tas, u, v)
+        gs_eff = gs
+        if gs_eff < 0.5:                        # vento de proa > TAS (patológico)
+            gs_eff = 0.5
+            clamps_gs += 1
+        t_com_vento = d / gs_eff * 60.0
+
+        segmentos.append(SegmentoVento(
+            x0_nm=A.x_nm, x1_nm=B.x_nm, fase=fase, alt_ft=alt_mid, rumo_deg=rumo,
+            tas_kt=tas, u_kt=u, v_kt=v, comp_cauda_kt=comp_cauda, deriva_deg=deriva,
+            gs_kt=gs, tempo_min=t_com_vento, tempo_min_sem_vento=t_sem_vento,
+        ))
+
+        if fase == "subida":
+            sub += t_com_vento; sub_d += d
+        elif fase == "descida":
+            des += t_com_vento; des_d += d
+        else:
+            cru += t_com_vento; cru_d += d
+        t_acum_sem_vento_min += t_sem_vento
+
+    n_falhas = wind.falhas - falhas_antes
+    if n_falhas > 0:
+        avisos.append(f"vento indisponível em {n_falhas} de {len(segmentos)} trecho(s) "
+                      f"(CDN); usado vento=0 nesses trechos.")
+    if clamps_gs > 0:
+        avisos.append(f"vento de proa extremo (> TAS) em {clamps_gs} trecho(s); "
+                      f"groundspeed limitada a 0.5 kt nesses trechos.")
+    return (FaseTempo(sub_d, sub), FaseTempo(cru_d, cru), FaseTempo(des_d, des), segmentos)
 
 
 def _terrain_silhouette(lateral, legs, cum, total, terreno, step_nm, avisos):

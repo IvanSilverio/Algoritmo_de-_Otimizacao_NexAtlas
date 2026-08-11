@@ -15,9 +15,11 @@ Edite AERONAVES e ROTAS abaixo. Requer pygeomag instalado (V3) e acesso ao
 jetstream + CDN de terreno (igual à CLI).
 """
 from __future__ import annotations
+import datetime as dt
 import os
 import sys
 import csv
+import time
 
 # ============================ CONFIGURAÇÃO (edite aqui) ============================
 
@@ -51,6 +53,15 @@ SALVAR_GRAFICOS = True          # salva o PNG do perfil de cada caso
 PASTA_SAIDA = "analise_voos"    # onde salvar os PNGs
 CSV_SAIDA = "analise_voos.csv"  # tabela completa
 
+# Hora de partida (UTC) usada em TODOS os casos desta rodada — fixa, pra
+# bateria ficar reprodutível (mesmo padrão de AERONAVES/ROTAS: edite e rode).
+# None = usa "agora" (UTC), resolvido UMA VEZ no início do main() (não teria
+# sentido cada caso pegar um "agora" diferente enquanto a bateria roda).
+# Aceita (ver parse_hora_utc em wind.py): data BR "15/08/2026 14:30" ou
+# "15/08/2026" (00:00), só hora "14:30" (assume hoje, UTC), ISO-8601
+# "2026-08-15T14:30:00", ou unix (int/float).
+HORA_PARTIDA_UTC: str | float | None = None
+
 # ==================================================================================
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -59,7 +70,8 @@ from nexatlas_router.db import PostgisLoader                       # noqa: E402
 from nexatlas_router.gwo import GWOConfig                          # noqa: E402
 from nexatlas_router.v1 import plan_v1_route                       # noqa: E402
 from nexatlas_router.vertical import (                             # noqa: E402
-    Terrain, load_from_db, find, plan_from_v1, plot_vertical_profile)
+    Terrain, Wind, parse_hora_utc, load_from_db, find, plan_from_v1,
+    plot_vertical_profile)
 
 # cores (degrada para vazio se não for TTY)
 _C = sys.stdout.isatty()
@@ -103,13 +115,17 @@ def escolher_aeronaves(catalog):
 def imprimir_vertices(perfil, ac) -> None:
     """Vértices do perfil com razão (fpm) e velocidade (kt) por trecho — só para
     verificação (igual ao nexatlas_cli.py::_print_vertical). Num trecho comprimido
-    a velocidade cai bem abaixo da do banco."""
-    print(f"    {DIM}[por trecho: razão fpm · velocidade kt — p/ verificação]{RST}")
+    a velocidade cai bem abaixo da do banco. Se o perfil tiver vento calculado
+    (perfil.segmentos_vento), mostra também GS/TAS e a componente cauda/proa."""
+    print(f"    {DIM}[por trecho: razão fpm · velocidade kt"
+          f"{' · vento GS/TAS/deriva' if perfil.segmentos_vento else ''} — p/ verificação]{RST}")
+    vento_by_x0 = {s.x0_nm: s for s in perfil.segmentos_vento}
     prev_alt = None
     prev_x = None
     for v in perfil.vertices:
         seta = "  "
         vel = ""
+        vento_txt = ""
         if prev_alt is not None:
             dalt = v.alt_ft - prev_alt
             dx = v.x_nm - prev_x
@@ -127,8 +143,13 @@ def imprimir_vertices(perfil, ac) -> None:
                 seta = f"{DIM}={RST}"
                 if v.x_nm - prev_x > 0.05:
                     vel = f"   {DIM}= {ac.speed_cruise_kt:.0f} kt{RST}"
+            if dx > 1e-9:              # só busca vento p/ trechos com distância real
+                seg = vento_by_x0.get(prev_x)
+                if seg is not None:
+                    vento_txt = (f"   {DIM}GS {seg.gs_kt:.0f} kt (TAS {seg.tas_kt:.0f}, "
+                                 f"cauda {seg.comp_cauda_kt:+.0f}, deriva {seg.deriva_deg:+.1f}°){RST}")
         nome = v.nome or ""
-        print(f"      {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{v.tipo:<8}] {nome}{vel}")
+        print(f"      {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{v.tipo:<8}] {nome}{vel}{vento_txt}")
         prev_alt = v.alt_ft
         prev_x = v.x_nm
 
@@ -139,6 +160,7 @@ def metricas(perfil, aeronave, ncorr):
     tt = perfil.tempo_total_min or 1e-9
     piso = any(("cruzeiro elevado" in a) or ("terreno NÃO liberado" in a)
                for a in perfil.avisos)
+    tt_v = perfil.tempo_total_vento_min
     return {
         "aeronave": aeronave.label,
         "teto_ft": round(aeronave.teto_ft),
@@ -160,6 +182,14 @@ def metricas(perfil, aeronave, ncorr):
         "comb_unit": perfil.comb_unit or "",
         "n_corredores": ncorr,
         "piso_terreno_acionado": "sim" if piso else "nao",
+        # -- com vento (TAREFA_vento.md passo 1) — None se Wind() indisponível --
+        "t_total_vento_min": (round(tt_v, 1) if tt_v is not None else None),
+        "diff_tempo_min": (round(tt_v - perfil.tempo_total_min, 1) if tt_v is not None else None),
+        "comb_total_vento": (round(perfil.comb_total_vento, 1)
+                             if perfil.comb_total_vento is not None else None),
+        "diff_comb": (round(perfil.comb_total_vento - perfil.comb_total, 1)
+                     if (perfil.comb_total_vento is not None and perfil.comb_total is not None)
+                     else None),
         "avisos": " | ".join(perfil.avisos) if perfil.avisos else "",
     }
 
@@ -182,6 +212,17 @@ def main():
 
     gwo_cfg = GWOConfig(seed=42, n_iterations=200, n_wolves=30, max_hops=80)
     terreno = Terrain()          # reaproveitado (cache de tiles) em todos os casos
+    vento = Wind()               # idem — cache de tiles de vento em todos os casos
+    if vento.disponivel():
+        print(f"  {GRN}Vento:{RST} CDN ok ({len(vento.meta.levels)} níveis, "
+              f"{len(vento.meta.timestamps)} horários de previsão)")
+    else:
+        print(f"  {DIM}Vento indisponível ({vento.erro}); rodando com vento=0.{RST}")
+    # Resolvida UMA VEZ (não por caso) — bateria reprodutível, ver HORA_PARTIDA_UTC acima.
+    hora_partida = (parse_hora_utc(HORA_PARTIDA_UTC) if HORA_PARTIDA_UTC is not None
+                    else time.time())
+    print(f"  {GRN}Hora de partida (UTC):{RST} "
+          f"{dt.datetime.fromtimestamp(hora_partida, dt.timezone.utc):%Y-%m-%d %H:%M}")
     linhas = []
 
     for (origin, dest) in ROTAS:
@@ -199,7 +240,8 @@ def main():
         # V3 para cada aeronave
         for ac in aeronaves:
             try:
-                perfil = plan_from_v1(graph, result, ac, terreno)
+                perfil = plan_from_v1(graph, result, ac, terreno, vento,
+                                      hora_partida_utc=hora_partida)
             except Exception as e:
                 print(f"  {RED}✗ V3 falhou ({ac.label}): {e}{RST}")
                 continue
@@ -208,11 +250,13 @@ def main():
             linhas.append(row)
             comb_txt = (f"{row['comb_total']:.1f} {row['comb_unit']}"
                         if row['comb_total'] is not None else "indisponível")
+            vento_txt = (f" | vento {row['diff_tempo_min']:+.0f}′"
+                        if row['diff_tempo_min'] is not None else "")
             print(f"  {CYN}{ac.label:<22}{RST} teto {row['teto_ft']:>6} | "
                   f"{row['dist_total_nm']:>6} NM | cruzeiro {row['cruzeiro_ft']:>6} ft "
                   f"({row['cruzeiro_nivelado']}) | sub {row['t_subida_min']:>4}′ "
                   f"cru {row['t_cruzeiro_min']:>4}′ des {row['t_descida_min']:>4}′ | "
-                  f"{row['pct_tempo_subindo']:>3}% subindo | comb {comb_txt}"
+                  f"{row['pct_tempo_subindo']:>3}% subindo | comb {comb_txt}{vento_txt}"
                   + (f" | {RED}piso terreno{RST}" if row['piso_terreno_acionado'] == 'sim' else ""))
             imprimir_vertices(perfil, ac)
             if SALVAR_GRAFICOS:
@@ -237,18 +281,20 @@ def main():
     # ---- tabela-resumo no terminal (ordenada por distância) ----
     print(f"\n{BLD}  RESUMO (ordenado por distância){RST}")
     hdr = (f"  {'Aeronave':<22}{'teto':>7}{'distNM':>8}{'cruz.ft':>9}{'niv':>5}"
-           f"{'t.sub':>7}{'t.cru':>7}{'t.des':>7}{'%sub':>6}{'corr':>5}{'terr':>5}{'combustível':>14}")
+           f"{'t.sub':>7}{'t.cru':>7}{'t.des':>7}{'%sub':>6}{'corr':>5}{'terr':>5}"
+           f"{'combustível':>14}{'vento':>10}")
     print(BLD + hdr + RST)
     print("  " + "-" * (len(hdr) - 2))
     for r in sorted(linhas, key=lambda x: (x["dist_total_nm"], x["teto_ft"])):
         comb_str = (f"{r['comb_total']:.1f} {r['comb_unit']}"
                     if r['comb_total'] is not None else "indisponível")
+        vento_str = f"{r['diff_tempo_min']:+.0f}′" if r['diff_tempo_min'] is not None else "-"
         print(f"  {r['aeronave']:<22}{r['teto_ft']:>7}{r['dist_total_nm']:>8}"
               f"{r['cruzeiro_ft']:>9}{r['cruzeiro_nivelado']:>5}"
               f"{r['t_subida_min']:>7}{r['t_cruzeiro_min']:>7}{r['t_descida_min']:>7}"
               f"{r['pct_tempo_subindo']:>5}%{r['n_corredores']:>5}"
               f"{('sim' if r['piso_terreno_acionado']=='sim' else '-'):>5}"
-              f"{comb_str:>14}")
+              f"{comb_str:>14}{vento_str:>10}")
 
     print(f"\n  {GRN}✓ {len(linhas)} casos.{RST} CSV: {os.path.abspath(CSV_SAIDA)}"
           + (f" | gráficos em {os.path.abspath(PASTA_SAIDA)}/" if SALVAR_GRAFICOS else ""))

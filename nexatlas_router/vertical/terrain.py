@@ -78,6 +78,14 @@ class _Table:
         start, n = self.vector_pos_len(slot)
         return [_i32(self.buf, start + 4 * i) for i in range(n)] if start else []
 
+    def vector_u8(self, slot):
+        start, n = self.vector_pos_len(slot)
+        return list(self.buf[start: start + n]) if start else []
+
+    def vector_f32(self, slot):
+        start, n = self.vector_pos_len(slot)
+        return [struct.unpack_from("<f", self.buf, start + 4 * i)[0] for i in range(n)] if start else []
+
     def vector_i64(self, slot):
         start, n = self.vector_pos_len(slot)
         return [struct.unpack_from("<q", self.buf, start + 8 * i)[0] for i in range(n)] if start else []
@@ -91,16 +99,23 @@ def _root(buf: bytes) -> _Table:
     return _Table(buf, _u32(buf, 0))
 
 
-# Mapeamento REAL dos slots do MetaData, decodificado byte a byte do
-# metadata.fb do terreno (bra/terrain_fb). Confirmado:
-#   slot0 fixed_point_precision (u8)   slot1 type (str, "fb")
-#   slot2 name (str, "terrain")        slot3 zooms ([int])
-#   slot4 width (u16)                  slot5 height (u16)
-#   slot6 channel_count (u8)           slot7 altitudes/levels ([int])
-#   slot8 timestamps ([long])          slot9 data_type (str, "int16")
+# Mapeamento dos slots do MetaData, pela ORDEM DE DECLARAÇÃO em
+# JetStreamDataTile.fbs (schema oficial do formato — mesma MetaData para
+# terreno, vento etc.):
+#   slot0  version (u8)              slot1  type (str, "fb")
+#   slot2  id (str)                  slot3  zooms ([u8]!)
+#   slot4  width (u16)               slot5  height (u16)
+#   slot6  channel_count (u8)        slot7  altitudes ([float]!)
+#   slot8  timestamps ([uint64])     slot9  data_type (str)
+#   slot10 fixed_point_precision (u8)
+# (Um mapeamento anterior, decodificado por tentativa sem o .fbs, tinha
+# slot0/slot10 trocados e lia zooms/altitudes com a largura de elemento
+# errada — inofensivo até agora só porque terreno/vento têm 1 zoom só e o
+# terreno 1 altitude só, ambos == 0 em qualquer largura de leitura.)
 _META = dict(
-    fixed_point_precision=0, type=1, name=2, zooms=3, width=4,
+    version=0, type=1, id=2, zooms=3, width=4,
     height=5, channel_count=6, altitudes=7, timestamps=8, data_type=9,
+    fixed_point_precision=10,
 )
 
 _DTYPE = {"int8": ("b", 1), "int16": ("h", 2), "int32": ("i", 4)}
@@ -140,8 +155,8 @@ class Terrain:
         raw = _http_get(f"{self.base}/metadata.fb")
         m = _root(raw)
         self.meta = TerrainMeta(
-            zooms=m.vector_i32(_META["zooms"]),
-            levels=m.vector_i32(_META["altitudes"]),
+            zooms=m.vector_u8(_META["zooms"]),
+            levels=m.vector_f32(_META["altitudes"]),
             timestamps=m.vector_i64(_META["timestamps"]),
             width=m.scalar_u16(_META["width"]),
             height=m.scalar_u16(_META["height"]),
@@ -153,12 +168,12 @@ class Terrain:
         self.z = max(self.meta.zooms)
         self.level = max(self.meta.levels)
         self.ts = self.meta.timestamps[0]
-        # ESCALA = 1: verificado empiricamente que o raw int16 do terreno JÁ está
-        # em metros inteiros (SBMT raw=723 ≈ 722 m; SBBH raw=788 ≈ 789 m). O campo
-        # metadata.fixed_point_precision vem 1 mas NÃO se aplica ao terreno (é
-        # herança do formato genérico usado p/ vento/nuvem no README). Por isso
-        # ignoramos 10**fixed_point aqui e usamos escala 1.
-        self.scale = 1.0
+        # ESCALA = 10**fixed_point_precision (slot 10, ver _META acima). Pro
+        # terreno dá 10**0 = 1 — bate com o valor já validado (SBMT raw=723 ≈
+        # 722 m; SBBH raw=788 ≈ 789 m); o número não mudou, só a forma de
+        # chegar nele (antes líamos por acidente o slot errado — version, que
+        # também vale 1 — e hardcodávamos escala=1; agora lemos o campo certo).
+        self.scale = 10 ** self.meta.fixed_point
 
     # ---- Web Mercator (idêntico ao read-tiles.js) ----
     def _tile_pixel(self, lon, lat):
@@ -177,7 +192,7 @@ class Terrain:
         cached = self._tiles.get(key)
         if cached is not None:
             return cached
-        url = f"{self.base}/{self.ts}/{self.level}/{self.z}/{tx}/{ty}.fb"
+        url = f"{self.base}/{self.ts}/{int(self.level)}/{self.z}/{tx}/{ty}.fb"
         raw = _http_get(url)
         data, _ = _root(raw).vector_bytes(0)  # Tile.data => slot 0
         fmt, size = _DTYPE[self.meta.data_type]
@@ -244,13 +259,14 @@ def _haversine_nm(lat1, lon1, lat2, lon2):
 
 if __name__ == "__main__":
     # Rode na SUA maquina (o CDN e publico). Confirma o parsing do metadata e
-    # imprime a elevacao (metros / pes). Escala confirmada = 1 (raw = metros).
+    # imprime a elevacao (metros / pes). Escala = 10**fixed_point (slot 10).
     t = Terrain(elevation_in_meters=True)
     m = t.meta
     print("=== METADATA ===")
     print(f"zooms={m.zooms} levels={m.levels} timestamps={m.timestamps}")
     print(f"width={m.width} height={m.height} channels={m.channels} "
-          f"data_type={m.data_type} fixed_point={m.fixed_point} (ignorado p/ terreno) type={m.type}")
+          f"data_type={m.data_type} fixed_point={m.fixed_point} "
+          f"(escala=10**{m.fixed_point}={t.scale:g}) type={m.type}")
     print(f"escala usada = {t.scale:g}  (raw int16 ja em METROS)")
 
     print("\n=== ELEVACAO ===")

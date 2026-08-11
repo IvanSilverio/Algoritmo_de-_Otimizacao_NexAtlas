@@ -13,25 +13,28 @@ Uso típico:
 """
 from .aircraft import (Aeronave, build_catalog, load_from_db, load_from_json, find)
 from .terrain import Terrain
+from .wind import Wind, ground_speed, parse_hora_utc
 from .contract import LateralRoute, LateralLeg, lateral_route_from_v1
-from .profile import PerfilVertical, Vertice, plan_vertical_profile
+from .profile import PerfilVertical, Vertice, SegmentoVento, plan_vertical_profile
 from .plot_profile import plot_vertical_profile
 from . import rules, magnetic
 
 __all__ = [
     "Aeronave", "build_catalog", "load_from_db", "load_from_json", "find",
-    "Terrain", "LateralRoute", "LateralLeg", "lateral_route_from_v1",
-    "PerfilVertical", "Vertice", "plan_vertical_profile", "plan_from_v1",
+    "Terrain", "Wind", "ground_speed", "parse_hora_utc",
+    "LateralRoute", "LateralLeg", "lateral_route_from_v1",
+    "PerfilVertical", "Vertice", "SegmentoVento", "plan_vertical_profile", "plan_from_v1",
     "plot_vertical_profile", "rules", "magnetic",
 ]
 
 
-def plan_from_v1(graph, route, aeronave, terreno, **kw) -> PerfilVertical:
+def plan_from_v1(graph, route, aeronave, terreno, wind=None, **kw) -> PerfilVertical:
     """Atalho: adapta a rota da V1 para o contrato e gera o perfil vertical.
 
     `route` é o DecodedRoute retornado pelo Dijkstra (ou result.route). Aceita
-    também um V1RouteResult que exponha `.route`, se existir.
+    também um V1RouteResult que exponha `.route`, se existir. `wind` (Wind ou
+    None) e `hora_partida_utc` (kw) são opcionais — ver plan_vertical_profile.
     """
     r = getattr(route, "route", route)
     lateral = lateral_route_from_v1(graph, r)
-    return plan_vertical_profile(lateral, aeronave, terreno, **kw)
+    return plan_vertical_profile(lateral, aeronave, terreno, wind, **kw)

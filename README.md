@@ -269,6 +269,54 @@ O GWO segue no código, reservado ao momento em que o objetivo deixar de ser
 separável (ex.: perfil vertical da V3) — e mesmo aí o padrão é resolver a rota
 lateral exata e otimizar o vertical em cima.
 
+## V3 — perfil vertical (altitude, cruzeiro, combustível, vento)
+
+Camada separada que roda **sobre** a rota lateral da V1, sem alterá-la: dada
+uma `LateralRoute` (contrato em `vertical/contract.py`) e uma aeronave,
+calcula o perfil de altitude ponto a ponto (subida, cruzeiro, descida),
+tempo, combustível e a influência do vento em cada trecho.
+
+```
+nexatlas_router/vertical/
+├── contract.py       # fronteira V1 -> V3 (LateralRoute/LateralLeg)
+├── terrain.py        # elevação do terreno (CDN NexAtlas, tiles FlatBuffer)
+├── wind.py           # vento em altitude (mesmo CDN/formato do terreno)
+├── magnetic.py       # declinação magnética (WMM/pygeomag)
+├── aircraft.py       # catálogo de aeronaves (published.aircraft_models)
+├── cruise.py         # altitude de cruzeiro (spec do documento de referência)
+├── profile.py        # motor: monta os vértices do perfil e tempo/combustível/vento
+├── plot_profile.py   # gráfico do perfil (degraus de altitude + terreno)
+└── __init__.py       # plan_from_v1(): atalho V1 -> perfil vertical
+```
+
+**Modelo**, em linhas gerais (detalhes em `CLAUDE.md`, não versionado):
+corredores REA voados no `higher_limit`; subida sempre na razão máxima da
+aeronave; descida sempre na razão do banco, governada pela linha de
+aproximação do destino; altitude de cruzeiro pela spec do documento de
+referência, com piso de terreno obrigatório e piso de corredor; combustível
+por fase, na unidade nativa da aeronave (sem normalizar).
+
+**Vento:** cada trecho do perfil tem tempo e combustível recalculados pelo
+**triângulo do vento**, usando dados do mesmo CDN do terreno (dataset
+`wind_fb`: 12 níveis de altitude, previsão de 3 em 3h). Dado o rumo
+verdadeiro da perna, a TAS da fase e o vento `(u,v)` naquele ponto/altitude/
+hora, calcula a velocidade de solo (GS), a componente de cauda/proa e a
+deriva. A **geometria do perfil não muda** — só tempo e combustível. A
+escolha da altitude de cruzeiro pelo vento é uma etapa futura, ainda não
+implementada.
+
+Como rodar: mesma CLI da V1 (`python3 nexatlas_cli.py`). Ao escolher uma
+aeronave (lista das que têm performance completa em `aircraft_models`), o
+perfil vertical aparece depois da rota lateral — a cada rota, a CLI pergunta
+a hora de partida (UTC; aceita `15/08/2026 14:30`, só `14:30` para hoje, ISO
+ou unix; Enter = agora) e mostra o vento por trecho e o total comparado com
+o valor sem vento. Requer `pygeomag` (WMM) instalado — sem ele a V3 é
+desativada com aviso, e só a rota lateral é exibida.
+
+Para rodar a mesma análise em lote (várias aeronaves × várias rotas, com
+gráficos e CSV): `python3 testes_voos.py` (edite `AERONAVES`/`ROTAS` no
+topo do arquivo).
+
 ## Segurança
 
 Credenciais **nunca** no código ou em commits — sempre em `.env.sh` (já no

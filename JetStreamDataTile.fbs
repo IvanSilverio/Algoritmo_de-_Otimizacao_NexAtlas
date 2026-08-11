@@ -1,0 +1,25 @@
+namespace JetStreamDataTile;
+
+table Tile {
+  // Pixel data for all channels
+  // The data is stored in row-major order, with the first row being the top row of the image
+  // The channel data is interleaved, with the first pixel of the first channel being the first pixel in the data array
+  // The data is stored as fixed-point integers, with the number of decimal places specified by the fixedPointPosition field in the MetaData table
+  data: [uint8];
+}
+
+table MetaData {
+  version: uint8;                // Version of the tile format
+  type: string;                  // fb | fb-gz | cog
+  id: string;                    // Unique identifier
+  zooms: [uint8];                // Zoom levels
+  width: uint16;                 // Tile width (256 for XYZ)
+  height: uint16;                // Tile height (256 for XYZ)
+  channel_count: uint8;          // Number of channels
+  altitudes: [float];            // Available altitudes
+  timestamps: [uint64];          // Timestamp of the data
+  data_type: string;             // "int8" | "int16" | "int32"
+  fixed_point_precision: uint8;  // Number of decimal places for fixed point data
+}
+
+root_type Tile;

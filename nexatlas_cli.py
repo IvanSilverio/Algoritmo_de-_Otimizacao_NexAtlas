@@ -10,6 +10,7 @@ Credenciais via variáveis de ambiente (source .env.sh):
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import subprocess
@@ -38,7 +39,8 @@ except Exception:
 
 # Camada V3 (vertical) — opcional: se pygeomag não estiver instalado, a V1 segue.
 try:
-    from nexatlas_router.vertical import (Terrain, load_from_db as load_aircraft,
+    from nexatlas_router.vertical import (Terrain, Wind, parse_hora_utc,
+                                          load_from_db as load_aircraft,
                                           find as find_aircraft, plan_from_v1,
                                           plot_vertical_profile)
     _HAS_V3 = True
@@ -211,15 +213,32 @@ def _print_vertical(perfil, ac=None) -> None:
               f"descida {perfil.comb_descida:.1f} {perfil.comb_unit}){RST}{tipo}")
     else:
         print(f"  {BLD}Combustível:{RST} {DIM}— (dados de combustível indisponíveis){RST}")
+    if perfil.subida_vento is not None:
+        quando = dt.datetime.fromtimestamp(perfil.hora_partida_utc, dt.timezone.utc)
+        tt_v, tt_s = perfil.tempo_total_vento_min, perfil.tempo_total_min
+        diff_t = tt_v - tt_s
+        print(f"  {DIM}Partida assumida: {quando:%Y-%m-%d %H:%M} UTC{RST}")
+        print(f"  {BLD}Tempo com vento:{RST} {tt_v:.0f} min  "
+              f"{DIM}({diff_t:+.0f} min vs sem vento){RST}")
+        if perfil.comb_total_vento is not None:
+            diff_c = perfil.comb_total_vento - perfil.comb_total
+            print(f"  {BLD}Combustível com vento:{RST} {perfil.comb_total_vento:.1f} {perfil.comb_unit}  "
+                  f"{DIM}({diff_c:+.1f} {perfil.comb_unit} vs sem vento){RST}")
+    if perfil.avisos:
+        for a in perfil.avisos:
+            print(f"  {RED}⚠{RST}  {DIM}{a}{RST}")
     print(f"  {DIM}TOC {perfil.toc_nm:.1f} NM  ·  TOD {perfil.tod_nm:.1f} NM  "
           f"@ {perfil.cruzeiro_ft:.0f} ft{RST}\n")
     print(f"  {BLD}Perfil (pontos reais + virtuais):{RST}"
-          f"   {DIM}[por trecho: razão fpm · velocidade kt — p/ verificação]{RST}")
+          f"   {DIM}[por trecho: razão fpm · velocidade kt"
+          f"{' · vento GS/TAS/deriva' if perfil.segmentos_vento else ''} — p/ verificação]{RST}")
+    vento_by_x0 = {s.x0_nm: s for s in perfil.segmentos_vento}
     prev_alt = None
     prev_x = None
     for v in perfil.vertices:
         seta = "  "
         vel = ""
+        vento_txt = ""
         if prev_alt is not None:
             dalt = v.alt_ft - prev_alt
             dx = v.x_nm - prev_x
@@ -237,6 +256,11 @@ def _print_vertical(perfil, ac=None) -> None:
                 seta = f"{DIM}={RST}"
                 if ac and v.x_nm - prev_x > 0.05:
                     vel = f"   {DIM}= {ac.speed_cruise_kt:.0f} kt{RST}"
+            if dx > 1e-9:              # só busca vento p/ trechos com distância real
+                seg = vento_by_x0.get(prev_x)
+                if seg is not None:
+                    vento_txt = (f"   {DIM}GS {seg.gs_kt:.0f} kt (TAS {seg.tas_kt:.0f}, "
+                                 f"cauda {seg.comp_cauda_kt:+.0f}, deriva {seg.deriva_deg:+.1f}°){RST}")
         if v.real:
             tag = GRN if v.tipo == "corredor" else CYN
             nome = v.nome or ""
@@ -244,7 +268,7 @@ def _print_vertical(perfil, ac=None) -> None:
             tag = DIM
             nome = (f"{DIM}(TOC/TOD){RST}" if v.tipo in ("toc", "tod")
                     else f"{DIM}(ponto virtual — atinge a altitude aqui){RST}")
-        print(f"    {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{tag}{v.tipo:<8}{RST}] {nome}{vel}")
+        print(f"    {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{tag}{v.tipo:<8}{RST}] {nome}{vel}{vento_txt}")
         prev_alt = v.alt_ft
         prev_x = v.x_nm
     print()
@@ -360,10 +384,22 @@ def main() -> None:
 
         _print_route(origin, dest, result)
 
-        # V3: perfil vertical sobre a rota lateral (terreno do CDN, injetado).
+        # V3: perfil vertical sobre a rota lateral (terreno/vento do CDN, injetados).
         if _HAS_V3 and aircraft is not None:
+            hora_partida = None
             try:
-                perfil = plan_from_v1(graph, result, aircraft, Terrain())
+                hora_raw = input(f"  {BLD}Hora de partida (UTC) "
+                                 f"[ex.: 15/08/2026 14:30 · 14:30 (hoje) · Enter = agora]:{RST} ").strip()
+            except (EOFError, KeyboardInterrupt):
+                hora_raw = ""
+            if hora_raw:
+                try:
+                    hora_partida = parse_hora_utc(hora_raw)
+                except Exception as e:
+                    print(f"  {RED}✗ Hora inválida ({e}); usando agora.{RST}")
+            try:
+                perfil = plan_from_v1(graph, result, aircraft, Terrain(), Wind(),
+                                      hora_partida_utc=hora_partida)
                 _print_vertical(perfil, aircraft)
                 perfil_png = f"{origin}_{dest}_perfil.png"
                 try:
