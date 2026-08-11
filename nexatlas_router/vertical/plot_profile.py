@@ -74,9 +74,25 @@ def plot_vertical_profile(perfil, output_path: str, titulo: Optional[str] = None
     ax.set_yticklabels([f"{v} ft" for v in yt])
 
     # --- caminho em degraus (segmento a segmento entre vértices) ---
+    # Um segmento é "de corredor" (verde) se o seu meio cai numa faixa de corredor,
+    # OU se é NIVELADO na altitude de um corredor e está FORA do cruzeiro (TOC–TOD):
+    # esse é o trecho reto que voa no nível do corredor entrando/saindo dele (após a
+    # aeronave atingir a altitude num ponto virtual). O cruzeiro (entre TOC e TOD)
+    # permanece azul mesmo que sua altitude coincida com a de um corredor.
+    corr_alts = {round(v.alt_ft) for v in V if v.tipo == "corredor"}
+    _toc, _tod = perfil.toc_nm, perfil.tod_nm
+
+    def _is_corr_seg(A, B, mid):
+        if in_corr(mid):
+            return True
+        if (abs(B.alt_ft - A.alt_ft) <= 1 and round(A.alt_ft) in corr_alts
+                and not (_toc - 1e-6 <= mid <= _tod + 1e-6)):
+            return True
+        return False
+
     for A, B in zip(V, V[1:]):
         mid = (A.x_nm + B.x_nm) / 2.0
-        col = CORR if in_corr(mid) else FREE
+        col = CORR if _is_corr_seg(A, B, mid) else FREE
         lw = 3.6 if col == CORR else 2.4
         ax.plot([A.x_nm, B.x_nm], [A.alt_ft, B.alt_ft], color=col, lw=lw,
                 solid_capstyle="round", zorder=4)

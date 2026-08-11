@@ -193,7 +193,7 @@ def _select_aircraft(catalog):
     return find_aircraft(catalog, sel)
 
 
-def _print_vertical(perfil) -> None:
+def _print_vertical(perfil, ac=None) -> None:
     print(); print(_hr())
     print(f"  {BLD}Perfil vertical (V3) — {CYN}{perfil.aeronave}{RST}")
     print(_hr())
@@ -204,19 +204,39 @@ def _print_vertical(perfil) -> None:
     print(f"  {BLD}Tempo:{RST} subida {perfil.subida.tempo_min:.0f} min + "
           f"cruzeiro {perfil.cruzeiro.tempo_min:.0f} min + descida {perfil.descida.tempo_min:.0f} min "
           f"= {BLD}{perfil.tempo_total_min:.0f} min{RST}")
+    if perfil.comb_total is not None:
+        tipo = f"  {DIM}[{perfil.fuel_type}]{RST}" if perfil.fuel_type else ""
+        print(f"  {BLD}Combustível:{RST} {perfil.comb_total:.1f} {perfil.comb_unit} "
+              f"{DIM}(subida {perfil.comb_subida:.1f} + cruzeiro {perfil.comb_cruzeiro:.1f} + "
+              f"descida {perfil.comb_descida:.1f} {perfil.comb_unit}){RST}{tipo}")
+    else:
+        print(f"  {BLD}Combustível:{RST} {DIM}— (dados de combustível indisponíveis){RST}")
     print(f"  {DIM}TOC {perfil.toc_nm:.1f} NM  ·  TOD {perfil.tod_nm:.1f} NM  "
           f"@ {perfil.cruzeiro_ft:.0f} ft{RST}\n")
-    print(f"  {BLD}Perfil (pontos reais + virtuais):{RST}")
-    prev = None
+    print(f"  {BLD}Perfil (pontos reais + virtuais):{RST}"
+          f"   {DIM}[por trecho: razão fpm · velocidade kt — p/ verificação]{RST}")
+    prev_alt = None
+    prev_x = None
     for v in perfil.vertices:
         seta = "  "
-        if prev is not None:
-            if v.alt_ft > prev + 1:
+        vel = ""
+        if prev_alt is not None:
+            dalt = v.alt_ft - prev_alt
+            dx = v.x_nm - prev_x
+            if dalt > 1:
                 seta = f"{GRN}↑{RST}"
-            elif v.alt_ft < prev - 1:
+                rate = ac.rate_ac_fpm if ac else 0.0
+                spd = (dx * 60.0 * rate / dalt) if (rate > 0 and dx > 0) else 0.0
+                vel = f"   {GRN}↑ {rate:.0f} fpm · {spd:.0f} kt{RST}"
+            elif dalt < -1:
                 seta = f"{DIM}↓{RST}"
+                rate = ac.rate_dc_fpm if ac else 0.0
+                spd = (dx * 60.0 * rate / (-dalt)) if (rate > 0 and dx > 0) else 0.0
+                vel = f"   {DIM}↓ {rate:.0f} fpm · {spd:.0f} kt{RST}"
             else:
                 seta = f"{DIM}={RST}"
+                if ac and v.x_nm - prev_x > 0.05:
+                    vel = f"   {DIM}= {ac.speed_cruise_kt:.0f} kt{RST}"
         if v.real:
             tag = GRN if v.tipo == "corredor" else CYN
             nome = v.nome or ""
@@ -224,8 +244,9 @@ def _print_vertical(perfil) -> None:
             tag = DIM
             nome = (f"{DIM}(TOC/TOD){RST}" if v.tipo in ("toc", "tod")
                     else f"{DIM}(ponto virtual — atinge a altitude aqui){RST}")
-        print(f"    {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{tag}{v.tipo:<8}{RST}] {nome}")
-        prev = v.alt_ft
+        print(f"    {v.x_nm:6.1f} NM  {seta} {v.alt_ft:6.0f} ft  [{tag}{v.tipo:<8}{RST}] {nome}{vel}")
+        prev_alt = v.alt_ft
+        prev_x = v.x_nm
     print()
 
 
@@ -343,7 +364,7 @@ def main() -> None:
         if _HAS_V3 and aircraft is not None:
             try:
                 perfil = plan_from_v1(graph, result, aircraft, Terrain())
-                _print_vertical(perfil)
+                _print_vertical(perfil, aircraft)
                 perfil_png = f"{origin}_{dest}_perfil.png"
                 try:
                     plot_vertical_profile(perfil, perfil_png,

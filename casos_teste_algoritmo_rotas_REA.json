@@ -1,0 +1,527 @@
+[
+  {
+    "grupo": "Dentro da mesma região de corredores",
+    "casos": [
+      {
+        "partida": "SBGO",
+        "destino": "SBNV",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBE",
+        "destino": "SWEQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBH",
+        "destino": "SBCF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBR",
+        "destino": "SIQE",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCG",
+        "destino": "SDTS",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCY",
+        "destino": "SIAQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBI",
+        "destino": "SBCT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNF",
+        "destino": "SBFL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBFZ",
+        "destino": "SNFF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBMG",
+        "destino": "SBLO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SISM",
+        "destino": "SBMQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNT",
+        "destino": "SBSG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SWPI",
+        "destino": "SJ9A",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPA",
+        "destino": "SBCX",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPS",
+        "destino": "SBTV",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBRF",
+        "destino": "SWDU",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBRP",
+        "destino": "SDJN",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSV",
+        "destino": "SNCL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSN",
+        "destino": "SNCJ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBVT",
+        "destino": "SIVU",
+        "tipo de corredor": "REA"
+      }
+    ]
+  },
+  {
+    "grupo": "Entre regiões de corredores diferentes",
+    "casos": [
+      {
+        "partida": "SBGO",
+        "destino": "SBBE",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNV",
+        "destino": "SBCF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SWDT",
+        "destino": "SBBR",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SSLM",
+        "destino": "SBCG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBE",
+        "destino": "SBCY",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SWEQ",
+        "destino": "SBCT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SD69",
+        "destino": "SBFL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBH",
+        "destino": "SBFZ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCF",
+        "destino": "SBLO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SIVJ",
+        "destino": "SBMQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBR",
+        "destino": "SBNT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SIQE",
+        "destino": "SBPA",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDCB",
+        "destino": "SBPS",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCG",
+        "destino": "SBRF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDTS",
+        "destino": "SBRP",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SNNF",
+        "destino": "SBRJ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCY",
+        "destino": "SBSV",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SIAQ",
+        "destino": "SBSN",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SJCY",
+        "destino": "SBSL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCT",
+        "destino": "SBVT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBI",
+        "destino": "SBTT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SSCF",
+        "destino": "SBEG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBFL",
+        "destino": "SBGO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNF",
+        "destino": "SBBE",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBFZ",
+        "destino": "SBBH",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SNFF",
+        "destino": "SBBR",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBLO",
+        "destino": "SBCG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBMG",
+        "destino": "SBCY",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBMQ",
+        "destino": "SBCT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SISM",
+        "destino": "SBFL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNT",
+        "destino": "SBFZ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSG",
+        "destino": "SBMG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPA",
+        "destino": "SBMQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCX",
+        "destino": "SBNT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPS",
+        "destino": "SBPA",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBTV",
+        "destino": "SBRF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBRF",
+        "destino": "SBRP",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SWDU",
+        "destino": "SBRJ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBRP",
+        "destino": "SBSV",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDJN",
+        "destino": "SBSN",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSV",
+        "destino": "SBSL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SNCL",
+        "destino": "SBVT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSN",
+        "destino": "SBTT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBSL",
+        "destino": "SBEG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBVT",
+        "destino": "SBGO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBTT",
+        "destino": "SBBR",
+        "tipo de corredor": "REA"
+      }
+    ]
+  },
+  {
+    "grupo": "Região de corredores para aeródromo externo",
+    "casos": [
+      {
+        "partida": "SBGO",
+        "destino": "SIBY",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBE",
+        "destino": "SS6L",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCF",
+        "destino": "SIOZ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBBR",
+        "destino": "SWKO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCG",
+        "destino": "SJFY",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCY",
+        "destino": "SDPH",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBCT",
+        "destino": "SNIE",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBFL",
+        "destino": "SDYI",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBFZ",
+        "destino": "SD2X",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBLO",
+        "destino": "SJ3C",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBMQ",
+        "destino": "SSPS",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBNT",
+        "destino": "SWDI",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPA",
+        "destino": "SSIQ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBPS",
+        "destino": "SSAE",
+        "tipo de corredor": "REA"
+      }
+    ]
+  },
+  {
+    "grupo": "Aeródromo externo para região de corredores",
+    "casos": [
+      {
+        "partida": "SIG6",
+        "destino": "SBRF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SD7F",
+        "destino": "SBRP",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDBV",
+        "destino": "SBRJ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SIBY",
+        "destino": "SBSV",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SS6L",
+        "destino": "SBSN",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SIOZ",
+        "destino": "SBSL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SWKO",
+        "destino": "SBVT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SJFY",
+        "destino": "SBTT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDPH",
+        "destino": "SBEG",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SNIE",
+        "destino": "SBGO",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SDYI",
+        "destino": "SBBE",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SD2X",
+        "destino": "SBCF",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SJ3C",
+        "destino": "SBBR",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SSPS",
+        "destino": "SBCG",
+        "tipo de corredor": "REA"
+      }
+    ]
+  },
+  {
+    "grupo": "São Paulo e Rio de Janeiro",
+    "casos": [
+      {
+        "partida": "SBMT",
+        "destino": "SBRJ",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBGR",
+        "destino": "SBGL",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBKP",
+        "destino": "SBJR",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBRJ",
+        "destino": "SBMT",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBGL",
+        "destino": "SBGR",
+        "tipo de corredor": "REA"
+      },
+      {
+        "partida": "SBJR",
+        "destino": "SBKP",
+        "tipo de corredor": "REA"
+      }
+    ]
+  }
+]

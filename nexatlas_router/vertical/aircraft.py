@@ -32,8 +32,16 @@ class Aeronave:
     speed_ac_kt: float        # velocidade de subida
     speed_cruise_kt: float    # velocidade de cruzeiro
     speed_dc_kt: float        # velocidade de descida
-    fuel_cruise: Optional[float] = None   # V3+: combustível (não usado agora)
-    fuel_unit: Optional[str] = None
+    # Combustível: por fase, NA UNIDADE NATIVA do banco (fuel_unit) — não
+    # normalizado. `fuel_consumption_unit` vem misturado entre aeronaves
+    # (l/h, us gal/h, lb/h); converter exigiria assumir densidade (ex.: lb/h
+    # de Jet-A) que não vem do banco nem da spec, então mantemos a unidade
+    # como está e exibimos junto do valor calculado (ver profile.py).
+    fuel_ac: Optional[float] = None       # consumo subindo, na unidade fuel_unit
+    fuel_cruise: Optional[float] = None   # consumo em cruzeiro, na unidade fuel_unit
+    fuel_dc: Optional[float] = None       # consumo descendo, na unidade fuel_unit
+    fuel_unit: Optional[str] = None       # unidade bruta do banco (ex.: "l/h", "lb/h")
+    fuel_type: Optional[str] = None       # avgas / jet-a (informativo)
 
     @property
     def label(self) -> str:
@@ -88,6 +96,11 @@ def _to_kt(val: Optional[float], unit: str) -> Optional[float]:
     return None
 
 
+def _fuel_val(v) -> Optional[float]:
+    n = _num(v)
+    return n if (n is not None and n > 0) else None      # 0/null/"" -> indisponível
+
+
 def aeronave_from_row(row: dict) -> Optional[Aeronave]:
     """Converte uma linha de aircraft_models em Aeronave, ou None se
     incompleta / com unidade desconhecida."""
@@ -103,15 +116,23 @@ def aeronave_from_row(row: dict) -> Optional[Aeronave]:
 
     vals = [teto, r_ac, r_dc, s_ac, s_cr, s_dc]
     if any(v is None or v <= 0 for v in vals):
-        return None                    # filtro de completude
+        return None                    # filtro de completude (não inclui combustível)
+
+    # Combustível: campos independentes (cada um None se ausente/zero); a
+    # unidade é texto livre, mantida como veio do banco (sem normalizar).
+    f_ac = _fuel_val(row.get("fuel_consumption_ac"))
+    f_cr = _fuel_val(row.get("fuel_consumption_cruise"))
+    f_dc = _fuel_val(row.get("fuel_consumption_dc"))
+    f_unit = (row.get("fuel_consumption_unit") or "").strip() or None
+    f_type = (row.get("fuel_type") or "").strip() or None
     return Aeronave(
         id=str(row.get("id")),
         icao=str(row.get("designator_icao") or "?"),
         model=str(row.get("model") or ""),
         teto_ft=teto, rate_ac_fpm=r_ac, rate_dc_fpm=r_dc,
         speed_ac_kt=s_ac, speed_cruise_kt=s_cr, speed_dc_kt=s_dc,
-        fuel_cruise=_num(row.get("fuel_consumption_cruise")),
-        fuel_unit=(row.get("fuel_consumption_unit") or None),
+        fuel_ac=f_ac, fuel_cruise=f_cr, fuel_dc=f_dc,
+        fuel_unit=f_unit, fuel_type=f_type,
     )
 
 
@@ -128,7 +149,8 @@ SELECT id, designator_icao, model, aircraft_type,
        operational_ceiling, operational_ceiling_unit,
        rate_ac, rate_dc, rate_unit,
        speed_ac, speed_cruise, speed_dc, speed_unit,
-       fuel_consumption_cruise, fuel_consumption_unit
+       fuel_consumption_ac, fuel_consumption_cruise, fuel_consumption_dc,
+       fuel_consumption_unit, fuel_type
 FROM published.aircraft_models;
 """
 

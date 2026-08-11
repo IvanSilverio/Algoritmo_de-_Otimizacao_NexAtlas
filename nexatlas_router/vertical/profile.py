@@ -65,6 +65,14 @@ class PerfilVertical:
     terreno_perfil: list = field(default_factory=list)   # [(dist_nm, elev_ft)]
     avisos: list = field(default_factory=list)
     diag: dict = field(default_factory=dict)
+    # Combustível por fase (na unidade nativa do banco — ver aircraft.py); None
+    # se a aeronave não tiver dados completos de combustível (nunca quebra o perfil).
+    comb_subida: Optional[float] = None
+    comb_cruzeiro: Optional[float] = None
+    comb_descida: Optional[float] = None
+    comb_total: Optional[float] = None
+    comb_unit: Optional[str] = None       # unidade de QUANTIDADE (ex.: "l", "us gal", "lb")
+    fuel_type: Optional[str] = None       # avgas / jet-a (informativo)
 
     @property
     def tempo_total_min(self) -> float:
@@ -81,6 +89,16 @@ def _trans_dist(dalt_ft: float, rate_fpm: float, speed_kt: float) -> float:
     if rate_fpm <= 0 or speed_kt <= 0:
         return 0.0
     return abs(dalt_ft) / rate_fpm / 60.0 * speed_kt
+
+
+def _qty_unit(rate_unit: Optional[str]) -> Optional[str]:
+    """Unidade de QUANTIDADE a partir da unidade de vazão do banco (ex.: 'l/h' ->
+    'l', 'us gal/h' -> 'us gal'). Consumo (vazão) x tempo = quantidade; sem a
+    troca de forma, mostrar "42.3 l/h" no total seria dimensionalmente errado."""
+    u = (rate_unit or "").strip()
+    if u.lower().endswith("/h"):
+        u = u[:-2].strip()
+    return u or None
 
 
 def _longest_free_run(legs) -> tuple[int, int]:
@@ -178,32 +196,6 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
                   f"{route_dir:.0f}°, teto {ac.teto_ft:.0f}) → {cruise}"
                   if cruise is not None else "spec → None (rota curta)")
 
-    # ---- piso de TERRENO obrigatório no trecho de cruzeiro (folga 500 ft, como
-    #      o documento do Cris). O documento já garante 500 ft acima do aeródromo
-    #      mais alto (Etapas 1/4 do cruise.py); aqui estendemos "o ponto mais alto"
-    #      para incluir a serra EN-ROUTE. Se o cruzeiro cair abaixo, sobe para o
-    #      menor NÍVEL LEGAL (semicircular) que respeite o piso. ----
-    if tem_cruise_stretch and cruise is not None:
-        en_path = [(legs[cs].from_pos.lon, legs[cs].from_pos.lat)]
-        for i in range(cs, ce):
-            en_path.append((legs[i].to_pos.lon, legs[i].to_pos.lat))
-        try:
-            terr_max = float(terreno.max_along(en_path, step_nm=step_nm, radius_px=radius_px))
-            piso = terr_max + 500.0
-            if cruise < piso - 1e-6:
-                novo = _nivel_legal_acima(piso, route_dir, ac.teto_ft)
-                if novo < piso - 1e-6:
-                    avisos.append(f"ATENÇÃO: terreno en-route {terr_max:.0f} ft exige piso "
-                                  f"{piso:.0f} ft, acima do teto ({ac.teto_ft:.0f}); "
-                                  f"cruzeiro no máximo legal {novo:.0f} ft — terreno NÃO liberado.")
-                else:
-                    avisos.append(f"cruzeiro elevado de {cruise:.0f} para {novo:.0f} ft "
-                                  f"(piso de terreno {terr_max:.0f}+500={piso:.0f} ft).")
-                cruise = novo
-                fonte_cruz += f" | piso terreno {piso:.0f} → {novo:.0f}"
-        except Exception as e:
-            avisos.append(f"não foi possível checar o piso de terreno do cruzeiro ({e}).")
-
     # helper: his de corredor (ou None)
     def his(i):
         l = legs[i]
@@ -233,6 +225,41 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
     else:
         H_post = elev_d
 
+    # ---- PISOS do cruzeiro (só quando há trecho de cruzeiro) ----
+    # (1) piso de CORREDOR: o cruzeiro não pode ficar ABAIXO do corredor que ele
+    #     conecta (senão a aeronave desceria abaixo do corredor e subiria para
+    #     entrar nele). Sobe para o NÍVEL do corredor (altitude de carta).
+    # (c) piso de TERRENO en-route (+500, como o documento estende "o ponto mais
+    #     alto"): se ainda ficar abaixo da serra, sobe para o menor NÍVEL LEGAL.
+    if tem_cruise_stretch and cruise is not None:
+        hpre_corr = next((his(j) for j in range(cs - 1, -1, -1) if his(j) is not None), None)
+        hpost_corr = next_corr_his(ce, n)
+        corr_floor = max([x for x in (hpre_corr, hpost_corr) if x is not None], default=None)
+        if corr_floor is not None and cruise < corr_floor - 1e-6:
+            avisos.append(f"cruzeiro elevado de {cruise:.0f} para {corr_floor:.0f} ft "
+                          f"(nível do corredor conectado).")
+            fonte_cruz += f" | piso corredor → {corr_floor:.0f}"
+            cruise = corr_floor
+        en_path = [(legs[cs].from_pos.lon, legs[cs].from_pos.lat)]
+        for i in range(cs, ce):
+            en_path.append((legs[i].to_pos.lon, legs[i].to_pos.lat))
+        try:
+            terr_max = float(terreno.max_along(en_path, step_nm=step_nm, radius_px=radius_px))
+            piso = terr_max + 500.0
+            if cruise < piso - 1e-6:
+                novo = _nivel_legal_acima(piso, route_dir, ac.teto_ft)
+                if novo < piso - 1e-6:
+                    avisos.append(f"ATENÇÃO: terreno en-route {terr_max:.0f} ft exige piso "
+                                  f"{piso:.0f} ft, acima do teto ({ac.teto_ft:.0f}); "
+                                  f"cruzeiro no máximo legal {novo:.0f} ft — terreno NÃO liberado.")
+                else:
+                    avisos.append(f"cruzeiro elevado de {cruise:.0f} para {novo:.0f} ft "
+                                  f"(piso de terreno {terr_max:.0f}+500={piso:.0f} ft).")
+                fonte_cruz += f" | piso terreno {piso:.0f} → {novo:.0f}"
+                cruise = novo
+        except Exception as e:
+            avisos.append(f"não foi possível checar o piso de terreno do cruzeiro ({e}).")
+
     vertices: list[Vertice] = []
 
     def add(x, alt, tipo, nome=None, real=False):
@@ -253,6 +280,70 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
         frac = (x1 - x0) / d if d > 0 else 1.0
         return alt0 + (alt_target - alt0) * frac        # rampa parcial (carrega)
 
+    # Descida FINAL, sempre na razão do banco, governada pela LINHA DE APROXIMAÇÃO
+    # que vem do destino: alt(x) = min(teto_corredor(x), alt_aprox(x)). A aeronave
+    # entra aqui já na altitude que mantém (cruzeiro ou pico) e desce quando a linha
+    # de aproximação a alcança — o "TOD de aproximação" (relativo ao aeródromo) — indo
+    # reta até a pista, atravessando os corredores de chegada por baixo dos tetos
+    # (higher_limit é máximo, não piso). Só fica nivelada num teto se esse teto estiver
+    # ABAIXO da linha de aproximação naquele ponto.
+    def _descida_final(x_start, alt_start):
+        slope = (ac.rate_dc_fpm * 60.0 / ac.speed_dc_kt
+                 if (ac.rate_dc_fpm > 0 and ac.speed_dc_kt > 0) else 0.0)
+        # ALVOS que a aeronave deve atingir DESCENDO na razão do banco: cada corredor
+        # de chegada no seu higher_limit (na ENTRADA do corredor) e o destino. A
+        # aeronave mantém a altitude até o início de descida MAIS URGENTE (o "TOD" de
+        # cada alvo, relativo a ele) e desce reto na razão do banco até atingi-lo;
+        # repete. Isso faz "cross" no corredor quando ele está longe (a linha ainda
+        # está acima do teto), e atravessa o corredor por baixo do teto quando ele
+        # está perto (a linha do destino já está abaixo do teto).
+        alvos = sorted(set(
+            [(cum[i], float(his(i))) for i in range(n)
+             if legs[i].is_corridor and his(i) is not None and cum[i] > x_start + 1e-9]
+            + [(float(total), float(elev_d))]))
+        poly = [(x_start, alt_start)]
+        cur = alt_start
+        x = x_start
+        rem = list(alvos)
+        guard = 0
+        while slope > 0 and guard < 4 * n + 8:
+            guard += 1
+            pend = [(xt, at) for xt, at in rem if xt > x + 1e-9 and at < cur - 1e-6]
+            if not pend:
+                break
+            xs, xt, at = min((xt - (cur - at) / slope, xt, at) for xt, at in pend)
+            xs = max(xs, x)
+            if xs > x + 1e-6:
+                poly.append((xs, cur))       # fim do nível mantido (início da descida)
+            poly.append((xt, at))            # chega no alvo (na razão do banco)
+            cur = at
+            x = xt
+            rem = [(a, b) for a, b in rem if a > x + 1e-9]
+        if poly[-1][0] < total - 1e-9:
+            poly.append((total, cur))        # nivelado até o destino (se sobrou)
+
+        def alt_at(xq):
+            for (xa, aa), (xb, ab) in zip(poly, poly[1:]):
+                if xa - 1e-9 <= xq <= xb + 1e-9:
+                    return aa if xb - xa < 1e-9 else aa + (ab - aa) * (xq - xa) / (xb - xa)
+            return poly[-1][1]
+
+        # vértices: breakpoints da descida (virtuais) + ENTRADAS de corredor (reais),
+        # cada um na altitude interpolada da poligonal.
+        pts = {}
+        for xa, _ in poly[1:-1]:
+            pts[round(xa, 3)] = (xa, False, "virtual", None)
+        for i in range(n):
+            xe = cum[i]
+            if x_start + 1e-9 < xe < total - 1e-9:
+                pts[round(xe, 3)] = (xe, True,
+                                     "corredor" if legs[i].is_corridor else "ponto",
+                                     legs[i].from_name)
+        for key in sorted(pts):
+            xq, real, tipo, nome = pts[key]
+            add(xq, alt_at(xq), tipo, nome, real)
+        return poly[-1][1]
+
     # =================== origem ===================
     add(0.0, elev_o, "origem", legs[0].from_name if n else lateral.origin_name, True)
     cur = elev_o
@@ -261,7 +352,17 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
     # A aeronave sobe SEMPRE na razão máxima (start): entra no corredor e alcança o
     # higher_limit num ponto virtual, depois nivela. Em trecho longo alcança o limite
     # já na entrada; em trecho curto, um pouco dentro do corredor (é o máximo físico).
-    pre_hi = cs if tem_cruise_stretch else n
+    # sem trecho de cruzeiro: sobe só até o corredor de PICO (1º a alcançar o
+    # maior teto do trajeto); dali em diante a descida governa (mesma linha de
+    # aproximação da chegada, aplicada abaixo após a pré-região).
+    if tem_cruise_stretch:
+        pre_hi = cs
+    else:
+        _tetos = [(i, his(i)) for i in range(n) if his(i) is not None]
+        _global_max = max(h for _, h in _tetos) if _tetos else None
+        peak_i = (next(i for i, h in _tetos if h >= _global_max - 1e-6)
+                  if _global_max is not None else -1)
+        pre_hi = (peak_i + 1) if peak_i >= 0 else n
     for i in range(0, pre_hi):
         x0, x1 = cum[i], cum[i + 1]
         if i > 0:
@@ -284,66 +385,45 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
         H_pre = cur
         L_en = x_en1 - x_en0
         alvo = cruise if cruise is not None else max(H_pre, H_post)
-        # distâncias de subir a 'alvo' e descer de 'alvo' a H_post
+        slope_dc = (ac.rate_dc_fpm * 60.0 / ac.speed_dc_kt
+                    if (ac.rate_dc_fpm > 0 and ac.speed_dc_kt > 0) else 0.0)
         d_up = (_trans_dist(alvo - H_pre, ac.rate_ac_fpm, ac.speed_ac_kt) if alvo > H_pre
                 else _trans_dist(H_pre - alvo, ac.rate_dc_fpm, ac.speed_dc_kt))
-        d_dn = (_trans_dist(alvo - H_post, ac.rate_dc_fpm, ac.speed_dc_kt) if alvo > H_post
-                else _trans_dist(H_post - alvo, ac.rate_ac_fpm, ac.speed_ac_kt))
-        if cruise is not None and L_en >= d_up + d_dn - 1e-9:
-            # cabe cruzeiro nivelado
-            x_toc = x_en0 + d_up
-            x_tod = x_en1 - d_dn
-            add(x_toc, alvo, "toc", "TOC", False)
-            if x_tod > x_toc + 1e-6:
-                add(x_tod, alvo, "tod", "TOD", False)
-            else:
-                x_tod = x_toc
-            cur = H_post
+        x_toc = x_en0 + d_up                              # onde a aeronave alcança 'alvo'
+        # TOD relativo ao AERÓDROMO: onde a linha de aproximação (do destino, na razão
+        # do banco) cruza a altitude de cruzeiro. É daqui que a descida começa.
+        x_tod_aero = (total - (alvo - elev_d) / slope_dc) if slope_dc > 0 else total
+        cabe = (cruise is not None and x_toc <= x_en1 + 1e-9 and x_toc <= x_tod_aero + 1e-9)
+        if cabe:
+            # cabe cruzeiro nivelado; a descida (a partir do TOD de aproximação) é
+            # delegada à linha de aproximação, que governa até a pista.
+            if x_toc > x_en0 + 1e-6:
+                add(x_toc, alvo, "toc", "TOC", False)
             alcancou = True
             cruz_efet = alvo
+            cur = _descida_final(x_toc, alvo)
         else:
-            # não cabe: pico de encontro dentro de [x_en0, x_en1]
-            a = ac.rate_ac_fpm * 60.0 / ac.speed_ac_kt      # ft por NM subindo
-            b = ac.rate_dc_fpm * 60.0 / ac.speed_dc_kt      # ft por NM descendo
-            xm = (H_post + b * L_en - H_pre) / (a + b) if (a + b) > 0 else L_en / 2
-            xm = max(0.0, min(L_en, xm))
-            peak = H_pre + a * xm
+            # não cabe cruzeiro: pico onde a subida (de H_pre) encontra a linha de
+            # aproximação (do destino); dali a descida governa até a pista.
+            a = ac.rate_ac_fpm * 60.0 / ac.speed_ac_kt
+            b = slope_dc
+            if a + b > 0:
+                x_peak = (elev_d + b * total + a * x_en0 - H_pre) / (a + b)
+            else:
+                x_peak = x_en0 + L_en / 2.0
+            x_peak = max(x_en0, min(total, x_peak))
+            peak = H_pre + a * (x_peak - x_en0)
             if cruise is not None:
-                peak = min(peak, cruise)
-            x_toc = x_tod = x_en0 + xm
-            add(x_toc, peak, "virtual", None, False)    # só um vértice geométrico (apex);
-            cur = H_post                                # o TOC/TOD real será o platô mais alto
+                peak = min(peak, alvo)
+            if x_peak > x_en0 + 1e-6:
+                add(x_peak, peak, "virtual", None, False)
             alcancou = False
             cruz_efet = peak
-        add(x_en1, cur, "ponto", legs[ce - 1].to_name, True)   # fim do trecho (entrada 1º corredor chegada / ou destino)
-
-    # =================== pós-região [ce, n): descida em degraus ===================
-    if tem_cruise_stretch:
-        # último corredor real do bloco de chegada (para separar descida final)
-        arr_last = -1
-        for i in range(ce, n):
-            if legs[i].is_corridor:
-                arr_last = i
-        for i in range(ce, n):
-            x0, x1 = cum[i], cum[i + 1]
-            if i > ce:
-                add(x0, cur, "corredor" if legs[i].is_corridor else "ponto", legs[i].from_name, True)
-            if legs[i].is_corridor:
-                tgt = his(i) if his(i) is not None else cur
-                if i == ce:
-                    cur = tgt                 # 1ª chegada: já entrou no his (cross)
-                else:
-                    cur = start_to(x0, cur, x1, tgt)   # degraus subsequentes (start)
-            else:
-                # DIRETO de chegada -> descida final ao destino (cross no destino)
-                if i > arr_last >= 0 or arr_last < 0:
-                    d_final = _trans_dist(cur - elev_d, ac.rate_dc_fpm, ac.speed_dc_kt) if cur > elev_d else 0.0
-                    x_desc = max(x0, total - d_final)
-                    if x_desc > x0 + 1e-6:
-                        add(x_desc, cur, "virtual")
-                    cur = elev_d
-                else:
-                    cur = start_to(x0, cur, x1, next_corr_his(i + 1, n) or cur)
+            cur = _descida_final(x_peak, peak)
+    elif pre_hi < n:
+        add(cum[pre_hi], cur, "corredor" if legs[pre_hi].is_corridor else "ponto",
+            legs[pre_hi].from_name, True)
+        cur = _descida_final(cum[pre_hi], cur)
 
     # =================== destino ===================
     add(total, elev_d, "destino", legs[-1].to_name if n else lateral.dest_name, True)
@@ -351,20 +431,21 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
     # ordena por x (os virtuais podem sair fora de ordem em bordas)
     vertices.sort(key=lambda v: v.x_nm)
 
-    # TOC/TOD: quando NÃO há cruzeiro nivelado (voo só de corredores, dominado por
-    # corredores, ou rota curta), são o INTERVALO da altitude máxima do perfil
-    # (1º ao último ponto no topo) — assim o "cruzeiro" pega o platô mais alto.
-    if not alcancou:
-        max_alt = max(v.alt_ft for v in vertices)
-        tops = [v.x_nm for v in vertices if v.alt_ft >= max_alt - 1.0]
-        x_toc, x_tod = min(tops), max(tops)
-        cruz_efet = max_alt
-    if x_toc is None:
-        x_toc = x_tod = 0.0
+    # TOC/TOD calculados AO FINAL, sobre a rota inteira: intervalo da altitude
+    # máxima do perfil. TOC = 1º ponto que atinge o topo (fim da ÚLTIMA subida);
+    # TOD = último ponto no topo (início da descida). Vale para todos os casos
+    # (com ou sem cruzeiro nivelado); o "topo" pode ser o cruzeiro ou o corredor
+    # mais alto. Assim, se a aeronave já nivelou num corredor na altitude de
+    # cruzeiro, o TOC começa ali (e não depois).
+    max_alt = max(v.alt_ft for v in vertices)
+    tops = [v.x_nm for v in vertices if v.alt_ft >= max_alt - 1.0]
+    x_toc, x_tod = min(tops), max(tops)
+    cruz_efet = max_alt
 
-    # ---- tempo por segmento: subida/descida pela RAZÃO (alt/razão em min);
-    #      trecho nivelado pela velocidade de cruzeiro (dist/vel). Modelo do Cristiano
-    #      (e correto mesmo quando a rampa de decolagem é comprimida até o 1º corredor). ----
+    # ---- tempo por segmento, bucketizado pela NATUREZA do trecho (não pela
+    #      posição): SUBIDA = só quando realmente sobe; DESCIDA = só quando desce;
+    #      CRUZEIRO = trecho NIVELADO (cruzeiro + corredores nivelados). Subida e
+    #      descida contam pela razão (alt/razão); nivelado pela velocidade. ----
     def _bucket_time():
         sub = cru = des = 0.0
         sub_d = cru_d = des_d = 0.0
@@ -373,27 +454,47 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
             if d <= 0:
                 continue
             dalt = B.alt_ft - A.alt_ft
-            if dalt > 1:
-                t = dalt / ac.rate_ac_fpm if ac.rate_ac_fpm > 0 else 0.0
-            elif dalt < -1:
-                t = (-dalt) / ac.rate_dc_fpm if ac.rate_dc_fpm > 0 else 0.0
-            else:
-                t = d / ac.speed_cruise_kt * 60.0 if ac.speed_cruise_kt > 0 else 0.0
-            mid = (A.x_nm + B.x_nm) / 2.0
-            if mid <= x_toc + 1e-6:
-                sub += t; sub_d += d
-            elif mid >= x_tod - 1e-6:
-                des += t; des_d += d
-            else:
-                cru += t; cru_d += d
+            if dalt > 1:                                   # subindo de fato
+                sub += dalt / ac.rate_ac_fpm if ac.rate_ac_fpm > 0 else 0.0
+                sub_d += d
+            elif dalt < -1:                                # descendo de fato
+                des += (-dalt) / ac.rate_dc_fpm if ac.rate_dc_fpm > 0 else 0.0
+                des_d += d
+            else:                                          # nivelado (cruzeiro/corredor)
+                cru += d / ac.speed_cruise_kt * 60.0 if ac.speed_cruise_kt > 0 else 0.0
+                cru_d += d
         return (FaseTempo(sub_d, sub), FaseTempo(cru_d, cru), FaseTempo(des_d, des))
     sub, cru, des = _bucket_time()
 
-    # ---- aviso de terreno (não altera altitude; só alerta) ----
+    # ---- combustível por fase: consumo (na unidade nativa do banco) x tempo
+    #      da fase (reaproveita os tempos já bucketizados acima). Tudo-ou-nada:
+    #      só calcula se as 3 fases + a unidade estiverem disponíveis, senão
+    #      fica indisponível (None) — nunca quebra o cálculo do perfil. ----
+    if ac.fuel_ac is not None and ac.fuel_cruise is not None and ac.fuel_dc is not None and ac.fuel_unit:
+        comb_subida = ac.fuel_ac * (sub.tempo_min / 60.0)
+        comb_cruzeiro = ac.fuel_cruise * (cru.tempo_min / 60.0)
+        comb_descida = ac.fuel_dc * (des.tempo_min / 60.0)
+        comb_total = comb_subida + comb_cruzeiro + comb_descida
+        comb_unit = _qty_unit(ac.fuel_unit)
+    else:
+        comb_subida = comb_cruzeiro = comb_descida = comb_total = comb_unit = None
+
+    # ---- aviso de terreno (só alerta; não altera altitude) ----
+    # Evita falsos positivos: só avisa em trecho NIVELADO e FORA de corredor.
+    # A subida de decolagem e a descida final ficam perto do relevo por natureza
+    # (é normal e legal), e os corredores têm folga própria de carta — por isso
+    # ambos são ignorados aqui.
+    corr_ranges = [(cum[i], cum[i + 1]) for i in range(n) if legs[i].is_corridor]
+
+    def _in_corr(x):
+        return any(a - 1e-9 <= x <= b + 1e-9 for a, b in corr_ranges)
+
     for A, B in zip(vertices, vertices[1:]):
-        if B.x_nm - A.x_nm <= 0:
+        if B.x_nm - A.x_nm <= 0 or abs(B.alt_ft - A.alt_ft) > 1:   # pula subida/descida
             continue
-        # amostra o terreno sob o segmento e compara com a menor altitude do trecho
+        mid = (A.x_nm + B.x_nm) / 2.0
+        if _in_corr(mid):                                           # pula corredor
+            continue
         pa = _interp_pos(lateral, legs, cum, A.x_nm)
         pb = _interp_pos(lateral, legs, cum, B.x_nm)
         try:
@@ -418,6 +519,8 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno, *,
               "H_pre": H_pre, "H_post": H_post, "route_dir": route_dir,
               "n_vertices": len(vertices), "margem_ft": margem_ft,
               "corredores_x": [(cum[i], cum[i + 1]) for i in range(n) if legs[i].is_corridor]},
+        comb_subida=comb_subida, comb_cruzeiro=comb_cruzeiro, comb_descida=comb_descida,
+        comb_total=comb_total, comb_unit=comb_unit, fuel_type=ac.fuel_type,
     )
 
 

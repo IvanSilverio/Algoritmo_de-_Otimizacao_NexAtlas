@@ -2,17 +2,24 @@
 .env.sh
 .env
 *.env
-CLAUDE.md
 # Ambiente virtual
 .venv/
 venv/
 __pycache__/
 *.pyc
-*.json
 
 # Saídas geradas
 *.png
 airports_world.csv
+analise_voos.csv
+resultados_testes_REA.json
+rotas_export.json
 
 # Dados provisórios baixados (opcional — descomente se não quiser versionar)
 # data/aerodromos_br_ourairports.csv
+
+# Notas de trabalho / specs de tarefa concluída — locais, não fazem parte do
+# produto do repositório (histórico de decisão fica na mensagem de commit).
+TAREFA_*.md
+VENTO_CDN_REFERENCIA.md
+CONTEXTO_CLAUDE_WEB.md
