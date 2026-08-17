@@ -120,6 +120,12 @@ def imprimir_vertices(perfil, ac) -> None:
     print(f"    {DIM}[por trecho: razão fpm · velocidade kt"
           f"{' · vento GS/TAS/deriva' if perfil.segmentos_vento else ''} — p/ verificação]{RST}")
     vento_by_x0 = {s.x0_nm: s for s in perfil.segmentos_vento}
+    ingreme = perfil.descida_ingreme_nm
+
+    def _e_ingreme(x0, x1):
+        mid = (x0 + x1) / 2.0
+        return any(a - 1e-6 <= mid <= b + 1e-6 for a, b in ingreme)
+
     prev_alt = None
     prev_x = None
     for v in perfil.vertices:
@@ -129,16 +135,24 @@ def imprimir_vertices(perfil, ac) -> None:
         if prev_alt is not None:
             dalt = v.alt_ft - prev_alt
             dx = v.x_nm - prev_x
+            # razão (fpm) DERIVADA do trecho real (dx/dalt), com a velocidade do
+            # banco FIXA — nunca o contrário. Em trechos íngremes a geometria
+            # foi construída com a velocidade do banco e a distância disponível
+            # da perna, então a razão implícita é a REAL (necessária), acima da
+            # nominal — mostrar a nominal ali estaria errado.
+            cor_ingreme = RED if _e_ingreme(prev_x, v.x_nm) else None
             if dalt > 1:
                 seta = f"{GRN}↑{RST}"
-                rate = ac.rate_ac_fpm
-                spd = (dx * 60.0 * rate / dalt) if (rate > 0 and dx > 0) else 0.0
-                vel = f"   {GRN}↑ {rate:.0f} fpm · {spd:.0f} kt{RST}"
+                spd = ac.speed_ac_kt
+                rate = (dalt * spd / (dx * 60.0)) if (spd > 0 and dx > 0) else 0.0
+                cor = cor_ingreme or GRN
+                vel = f"   {cor}↑ {rate:.0f} fpm · {spd:.0f} kt{RST}"
             elif dalt < -1:
                 seta = f"{DIM}↓{RST}"
-                rate = ac.rate_dc_fpm
-                spd = (dx * 60.0 * rate / (-dalt)) if (rate > 0 and dx > 0) else 0.0
-                vel = f"   {DIM}↓ {rate:.0f} fpm · {spd:.0f} kt{RST}"
+                spd = ac.speed_dc_kt
+                rate = (-dalt * spd / (dx * 60.0)) if (spd > 0 and dx > 0) else 0.0
+                cor = cor_ingreme or DIM
+                vel = f"   {cor}↓ {rate:.0f} fpm · {spd:.0f} kt{RST}"
             else:
                 seta = f"{DIM}={RST}"
                 if v.x_nm - prev_x > 0.05:

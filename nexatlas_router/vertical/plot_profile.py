@@ -12,7 +12,7 @@ from typing import Optional
 
 OCEAN = "#0f172a"; GRID = "#334155"
 TERR_FILL = "#4b3f2a"; TERR_EDGE = "#a8823c"
-CORR = "#34d399"; FREE = "#38bdf8"; TOCTOD = "#f472b6"
+CORR = "#34d399"; FREE = "#38bdf8"; TOCTOD = "#f472b6"; STEEP = "#ef4444"
 WP = "#e2e8f0"; ORIGIN_MK = "#fbbf24"; DEST_MK = "#f472b6"
 
 
@@ -81,6 +81,7 @@ def plot_vertical_profile(perfil, output_path: str, titulo: Optional[str] = None
     # permanece azul mesmo que sua altitude coincida com a de um corredor.
     corr_alts = {round(v.alt_ft) for v in V if v.tipo == "corredor"}
     _toc, _tod = perfil.toc_nm, perfil.tod_nm
+    _ingreme = perfil.descida_ingreme_nm
 
     def _is_corr_seg(A, B, mid):
         if in_corr(mid):
@@ -90,9 +91,17 @@ def plot_vertical_profile(perfil, output_path: str, titulo: Optional[str] = None
             return True
         return False
 
+    def _is_ingreme_seg(mid):
+        return any(x0 - 1e-6 <= mid <= x1 + 1e-6 for x0, x1 in _ingreme)
+
     for A, B in zip(V, V[1:]):
         mid = (A.x_nm + B.x_nm) / 2.0
-        col = CORR if _is_corr_seg(A, B, mid) else FREE
+        if _is_ingreme_seg(mid):
+            col = STEEP
+        elif _is_corr_seg(A, B, mid):
+            col = CORR
+        else:
+            col = FREE
         lw = 3.6 if col == CORR else 2.4
         ax.plot([A.x_nm, B.x_nm], [A.alt_ft, B.alt_ft], color=col, lw=lw,
                 solid_capstyle="round", zorder=4)
@@ -172,7 +181,10 @@ def plot_vertical_profile(perfil, output_path: str, titulo: Optional[str] = None
         Line2D([0], [0], marker="o", color="none", markerfacecolor="white",
                markeredgecolor=TOCTOD, markeredgewidth=2, markersize=9, label="TOC / TOD"),
     ]
-    ax.legend(handles=handles, loc="upper center", ncol=3, facecolor="#1e293b",
+    if _ingreme:
+        handles.append(Line2D([0], [0], color=STEEP, lw=2.4,
+                               label="Descida acima da razão (atenção)"))
+    ax.legend(handles=handles, loc="upper center", ncol=len(handles), facecolor="#1e293b",
               edgecolor=GRID, labelcolor="white", fontsize=8.4, framealpha=0.9)
 
     # --- legenda dos pontos (letra -> waypoint) por fora ---
