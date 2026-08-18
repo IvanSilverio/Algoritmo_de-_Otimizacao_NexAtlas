@@ -245,7 +245,9 @@ def main():
         try:
             graph, meta = loader.build_subgraph(origin, dest,
                                                 chart_radius_nm=60.0, link_radius_nm=30.0)
-            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg)
+            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+                                   origin_gate_ids=meta.get("origin_gate_ids"),
+                                   dest_gate_ids=meta.get("dest_gate_ids"))
         except Exception as e:
             print(f"  {RED}✗ V1 falhou ({origin}->{dest}): {e}{RST}")
             continue

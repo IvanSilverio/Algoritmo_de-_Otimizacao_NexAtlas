@@ -25,7 +25,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from .geo import LonLat, haversine_m
+from .geo import LonLat, haversine_m, progresso_nm
 
 
 @dataclass(frozen=True)
@@ -59,6 +59,25 @@ class Edge:
 # de fronteira (perto ou além da borda); score baixo = miolo da TMA.
 BORDER_DREF_NM = 25.0          # dentro da TMA, o score zera a partir desta distância (miolo)
 BRIDGE_BORDER_PMAX_NM = 20.0   # força da penalidade na ponte (robusta na faixa ~10–80 NM)
+
+# TAREFA_coerencia_geometrica.md (III): raio de coincidência para tratar um
+# waypoint REA como "o próprio destino" (a malha cadastra o ponto de
+# referência de alguns aeródromos como nó da REA, com o MESMO NOME do ICAO —
+# casos 018/020 do gabarito: SNCL/SIVU a 86-116 m do aeródromo real). Definida
+# aqui (não só em v1.py) porque o portão obrigatório (TAREFA_portoes.md)
+# também precisa dela na CONSTRUÇÃO do grafo — ver uso em add_synthetic_edges.
+DEDUP_DEST_RADIUS_M = 1852.0 * 0.5
+
+# TAREFA_portoes.md (pedido do Ivan 17/08): quando o documento de portões
+# obrigatórios lista MAIS DE UM ponto válido pra um aeródromo ("X ou Y"), a
+# escolha entre eles pelo caminho mínimo também leva em conta a coerência
+# geométrica — um empurrão SUAVE (soma ao peso; nunca exclui candidato, o
+# portão continua válido mesmo perdendo essa preferência) contra o ponto que
+# representar retrocesso em relação ao eixo origem->destino. Só entra em jogo
+# nos portões FORÇADOS pelo documento (add_synthetic_edges, origin_forced/
+# dest_forced) — não toca a regra de mínimo-local existente (sem documento).
+# Heurística, a calibrar com Vinícius/Cristiano.
+PORTAO_RETROCESSO_PESO_M_POR_NM = 1852.0 * 3.0
 
 
 def border_score(dist_border_nm: Optional[float], inside: Optional[bool]) -> float:
@@ -207,15 +226,32 @@ class RouteGraph:
         return neigh
 
     def _skips_closer_corridor_node(self, node_id: str, ref_pos,
-                                    neighbors: dict, eps_m: float = 1.0) -> bool:
+                                    neighbors: dict, eps_m: float = 1.0,
+                                    only_mandatory: bool = False) -> bool:
         """MÍNIMO-LOCAL negado: o DIRETO de ref_pos até node_id passa por cima de
         um nó de corredor MAIS PRÓXIMO de ref_pos? (existe vizinho de corredor
-        mais perto -> node_id não é a ponta mais próxima -> 'pula' alguém)."""
+        mais perto -> node_id não é a ponta mais próxima -> 'pula' alguém).
+
+        `only_mandatory=True` (TAREFA_coerencia_geometrica.md II.d; usado só na
+        SAÍDA, ver add_synthetic_edges) conta apenas o vizinho alcançado por
+        trecho OBRIGATÓRIO a partir de node_id. Um trecho OPCIONAL diz que o
+        corredor não exige seguir adiante — node_id já é, por si, um portão de
+        saída válido, mesmo com outro portão do MESMO corredor mais perto do
+        destino (caso 008: TRAPICHE é portão válido mesmo com TREVO mais perto,
+        porque TRAPICHE->TREVO é opcional)."""
         d_node = haversine_m(self.nodes[node_id].pos, ref_pos)
         for m in neighbors.get(node_id, ()):
             if haversine_m(self.nodes[m].pos, ref_pos) < d_node - eps_m:
+                if only_mandatory and not self._has_mandatory_edge_to(node_id, m):
+                    continue
                 return True
         return False
+
+    def _has_mandatory_edge_to(self, src: str, tgt: str) -> bool:
+        """Existe aresta REAL OBRIGATÓRIA src->tgt? (direção importa — ver
+        _skips_closer_corridor_node com only_mandatory=True)."""
+        return any((not e.synthetic) and e.is_mandatory and e.target == tgt
+                   for e in self.adj.get(src, []))
 
     def _is_gateway(self, node_id: str, ref_pos, neighbors: dict,
                     need_outgoing: bool = True) -> bool:
@@ -319,8 +355,20 @@ class RouteGraph:
         entry_exit_k: int = 6,
         inter_tma_nm: float = 300.0,
         synth_penalty: float = 1.0,
+        origin_forced: Optional[list] = None,
+        dest_forced: Optional[list] = None,
     ) -> dict:
         """Liga aeródromos e TMAs por trechos 'DIRETO', seguindo a regra REA.
+
+        `origin_forced`/`dest_forced` (TAREFA_portoes.md PASSO B): quando não
+        None, é a lista de IDs de nó JÁ RESOLVIDA do portão obrigatório de
+        entrada/saída do documento (data/portoes_rea.json) — substitui
+        INTEIRAMENTE a escolha por mínimo-local/k-mais-próximos daquela ponta
+        (o portão publicado PREVALECE). "X ou Y" chegam aqui como lista com 2
+        IDs; o caminho mínimo escolhe entre eles (com um empurrão de
+        coerência — ver PORTAO_RETROCESSO_PESO_M_POR_NM). Resolvido em
+        db.py, que conhece o ICAO de cada ponta; este módulo fica agnóstico
+        ao documento.
 
         REGRA OPERACIONAL (extraída dos casos de referência): se o aeródromo
         está DENTRO de uma TMA com malha REA, a aeronave é OBRIGADA a usar os
@@ -414,7 +462,12 @@ class RouteGraph:
         #    MANNESMANN no SBBH). FLORES/JUATUBA caem (têm vizinho mais perto da
         #    origem). O caminho mínimo escolhe por onde entrar. Válvula: se nenhum
         #    mínimo-local servir, relaxa (não isolar a origem).
-        if origin_in_tma:
+        if origin_forced is not None:
+            # TAREFA_portoes.md: portão obrigatório do documento PREVALECE
+            # sobre o mínimo-local — substitui inteiramente a lista de
+            # candidatos (não depende de origin_in_tma nem de k-mais-próximos).
+            entry_targets = list(dict.fromkeys(origin_forced))
+        elif origin_in_tma:
             in_chart = [n for n in rea_nodes if self.nodes[n].chart == origin_chart]
             gateways = [n for n in in_chart
                         if self._is_gateway(n, origin.pos, corridor_neigh)]
@@ -437,7 +490,14 @@ class RouteGraph:
             kept_entries, entries_gated, entries_relaxed = entry_targets, 0, 1
         for nid in kept_entries:
             d = haversine_m(origin.pos, self.nodes[nid].pos)
-            self.add_edge(Edge(origin_id, nid, w(d), corridor="DIRETO", synthetic=True))
+            weight = w(d)
+            if origin_forced is not None:
+                # Empurrão de coerência ENTRE portões obrigatórios alternativos
+                # (só penaliza retrocesso; nunca exclui — o portão continua
+                # válido mesmo perdendo essa preferência).
+                prog = progresso_nm(origin.pos, self.nodes[nid].pos, dest.pos)
+                weight += PORTAO_RETROCESSO_PESO_M_POR_NM * max(0.0, -prog)
+            self.add_edge(Edge(origin_id, nid, weight, corridor="DIRETO", synthetic=True))
             linked_in += 1
 
         # 2) SAÍDA: REA -> destino. DIFERENTE da entrada: a saída NÃO é a ponta mais
@@ -454,12 +514,33 @@ class RouteGraph:
         #    Sem trava estática (o PORTÃO tipo DUTRA, cujo corredor volta para dentro,
         #    precisa poder sair). Usar mínimo-local (não k-mais-próximos) garante que
         #    a ponta certa entre mesmo fora das k mais perto (PÓLO NORTE é a 8ª).
-        if dest_in_tma:
+        exits_non_gateway_dropped = exits_gateway_relaxed = 0
+        if dest_forced is not None:
+            # TAREFA_portoes.md: mesma prevalência do portão sobre o
+            # mínimo-local, espelhada na saída. TAMBÉM inclui qualquer
+            # waypoint da malha com o MESMO NOME do aeródromo de destino, a
+            # até DEDUP_DEST_RADIUS_M dele (achado ao vivo 17/08, caso SIVU):
+            # o portão obrigatório (ex. VIANA) às vezes só alcança as
+            # vizinhanças do aeródromo por um trecho REAL OBRIGATÓRIO até
+            # esse waypoint duplicado — sem essa extensão, 'owes_real' barra
+            # a saída sintética direto do portão (ele ainda deve aquele
+            # trecho) e a malha fica DESCONEXA. v1._remove_duplicidade_destino
+            # depois funde esse waypoint no destino pra exibição, como já
+            # fazia antes do portão existir.
+            dedup_targets = [
+                n for n in rea_nodes
+                if dest_chart and self.nodes[n].chart == dest_chart
+                and self.nodes[n].name.strip().upper() == dest.name.strip().upper()
+                and haversine_m(self.nodes[n].pos, dest.pos) <= DEDUP_DEST_RADIUS_M
+            ]
+            exit_sources = list(dict.fromkeys(list(dest_forced) + dedup_targets))
+        elif dest_in_tma:
             in_chart = [n for n in rea_nodes
                         if self.nodes[n].chart == dest_chart and self._has_real_incoming(n)]
             exit_gateways = [n for n in in_chart
                              if not self._skips_closer_corridor_node(
-                                 n, dest.pos, corridor_neigh)]   # MÍNIMO-LOCAL ao destino
+                                 n, dest.pos, corridor_neigh,
+                                 only_mandatory=True)]   # MÍNIMO-LOCAL ao destino (II.d)
             exits_non_gateway_dropped = max(0, len(in_chart) - len(exit_gateways))
             exits_gateway_relaxed = 0 if exit_gateways else 1
             # válvula: nenhuma ponta serve -> cai nos k-mais-próximos (antigo).
@@ -467,7 +548,6 @@ class RouteGraph:
                 dest.pos, in_chart or rea_nodes, entry_exit_k)
         else:
             exit_sources = [n for n in rea_nodes if self._has_real_incoming(n)] or rea_nodes
-            exits_non_gateway_dropped = exits_gateway_relaxed = 0
         exit_candidates = [(haversine_m(self.nodes[nid].pos, dest.pos), nid)
                            for nid in exit_sources]
         # portão: descarta saídas cuja reta até o destino cruza corredor obrigatório.
@@ -477,7 +557,11 @@ class RouteGraph:
         if not kept_exits and exit_candidates:    # válvula: não isolar o destino
             kept_exits, exits_gated, exits_relaxed = exit_candidates, 0, 1
         for d, nid in kept_exits:
-            self.add_edge(Edge(nid, dest_id, w(d), corridor="DIRETO", synthetic=True))
+            weight = w(d)
+            if dest_forced is not None:
+                prog = progresso_nm(origin.pos, self.nodes[nid].pos, dest.pos)
+                weight += PORTAO_RETROCESSO_PESO_M_POR_NM * max(0.0, -prog)
+            self.add_edge(Edge(nid, dest_id, weight, corridor="DIRETO", synthetic=True))
             linked_out += 1
         exits_safety_valve = 0
         if linked_out == 0 and rea_nodes:              # válvula de saída (último recurso)
@@ -626,7 +710,11 @@ class RouteGraph:
 
         # Flag lida por v1.plan_v1_route: ponta em TMA REA => rota OBRIGADA a
         # usar >=1 corredor real (caminho mínimo restrito em dijkstra.shortest_route).
-        self.requires_corridor = origin_in_tma or dest_in_tma
+        # TAREFA_portoes.md: um portão obrigatório do documento força o mesmo,
+        # mesmo no caso hipotético (não observado nos 52 aeródromos do
+        # documento) de a ponta cair fora do raio geométrico de TMA.
+        self.requires_corridor = (origin_in_tma or dest_in_tma
+                                  or origin_forced is not None or dest_forced is not None)
 
         return {
             "origin_in_tma": origin_in_tma,
@@ -655,6 +743,8 @@ class RouteGraph:
             "requires_corridor": self.requires_corridor,
             "n_rea_nodes": len(rea_nodes),
             "n_charts": len(charts),
+            "origin_gate_forced": origin_forced is not None,
+            "dest_gate_forced": dest_forced is not None,
         }
 
     def add_direct_fallback(self, origin_id: str, dest_id: str) -> bool:

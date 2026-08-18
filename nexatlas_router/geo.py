@@ -50,3 +50,26 @@ def initial_bearing(a: LonLat, b: LonLat) -> float:
     y = math.sin(dl) * math.cos(phi2)
     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dl)
     return (math.degrees(math.atan2(y, x)) + 360.0) % 360.0
+
+
+def progresso_nm(source: LonLat, target: LonLat, dest: LonLat) -> float:
+    """Projeção do vetor do passo (source->target) sobre o eixo source->dest,
+    em NM (produto escalar normalizado — TAREFA_coerencia_geometrica.md II.1):
+    positivo = avança rumo a `dest`, negativo = retrocesso. Plano local (lon
+    escalado por cos(lat), 1 NM = 1/60°) — válido na escala de TMA/ponte
+    inter-TMA (dezenas/centenas de NM). Compartilhado por v1.py (coerência da
+    rota decidida) e graphmodel.py (escolha entre portões obrigatórios
+    alternativos do documento — TAREFA_portoes.md)."""
+    lat0 = math.radians(source.lat)
+
+    def _loc(p: LonLat) -> tuple:
+        return ((p.lon - source.lon) * math.cos(lat0) * 60.0,
+                (p.lat - source.lat) * 60.0)
+
+    ux, uy = _loc(dest)
+    length = math.hypot(ux, uy)
+    if length < 1e-9:
+        return 0.0
+    ux, uy = ux / length, uy / length
+    sx, sy = _loc(target)
+    return sx * ux + sy * uy

@@ -32,6 +32,7 @@ from typing import Any, Iterable, Optional
 
 from .geo import LonLat
 from .graphmodel import Edge, Node, RouteGraph, border_score
+from .portoes import resolver_pontos_obrigatorios, PortaoDesconectadoError
 
 
 def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
@@ -252,8 +253,26 @@ class PostgisLoader:
                                     heading=(float(heading) if heading is not None else None),
                                     geom=geom))
 
-        diag = g.add_synthetic_edges(origin.id, dest.id)
+        # TAREFA_portoes.md PASSO B: portão obrigatório de entrada/saída do
+        # documento (data/portoes_rea.json), quando existir pra este ICAO —
+        # resolvido AQUI (não em graphmodel.py, que fica agnóstico ao
+        # documento) porque só aqui se conhece o ICAO de cada ponta. None
+        # quando o aeródromo não tem regra: comportamento inalterado.
+        origin_forced = resolver_pontos_obrigatorios(g, origin_icao, "partida", dest_icao)
+        dest_forced = resolver_pontos_obrigatorios(g, dest_icao, "destino", origin_icao)
+
+        diag = g.add_synthetic_edges(origin.id, dest.id,
+                                     origin_forced=origin_forced, dest_forced=dest_forced)
+
+        if (origin_forced is not None or dest_forced is not None) \
+                and not g._reaches(origin.id, dest.id):
+            raise PortaoDesconectadoError(
+                f"forçar portão obrigatório em {origin_icao}->{dest_icao} desconecta a "
+                f"rota (sem caminho a partir do(s) ponto(s) obrigatório(s) do documento)"
+            )
 
         meta = {"charts": charts, "origin_id": origin.id, "dest_id": dest.id,
-                "synthetic_diagnostics": diag}
+                "synthetic_diagnostics": diag,
+                "origin_gate_ids": set(origin_forced) if origin_forced else None,
+                "dest_gate_ids": set(dest_forced) if dest_forced else None}
         return g, meta

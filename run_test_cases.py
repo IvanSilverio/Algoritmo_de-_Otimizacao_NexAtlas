@@ -33,6 +33,7 @@ from nexatlas_router.db import PostgisLoader
 from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.plot_route import plot_v1_combined
+from nexatlas_router.portoes import PortaoError
 
 
 def get_conn():
@@ -82,7 +83,9 @@ def run_case(loader: PostgisLoader, gwo_cfg: GWOConfig, case: dict,
         # Mesmos parâmetros que o CLI usa (nexatlas_cli.py: build_subgraph).
         graph, meta = loader.build_subgraph(
             partida, destino, chart_radius_nm=60.0, link_radius_nm=30.0)
-        result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg)
+        result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+                               origin_gate_ids=meta.get("origin_gate_ids"),
+                               dest_gate_ids=meta.get("dest_gate_ids"))
 
         plot_path = None
         if png_dir is not None:
@@ -102,12 +105,15 @@ def run_case(loader: PostgisLoader, gwo_cfg: GWOConfig, case: dict,
         })
         return row
     except Exception as e:
+        # TAREFA_portoes.md item 6: falha por portão obrigatório inaplicável
+        # (ponto não resolvido, ou forçado desconecta a rota) é uma falha
+        # EXPLICADA, não um erro silencioso — status próprio no relatório.
         return {
             "grupo": case["grupo"],
             "partida": partida,
             "destino": destino,
             "tipo_corredor": case["tipo_corredor"],
-            "status": "ERRO",
+            "status": "ERRO_PORTAO" if isinstance(e, PortaoError) else "ERRO",
             "erro": str(e),
             "elapsed_s": round(time.time() - t0, 2),
             "plot_path": None,
@@ -116,8 +122,8 @@ def run_case(loader: PostgisLoader, gwo_cfg: GWOConfig, case: dict,
 
 def print_case_line(idx: int, total: int, row: dict) -> None:
     prefix = f"[{idx:03d}/{total}] {row['grupo']} · {row['partida']} → {row['destino']}"
-    if row["status"] == "ERRO":
-        print(f"{prefix}  ERRO  {row['erro']}")
+    if row["status"] in ("ERRO", "ERRO_PORTAO"):
+        print(f"{prefix}  {row['status']}  {row['erro']}")
         return
     direct_nm = row["direct_distance_nm"]
     total_nm = row["total_distance_nm"]
@@ -127,21 +133,28 @@ def print_case_line(idx: int, total: int, row: dict) -> None:
     n_corr = len(row["corridors_used"])
     n_alt = row["meta"].get("n_alternatives", 0)
     fallback = "  [FALLBACK DIRETO]" if row["meta"].get("used_direct_fallback") else ""
+    colisao = row["meta"].get("colisao_portao_coerencia")
+    aviso = ""
+    if colisao:
+        lados = "/".join(l for l in ("entrada", "saida") if colisao.get(l))
+        aviso = f"  [COLISÃO PORTÃO×COERÊNCIA: {lados}]"
     print(f"{prefix}  OK   {src:<14}  {total_nm:.1f} NM "
           f"(direta {direct_nm:.1f}, {sign}{overhead:.1f})  "
-          f"corredores={n_corr}  alt={n_alt}{fallback}")
+          f"corredores={n_corr}  alt={n_alt}{fallback}{aviso}")
 
 
 def print_summary(rows: list[dict]) -> None:
     total = len(rows)
     ok = [r for r in rows if r["status"] == "OK"]
     erro = [r for r in rows if r["status"] == "ERRO"]
+    erro_portao = [r for r in rows if r["status"] == "ERRO_PORTAO"]
     fallback = [r for r in ok if r["meta"].get("used_direct_fallback")]
+    colisoes = [r for r in ok if r["meta"].get("colisao_portao_coerencia")]
 
     print()
     print("─" * 66)
     print(f"Total: {total}   OK: {len(ok)}   ERRO: {len(erro)}   "
-          f"Fallback direto: {len(fallback)}")
+          f"ERRO_PORTAO: {len(erro_portao)}   Fallback direto: {len(fallback)}")
 
     por_grupo: dict[str, dict[str, int]] = {}
     for r in rows:
@@ -158,6 +171,22 @@ def print_summary(rows: list[dict]) -> None:
         print("Casos com erro:")
         for r in erro:
             print(f"  {r['partida']} → {r['destino']}: {r['erro']}")
+
+    if erro_portao:
+        print()
+        print("Casos com portão obrigatório INAPLICÁVEL (falha explicada — TAREFA_portoes.md):")
+        for r in erro_portao:
+            print(f"  {r['partida']} → {r['destino']}: {r['erro']}")
+
+    print()
+    print(f"Relatório de colisões portão×coerência (TAREFA_portoes.md): {len(colisoes)} caso(s)")
+    if colisoes:
+        print("(o portão prevalece — a rota é mantida; sinalizado pra revisão humana)")
+        for r in colisoes:
+            c = r["meta"]["colisao_portao_coerencia"]
+            lados = "/".join(l for l in ("entrada", "saida") if c.get(l))
+            print(f"  {r['partida']} → {r['destino']}: colisão na {lados} "
+                  f"(rota: {' → '.join(p['name'] for p in r['points'])})")
     print("─" * 66)
 
 
@@ -213,9 +242,16 @@ def main() -> None:
         "total": len(rows),
         "ok": sum(1 for r in rows if r["status"] == "OK"),
         "erro": sum(1 for r in rows if r["status"] == "ERRO"),
+        "erro_portao": sum(1 for r in rows if r["status"] == "ERRO_PORTAO"),
         "fallback_direto": sum(
             1 for r in rows
             if r["status"] == "OK" and r["meta"].get("used_direct_fallback")),
+        "colisoes_portao_coerencia": [
+            {"partida": r["partida"], "destino": r["destino"],
+             "colisao": r["meta"]["colisao_portao_coerencia"]}
+            for r in rows
+            if r["status"] == "OK" and r["meta"].get("colisao_portao_coerencia")
+        ],
         "casos": rows,
     }
     with open(args.output, "w", encoding="utf-8") as f:

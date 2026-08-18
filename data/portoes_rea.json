@@ -1,0 +1,1111 @@
+{
+  "SBAF": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "REALENGO"
+        ],
+        "extra_se_outro_extremo": {
+          "SBJR": [
+            "TAQUARA"
+          ]
+        }
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "REALENGO"
+        ],
+        "extra_se_outro_extremo": {
+          "SBJR": [
+            "TAQUARA"
+          ]
+        }
+      }
+    ]
+  },
+  "SBBE": {
+    "chart": "REA Belém",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "ONÇA",
+          "ILHA GRANDE"
+        ]
+      }
+    ]
+  },
+  "SBBH": {
+    "chart": "REA Belo Horizonte",
+    "partida": [
+      {
+        "pontos": [
+          "CEASA",
+          "TAQUARAÇU"
+        ],
+        "pistas": [
+          "13"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CEASA"
+        ]
+      }
+    ]
+  },
+  "SBBI": {
+    "chart": "REA Curitiba",
+    "partida": [
+      {
+        "pontos": [
+          "TAMANDARÉ",
+          "COLOMBO",
+          "ATUBA",
+          "IRAÍ"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TAMANDARÉ",
+          "COLOMBO",
+          "ATUBA",
+          "IRAÍ"
+        ]
+      }
+    ]
+  },
+  "SBCF": {
+    "chart": "REA Belo Horizonte",
+    "partida": [
+      {
+        "pontos": [
+          "CIRRUS",
+          "ANDIROBA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "SETE LAGOAS",
+          "CIRRUS",
+          "ANDIROBA"
+        ]
+      }
+    ]
+  },
+  "SBCO": {
+    "chart": "REA Porto Alegre",
+    "partida": [
+      {
+        "pontos": [
+          "BEIRA-RIO",
+          "TARUMÃ",
+          "GM",
+          "CHAPÉU",
+          "PÓLO NORTE"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BEIRA-RIO",
+          "TARUMÃ",
+          "GM",
+          "CHAPÉU",
+          "PÓLO NORTE"
+        ]
+      }
+    ]
+  },
+  "SBCT": {
+    "chart": "REA Curitiba",
+    "partida": [
+      {
+        "pontos": [
+          "TAMANDARÉ",
+          "COLOMBO",
+          "BARIGUI",
+          "IRAÍ",
+          "SANEPAR"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TAMANDARÉ",
+          "COLOMBO",
+          "BARIGUI",
+          "IRAÍ",
+          "SANEPAR"
+        ]
+      }
+    ]
+  },
+  "SBCX": {
+    "chart": "REA Porto Alegre",
+    "partida": [
+      {
+        "pontos": [
+          "FORQUETA",
+          "4 FOLHAS"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "FORQUETA",
+          "4 FOLHAS"
+        ]
+      }
+    ]
+  },
+  "SBCY": {
+    "chart": "REA Cuiabá",
+    "partida": [
+      {
+        "pontos": [
+          "SÃO MATEUS",
+          "CONDOMÍNIO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "SÃO MATEUS",
+          "CONDOMÍNIO"
+        ]
+      }
+    ]
+  },
+  "SBEG": {
+    "chart": "REA Manaus",
+    "partida": [
+      {
+        "pontos": [
+          "TARUMÃ AÇU",
+          "RESERVA DUQUE"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TARUMÃ AÇU",
+          "RESERVA DUQUE"
+        ]
+      }
+    ]
+  },
+  "SBES": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "IGUABA",
+          "TAMOIOS"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "IGUABA",
+          "TAMOIOS"
+        ]
+      }
+    ]
+  },
+  "SBFL": {
+    "chart": "REA Florianópolis",
+    "partida": [
+      {
+        "pontos": [
+          "TRAPICHE",
+          "JOAQUINA",
+          "RIBEIRÃO DA ILHA",
+          "PANTANO DO SUL",
+          "SÃO PEDRO DE ALCÂNTARA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TRAPICHE",
+          "JOAQUINA",
+          "RIBEIRÃO DA ILHA",
+          "PANTANO DO SUL",
+          "SÃO PEDRO DE ALCÂNTARA"
+        ]
+      }
+    ]
+  },
+  "SBFZ": {
+    "chart": "REA Fortaleza",
+    "partida": [
+      {
+        "pontos": [
+          "BARRA",
+          "BEACH PARK"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BARRA",
+          "BEACH PARK"
+        ]
+      }
+    ]
+  },
+  "SBGL": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "MAUÁ",
+          "ROXO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "MAUÁ",
+          "ROXO"
+        ]
+      }
+    ]
+  },
+  "SBJD": {
+    "chart": "REA São Paulo",
+    "partida": [
+      {
+        "pontos": [
+          "TREVO",
+          "ELÓI"
+        ],
+        "pistas": [
+          "18"
+        ]
+      },
+      {
+        "pontos": [
+          "LAGOA",
+          "TREVO",
+          "ELÓI"
+        ],
+        "pistas": [
+          "36"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "ESTÁDIO"
+        ],
+        "pistas": [
+          "18"
+        ]
+      },
+      {
+        "pontos": [
+          "ESTÁDIO",
+          "ELÓI"
+        ],
+        "pistas": [
+          "36"
+        ]
+      }
+    ]
+  },
+  "SBJR": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "BARRA",
+          "CURICICA"
+        ],
+        "pistas": [
+          "03"
+        ],
+        "extra_se_outro_extremo": {
+          "SBAF": [
+            "TAQUARA"
+          ]
+        }
+      },
+      {
+        "pontos": [
+          "MARAPENDI"
+        ],
+        "pistas": [
+          "21"
+        ],
+        "extra_se_outro_extremo": {
+          "SBAF": [
+            "TAQUARA"
+          ]
+        }
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "MARAPENDI"
+        ],
+        "pistas": [
+          "03"
+        ],
+        "extra_se_outro_extremo": {
+          "SBAF": [
+            "TAQUARA"
+          ]
+        }
+      },
+      {
+        "pontos": [
+          "BARRA",
+          "CURICICA"
+        ],
+        "pistas": [
+          "21"
+        ],
+        "extra_se_outro_extremo": {
+          "SBAF": [
+            "TAQUARA"
+          ]
+        }
+      }
+    ]
+  },
+  "SBJV": {
+    "chart": "REA Curitiba",
+    "partida": [
+      {
+        "pontos": [
+          "GUARATUBA",
+          "BARRA DO SUL"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "GUARATUBA",
+          "BARRA DO SUL"
+        ]
+      }
+    ]
+  },
+  "SBKP": {
+    "chart": "REA São Paulo",
+    "partida": [
+      {
+        "pontos": [
+          "JAGUARIÚNA",
+          "ITU"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "JAGUARIÚNA",
+          "ITU"
+        ]
+      }
+    ]
+  },
+  "SBLS": {
+    "chart": "REA Belo Horizonte",
+    "partida": [
+      {
+        "pontos": [
+          "CIRRUS",
+          "ANDIROBA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "SETE LAGOAS",
+          "CIRRUS",
+          "ANDIROBA"
+        ]
+      }
+    ]
+  },
+  "SBMN": {
+    "chart": "REA Manaus",
+    "partida": [
+      {
+        "pontos": [
+          "PONTE RIO NEGRO",
+          "ALEIXO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "PONTE RIO NEGRO",
+          "ALEIXO"
+        ]
+      }
+    ]
+  },
+  "SBMQ": {
+    "chart": "REA Macapá",
+    "partida": [
+      {
+        "pontos": [
+          "ROTATÓRIA KM9 BR156"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "ROTATÓRIA KM9 BR156"
+        ]
+      }
+    ]
+  },
+  "SBMT": {
+    "chart": "REA São Paulo",
+    "partida": [
+      {
+        "pontos": [
+          "COMETA",
+          "ABRIL"
+        ],
+        "pistas": [
+          "12"
+        ]
+      },
+      {
+        "pontos": [
+          "DUTRA",
+          "PENTEADO"
+        ],
+        "pistas": [
+          "30"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "DUTRA",
+          "PENTEADO"
+        ],
+        "pistas": [
+          "12"
+        ]
+      },
+      {
+        "pontos": [
+          "COMETA",
+          "ABRIL"
+        ],
+        "pistas": [
+          "30"
+        ]
+      }
+    ]
+  },
+  "SBNF": {
+    "chart": "REA Florianópolis",
+    "partida": [
+      {
+        "pontos": [
+          "PIÇARRAS",
+          "RODOVIA",
+          "ESTALEIRINHO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "PIÇARRAS",
+          "RODOVIA",
+          "ESTALEIRINHO"
+        ]
+      }
+    ]
+  },
+  "SBNT": {
+    "chart": "REA Natal",
+    "partida": [
+      {
+        "pontos": [
+          "PRAIA",
+          "PIRANGI"
+        ],
+        "pistas": [
+          "16L",
+          "16R",
+          "12"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "VILA OLÍMPICA",
+          "BARRAGEM"
+        ],
+        "pistas": [
+          "16L",
+          "16R",
+          "12"
+        ]
+      }
+    ]
+  },
+  "SBPA": {
+    "chart": "REA Porto Alegre",
+    "partida": [
+      {
+        "pontos": [
+          "BEIRA-RIO",
+          "TARUMÃ",
+          "GM",
+          "CHAPÉU",
+          "PÓLO NORTE"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BEIRA-RIO",
+          "TARUMÃ",
+          "GM",
+          "CHAPÉU",
+          "PÓLO NORTE"
+        ]
+      }
+    ]
+  },
+  "SBRF": {
+    "chart": "REA Recife",
+    "partida": [
+      {
+        "pontos": [
+          "CAIS DE SANTA RITA",
+          "LAGOA AZUL"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CAIS DE SANTA RITA",
+          "LAGOA AZUL"
+        ]
+      }
+    ]
+  },
+  "SBRJ": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "ITAIPU",
+          "SÃO GONÇALO"
+        ],
+        "pistas": [
+          "02"
+        ]
+      },
+      {
+        "pontos": [
+          "BOCA",
+          "SÃO GONÇALO"
+        ],
+        "pistas": [
+          "20"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "ITAIPU",
+          "SÃO GONÇALO"
+        ]
+      }
+    ]
+  },
+  "SBRP": {
+    "chart": "REA Ribeirão Preto",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "PIRIPAU",
+          "USP"
+        ]
+      }
+    ]
+  },
+  "SBSC": {
+    "chart": "REA Rio de Janeiro",
+    "partida": [
+      {
+        "pontos": [
+          "COSMO",
+          "RESTINGA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "COSMO",
+          "RESTINGA"
+        ]
+      }
+    ]
+  },
+  "SBSJ": {
+    "chart": "REA São Paulo",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "CAÇAPAVA",
+          "REDENÇÃO",
+          "GUARAREMA",
+          "IGARATÁ"
+        ]
+      }
+    ]
+  },
+  "SBSL": {
+    "chart": "REA São Luís",
+    "partida": [
+      {
+        "pontos": [
+          "CAJUPARI",
+          "BATATÃ CAEMA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CAJUPARI",
+          "BATATÃ CAEMA"
+        ]
+      }
+    ]
+  },
+  "SBSN": {
+    "chart": "REA Santarém",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "MARIA JOSÉ",
+          "TREVO"
+        ]
+      }
+    ]
+  },
+  "SBSV": {
+    "chart": "REA Salvador",
+    "partida": [
+      {
+        "pontos": [
+          "FAROL DE ITAPUÃ"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CEASA"
+        ]
+      }
+    ]
+  },
+  "SBTT": {
+    "chart": "REA Tabatinga",
+    "partida": [
+      {
+        "pontos": [
+          "BRAÇO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BRAÇO"
+        ]
+      }
+    ]
+  },
+  "SBTV": {
+    "chart": "REA Porto Seguro",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "TRANCOSO"
+        ]
+      }
+    ]
+  },
+  "SBVT": {
+    "chart": "REA Vitória",
+    "partida": [
+      {
+        "pontos": [
+          "CARIACICA",
+          "MANGUINHOS"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CARIACICA",
+          "MANGUINHOS"
+        ]
+      }
+    ]
+  },
+  "SDCO": {
+    "chart": "REA São Paulo",
+    "partida": [
+      {
+        "pontos": [
+          "HOSPITAL"
+        ],
+        "pistas": [
+          "19"
+        ]
+      },
+      {
+        "pontos": [
+          "LAGO"
+        ],
+        "pistas": [
+          "01"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "LAGO"
+        ],
+        "pistas": [
+          "19"
+        ]
+      },
+      {
+        "pontos": [
+          "HOSPITAL"
+        ],
+        "pistas": [
+          "01"
+        ]
+      }
+    ]
+  },
+  "SDEN": {
+    "chart": "REA Florianópolis",
+    "partida": [
+      {
+        "pontos": [
+          "TÊXTIL",
+          "PONTA DO ARAÇÁ",
+          "ESTALEIRINHO",
+          "DECKER",
+          "CANELINHA",
+          "GANCHOS"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TÊXTIL",
+          "ESTALEIRINHO",
+          "DECKER",
+          "CANELINHA",
+          "GANCHOS"
+        ]
+      }
+    ]
+  },
+  "SIAQ": {
+    "chart": "REA Cuiabá",
+    "partida": [
+      {
+        "pontos": [
+          "TREVO DO MANSO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TREVO DO MANSO"
+        ]
+      }
+    ]
+  },
+  "SIPB": {
+    "chart": "REA São Luís",
+    "partida": [
+      {
+        "pontos": [
+          "CAVU"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CAVU"
+        ]
+      }
+    ]
+  },
+  "SIQE": {
+    "chart": "REA Brasília",
+    "partida": [],
+    "destino": [
+      {
+        "pontos": [
+          "GRANJA 2"
+        ]
+      }
+    ]
+  },
+  "SIVU": {
+    "chart": "REA Vitória",
+    "partida": [
+      {
+        "pontos": [
+          "VIANA",
+          "PONTA DA FRUTA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "VIANA",
+          "PONTA DA FRUTA"
+        ]
+      }
+    ]
+  },
+  "SNCJ": {
+    "chart": "REA Santarém",
+    "partida": [
+      {
+        "pontos": [
+          "BEC"
+        ],
+        "so_com_rea": true
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BEC"
+        ],
+        "so_com_rea": true
+      }
+    ]
+  },
+  "SNOZ": {
+    "chart": "REA São Luís",
+    "partida": [
+      {
+        "pontos": [
+          "PAÇO DO LUMIAR"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "PAÇO DO LUMIAR"
+        ]
+      }
+    ]
+  },
+  "SNSH": {
+    "chart": "REA Santarém",
+    "partida": [
+      {
+        "pontos": [
+          "BEC"
+        ],
+        "so_com_rea": true
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BEC"
+        ],
+        "so_com_rea": true
+      }
+    ]
+  },
+  "SSAY": {
+    "chart": "REA Campo Grande",
+    "partida": [
+      {
+        "pontos": [
+          "ESTUFA",
+          "PEIXES"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "PEIXES"
+        ]
+      }
+    ]
+  },
+  "SSGP": {
+    "chart": "REA Brasília",
+    "partida": [
+      {
+        "pontos": [
+          "CBAAER",
+          "TORRE 3"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "CBAAER",
+          "TORRE 2"
+        ]
+      }
+    ]
+  },
+  "SSIE": {
+    "chart": "REA Campo Grande",
+    "partida": [
+      {
+        "pontos": [
+          "TORRE"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "TORRE"
+        ]
+      }
+    ]
+  },
+  "SSKG": {
+    "chart": "REA Campo Grande",
+    "partida": [
+      {
+        "pontos": [
+          "ESTUFA",
+          "LAGOS"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "LAGOS"
+        ]
+      }
+    ]
+  },
+  "SSKT": {
+    "chart": "REA Florianópolis",
+    "partida": [
+      {
+        "pontos": [
+          "BIGUAÇU",
+          "TREVO",
+          "SÃO PEDRO DE ALCÂNTARA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "BIGUAÇU",
+          "TREVO",
+          "SÃO PEDRO DE ALCÂNTARA"
+        ]
+      }
+    ]
+  },
+  "SWEQ": {
+    "chart": "REA Belém",
+    "partida": [
+      {
+        "pontos": [
+          "SÃO PEDRO"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "SÃO PEDRO"
+        ]
+      }
+    ]
+  },
+  "SWLV": {
+    "chart": "REA Cuiabá",
+    "partida": [
+      {
+        "pontos": [
+          "LAGOA"
+        ]
+      }
+    ],
+    "destino": [
+      {
+        "pontos": [
+          "LAGOA"
+        ]
+      }
+    ]
+  }
+}

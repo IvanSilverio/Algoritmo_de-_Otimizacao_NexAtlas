@@ -133,8 +133,12 @@ def _print_route(origin: str, dest: str, result) -> None:
     print(f"  {BLD}Distância direta :{RST} {direct_nm:.1f} NM")
     print(f"  {BLD}Distância da rota:{RST} {total_nm:.1f} NM  "
           f"{DIM}({sign}{delta:.1f} NM sobre a direta){RST}")
-    metodo = ("Dijkstra com estado de fase (exato)" if src == "dijkstra-fase"
-              else "Dijkstra (caminho mínimo exato)")
+    if src == "dijkstra-fase":
+        metodo = "Dijkstra com estado de fase (exato)"
+    elif src == "direto-preferido":
+        metodo = "Direta preferida sobre a malha (coerência geométrica)"
+    else:
+        metodo = "Dijkstra (caminho mínimo exato)"
     print(f"  {DIM}Método: {metodo}{RST}")
     print()
 
@@ -150,6 +154,17 @@ def _print_route(origin: str, dest: str, result) -> None:
     else:
         print(f"  {DIM}ℹ  Nenhum corredor REA relevante — rota direta autorizada.{RST}")
     print()
+
+    # TAREFA_portoes.md: portão obrigatório do documento prevalece sobre a
+    # coerência (nunca derruba a rota), mas a colisão é sinalizada aqui.
+    colisao = result.meta.get("colisao_portao_coerencia")
+    if colisao:
+        lados = "/".join(l for l in ("entrada", "saida") if colisao.get(l))
+        print(f"  {RED}{BLD}⚠ Colisão portão × coerência ({lados}):{RST} "
+              f"{DIM}o portão obrigatório do documento exige aqui um trecho com "
+              f"retrocesso ou curva acentuada — mantido (o portão prevalece), "
+              f"sinalizado para revisão.{RST}")
+        print()
 
     # motivo
     print(DIM + textwrap.fill(result.reason, width=62,
@@ -394,7 +409,9 @@ def main() -> None:
               f"{n_real} arestas de corredor REA{RST}")
 
         try:
-            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg)
+            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+                                   origin_gate_ids=meta.get("origin_gate_ids"),
+                                   dest_gate_ids=meta.get("dest_gate_ids"))
         except Exception as e:
             print(f"\n  {RED}✗ Erro no otimizador:{RST} {e}\n"); continue
 
