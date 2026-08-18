@@ -18,8 +18,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Optional
 
 from .geo import m_to_nm, haversine_m, initial_bearing, progresso_nm as _progresso_nm
-from .graphmodel import Edge, RouteGraph, DEDUP_DEST_RADIUS_M
-from .gwo import GWOConfig, DecodedRoute
+from .graphmodel import Edge, RouteGraph, DEDUP_DEST_RADIUS_M, DecodedRoute
 from .dijkstra import shortest_route, k_shortest_routes
 
 # TAREFA_coerencia_geometrica.md (II)/(II.b): limiares de coerência geométrica
@@ -255,7 +254,6 @@ class V1RouteResult:
 
 
 def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
-                  config: Optional[GWOConfig] = None,
                   origin_gate_ids: Optional[set] = None,
                   dest_gate_ids: Optional[set] = None) -> V1RouteResult:
     # origin_gate_ids/dest_gate_ids (TAREFA_portoes.md): IDs de nó do portão
@@ -270,9 +268,10 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
 
     # AUTORIDADE: shortest_route (Dijkstra com ESTADO DE FASE) — exato e
     # determinístico, codifica a regra das TMAs. As alternativas também vêm do
-    # Dijkstra (k-shortest/Yen, mais abaixo), não do GWO: assim TODAS as rotas
-    # exibidas respeitam a mesma regra de validade. O GWO segue no código,
-    # reservado ao V2/V3 multiobjetivo (ele nunca superava o Dijkstra em distância).
+    # Dijkstra (k-shortest/Yen, mais abaixo): assim TODAS as rotas exibidas
+    # respeitam a mesma regra de validade (o Grey Wolf Optimizer, usado antes
+    # pra gerar alternativas, foi removido — nunca superava o Dijkstra em
+    # distância e não conhecia a regra de fase; ver git history/gwo.py).
     used_direct_fallback = False
     mesh = shortest_route(graph, origin_id, dest_id, require_real_edge=require)
 

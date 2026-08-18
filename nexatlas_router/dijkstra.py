@@ -12,8 +12,7 @@ from __future__ import annotations
 import heapq
 from typing import Optional
 
-from .graphmodel import Edge, RouteGraph
-from .gwo import DecodedRoute
+from .graphmodel import Edge, RouteGraph, DecodedRoute
 from .geo import haversine_m as _haversine
 
 

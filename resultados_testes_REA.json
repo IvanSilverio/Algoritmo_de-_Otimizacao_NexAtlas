@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-18T19:14:04.331182+00:00",
+  "gerado_em": "2026-08-18T19:33:17.893807+00:00",
   "arquivo_casos": "casos_teste_algoritmo_rotas_REA.json",
   "filtro_grupo": null,
   "total": 100,
@@ -156,7 +156,7 @@
       "destino": "SBNV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.39,
+      "elapsed_s": 1.33,
       "plot_path": null
     },
     {
@@ -405,7 +405,7 @@
       "destino": "SWEQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.86,
+      "elapsed_s": 0.93,
       "plot_path": null
     },
     {
@@ -456,7 +456,7 @@
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.4,
+      "elapsed_s": 1.04,
       "plot_path": null
     },
     {
@@ -654,7 +654,7 @@
       "destino": "SIQE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.96,
+      "elapsed_s": 0.9,
       "plot_path": null
     },
     {
@@ -763,7 +763,7 @@
       "destino": "SDTS",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.16,
+      "elapsed_s": 1.05,
       "plot_path": null
     },
     {
@@ -814,7 +814,7 @@
       "destino": "SIAQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.94,
+      "elapsed_s": 1.23,
       "plot_path": null
     },
     {
@@ -975,7 +975,7 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 0.96,
       "plot_path": null
     },
     {
@@ -1528,7 +1528,7 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
+      "elapsed_s": 1.01,
       "plot_path": null
     },
     {
@@ -1579,7 +1579,7 @@
       "destino": "SNFF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
+      "elapsed_s": 0.98,
       "plot_path": null
     },
     {
@@ -1767,7 +1767,7 @@
       "destino": "SBLO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.94,
+      "elapsed_s": 1.04,
       "plot_path": null
     },
     {
@@ -1851,7 +1851,7 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.95,
+      "elapsed_s": 1.06,
       "plot_path": null
     },
     {
@@ -2025,7 +2025,7 @@
       "destino": "SBSG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -2076,7 +2076,7 @@
       "destino": "SJ9A",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.99,
+      "elapsed_s": 0.96,
       "plot_path": null
     },
     {
@@ -2510,7 +2510,7 @@
       "destino": "SBCX",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.11,
       "plot_path": null
     },
     {
@@ -2610,7 +2610,7 @@
       "destino": "SBTV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.15,
       "plot_path": null
     },
     {
@@ -2872,7 +2872,7 @@
       "destino": "SWDU",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.04,
+      "elapsed_s": 1.0,
       "plot_path": null
     },
     {
@@ -2923,7 +2923,7 @@
       "destino": "SDJN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 0.86,
       "plot_path": null
     },
     {
@@ -3082,7 +3082,7 @@
       "destino": "SNCL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 0.95,
       "plot_path": null
     },
     {
@@ -3191,7 +3191,7 @@
       "destino": "SNCJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.02,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -3353,7 +3353,7 @@
       "destino": "SIVU",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.24,
       "plot_path": null
     },
     {
@@ -3550,7 +3550,7 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.14,
       "plot_path": null
     },
     {
@@ -3601,7 +3601,7 @@
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.99,
+      "elapsed_s": 0.94,
       "plot_path": null
     },
     {
@@ -3934,7 +3934,7 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.91,
+      "elapsed_s": 0.88,
       "plot_path": null
     },
     {
@@ -4208,7 +4208,7 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.27,
       "plot_path": null
     },
     {
@@ -4259,7 +4259,7 @@
       "destino": "SBCY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.05,
       "plot_path": null
     },
     {
@@ -4698,7 +4698,7 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
+      "elapsed_s": 0.94,
       "plot_path": null
     },
     {
@@ -5399,7 +5399,7 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
+      "elapsed_s": 1.01,
       "plot_path": null
     },
     {
@@ -5453,7 +5453,7 @@
       "destino": "SBFZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.04,
+      "elapsed_s": 1.2,
       "plot_path": null
     },
     {
@@ -5647,7 +5647,7 @@
       "destino": "SBLO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.34,
+      "elapsed_s": 1.13,
       "plot_path": null
     },
     {
@@ -5698,7 +5698,7 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.09,
       "plot_path": null
     },
     {
@@ -6277,7 +6277,7 @@
       "destino": "SBNT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.28,
+      "elapsed_s": 1.16,
       "plot_path": null
     },
     {
@@ -7186,7 +7186,7 @@
       "destino": "SBPA",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.93,
+      "elapsed_s": 1.27,
       "plot_path": null
     },
     {
@@ -7655,7 +7655,7 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.08,
+      "elapsed_s": 1.07,
       "plot_path": null
     },
     {
@@ -7915,7 +7915,7 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.02,
+      "elapsed_s": 1.1,
       "plot_path": null
     },
     {
@@ -8586,7 +8586,7 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
+      "elapsed_s": 1.27,
       "plot_path": null
     },
     {
@@ -8770,7 +8770,7 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.87,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -8886,7 +8886,7 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
+      "elapsed_s": 1.11,
       "plot_path": null
     },
     {
@@ -9296,7 +9296,7 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.02,
+      "elapsed_s": 1.11,
       "plot_path": null
     },
     {
@@ -9858,7 +9858,7 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
+      "elapsed_s": 1.05,
       "plot_path": null
     },
     {
@@ -10122,7 +10122,7 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.86,
+      "elapsed_s": 0.88,
       "plot_path": null
     },
     {
@@ -10288,7 +10288,7 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.9,
+      "elapsed_s": 1.14,
       "plot_path": null
     },
     {
@@ -11155,7 +11155,7 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
+      "elapsed_s": 0.96,
       "plot_path": null
     },
     {
@@ -11206,7 +11206,7 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.89,
+      "elapsed_s": 1.28,
       "plot_path": null
     },
     {
@@ -11642,7 +11642,7 @@
       "destino": "SBBH",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.99,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -11790,7 +11790,7 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.89,
+      "elapsed_s": 1.13,
       "plot_path": null
     },
     {
@@ -12329,7 +12329,7 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.1,
+      "elapsed_s": 1.44,
       "plot_path": null
     },
     {
@@ -12601,7 +12601,7 @@
       "destino": "SBCY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.08,
+      "elapsed_s": 1.29,
       "plot_path": null
     },
     {
@@ -12959,7 +12959,7 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
+      "elapsed_s": 1.12,
       "plot_path": null
     },
     {
@@ -13010,7 +13010,7 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.23,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -13377,7 +13377,7 @@
       "destino": "SBFZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.97,
+      "elapsed_s": 1.15,
       "plot_path": null
     },
     {
@@ -13876,7 +13876,7 @@
       "destino": "SBMG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.14,
+      "elapsed_s": 1.17,
       "plot_path": null
     },
     {
@@ -14506,7 +14506,7 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.91,
+      "elapsed_s": 1.1,
       "plot_path": null
     },
     {
@@ -14658,7 +14658,7 @@
       "destino": "SBNT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.89,
+      "elapsed_s": 1.13,
       "plot_path": null
     },
     {
@@ -15189,7 +15189,7 @@
       "destino": "SBPA",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
+      "elapsed_s": 1.21,
       "plot_path": null
     },
     {
@@ -15240,7 +15240,7 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
+      "elapsed_s": 1.21,
       "plot_path": null
     },
     {
@@ -15388,7 +15388,7 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.86,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -16262,7 +16262,7 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -16428,7 +16428,7 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -16526,7 +16526,7 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.14,
+      "elapsed_s": 1.09,
       "plot_path": null
     },
     {
@@ -16688,7 +16688,7 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -16896,7 +16896,7 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.89,
+      "elapsed_s": 0.98,
       "plot_path": null
     },
     {
@@ -17044,7 +17044,7 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.06,
       "plot_path": null
     },
     {
@@ -17192,7 +17192,7 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.91,
+      "elapsed_s": 1.09,
       "plot_path": null
     },
     {
@@ -17519,7 +17519,7 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.43,
+      "elapsed_s": 1.24,
       "plot_path": null
     },
     {
@@ -18228,7 +18228,7 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.15,
+      "elapsed_s": 1.22,
       "plot_path": null
     },
     {
@@ -18337,7 +18337,7 @@
       "destino": "SIBY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.07,
+      "elapsed_s": 1.18,
       "plot_path": null
     },
     {
@@ -18756,7 +18756,7 @@
       "destino": "SS6L",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.25,
+      "elapsed_s": 1.1,
       "plot_path": null
     },
     {
@@ -19094,7 +19094,7 @@
       "destino": "SIOZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.24,
+      "elapsed_s": 0.98,
       "plot_path": null
     },
     {
@@ -19412,7 +19412,7 @@
       "destino": "SWKO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
+      "elapsed_s": 1.01,
       "plot_path": null
     },
     {
@@ -19762,7 +19762,7 @@
       "destino": "SJFY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.04,
+      "elapsed_s": 0.88,
       "plot_path": null
     },
     {
@@ -19871,7 +19871,7 @@
       "destino": "SDPH",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.93,
+      "elapsed_s": 0.9,
       "plot_path": null
     },
     {
@@ -20238,7 +20238,7 @@
       "destino": "SNIE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.27,
+      "elapsed_s": 1.0,
       "plot_path": null
     },
     {
@@ -20613,7 +20613,7 @@
       "destino": "SDYI",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -20824,7 +20824,7 @@
       "destino": "SD2X",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
+      "elapsed_s": 0.79,
       "plot_path": null
     },
     {
@@ -21111,7 +21111,7 @@
       "destino": "SJ3C",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.24,
+      "elapsed_s": 0.8,
       "plot_path": null
     },
     {
@@ -21241,7 +21241,7 @@
       "destino": "SSPS",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
+      "elapsed_s": 0.77,
       "plot_path": null
     },
     {
@@ -21425,7 +21425,7 @@
       "destino": "SWDI",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
+      "elapsed_s": 0.96,
       "plot_path": null
     },
     {
@@ -21765,7 +21765,7 @@
       "destino": "SSIQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.17,
+      "elapsed_s": 0.89,
       "plot_path": null
     },
     {
@@ -21953,7 +21953,7 @@
       "destino": "SSAE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
+      "elapsed_s": 0.93,
       "plot_path": null
     },
     {
@@ -22214,7 +22214,7 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.33,
+      "elapsed_s": 0.9,
       "plot_path": null
     },
     {
@@ -22413,7 +22413,7 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.57,
+      "elapsed_s": 1.13,
       "plot_path": null
     },
     {
@@ -22848,7 +22848,7 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.25,
+      "elapsed_s": 0.94,
       "plot_path": null
     },
     {
@@ -23032,7 +23032,7 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.97,
+      "elapsed_s": 1.01,
       "plot_path": null
     },
     {
@@ -23216,7 +23216,7 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
+      "elapsed_s": 0.77,
       "plot_path": null
     },
     {
@@ -23558,7 +23558,7 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
+      "elapsed_s": 0.87,
       "plot_path": null
     },
     {
@@ -23923,7 +23923,7 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.07,
+      "elapsed_s": 0.82,
       "plot_path": null
     },
     {
@@ -24046,7 +24046,7 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
+      "elapsed_s": 1.17,
       "plot_path": null
     },
     {
@@ -24169,7 +24169,7 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 0.92,
       "plot_path": null
     },
     {
@@ -24359,7 +24359,7 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.09,
+      "elapsed_s": 0.84,
       "plot_path": null
     },
     {
@@ -24733,7 +24733,7 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.15,
+      "elapsed_s": 1.05,
       "plot_path": null
     },
     {
@@ -24994,7 +24994,7 @@
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.89,
+      "elapsed_s": 1.03,
       "plot_path": null
     },
     {
@@ -25465,7 +25465,7 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.23,
       "plot_path": null
     },
     {
@@ -25860,7 +25860,7 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.86,
+      "elapsed_s": 1.02,
       "plot_path": null
     },
     {
@@ -26145,7 +26145,7 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 1.17,
       "plot_path": null
     },
     {
@@ -26196,7 +26196,7 @@
       "destino": "SBGL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
+      "elapsed_s": 0.97,
       "plot_path": null
     },
     {
@@ -27032,7 +27032,7 @@
       "destino": "SBJR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
+      "elapsed_s": 0.84,
       "plot_path": null
     },
     {
@@ -27972,7 +27972,7 @@
       "destino": "SBMT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
+      "elapsed_s": 1.02,
       "plot_path": null
     },
     {
@@ -28703,7 +28703,7 @@
       "destino": "SBGR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.16,
+      "elapsed_s": 1.11,
       "plot_path": null
     },
     {
@@ -29692,7 +29692,7 @@
       "destino": "SBKP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.22,
+      "elapsed_s": 0.9,
       "plot_path": null
     }
   ]

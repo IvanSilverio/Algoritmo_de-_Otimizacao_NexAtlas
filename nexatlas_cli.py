@@ -29,7 +29,6 @@ except ImportError:
     sys.exit("Instale o driver: pip install psycopg2-binary")
 
 from nexatlas_router.db import PostgisLoader
-from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 try:
     from nexatlas_router.plot_route import plot_v1_combined
@@ -377,9 +376,6 @@ def main() -> None:
         except Exception as e:
             print(f"  {DIM}V3 indisponível ({e}); seguindo só com a rota lateral.{RST}")
 
-    # max_hops=80 para rotas longas com múltiplas TMAs encadeadas.
-    gwo_cfg = GWOConfig(seed=42, n_iterations=200, n_wolves=30, max_hops=80)
-
     while True:
         print(); print(_hr())
         try:
@@ -409,7 +405,7 @@ def main() -> None:
               f"{n_real} arestas de corredor REA{RST}")
 
         try:
-            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"],
                                    origin_gate_ids=meta.get("origin_gate_ids"),
                                    dest_gate_ids=meta.get("dest_gate_ids"))
         except Exception as e:

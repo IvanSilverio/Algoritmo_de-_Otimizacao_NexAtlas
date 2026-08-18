@@ -1,4 +1,3 @@
-numpy>=1.26
 matplotlib>=3.8
 psycopg2-binary>=2.9
 # V3 (navegação vertical): declinação magnética (WMM). O terreno usa só urllib (stdlib).

@@ -67,7 +67,6 @@ HORA_PARTIDA_UTC: str | float | None = None
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import psycopg2  # noqa: E402
 from nexatlas_router.db import PostgisLoader                       # noqa: E402
-from nexatlas_router.gwo import GWOConfig                          # noqa: E402
 from nexatlas_router.v1 import plan_v1_route                       # noqa: E402
 from nexatlas_router.vertical import (                             # noqa: E402
     Terrain, Wind, parse_hora_utc, load_from_db, find, plan_from_v1,
@@ -224,7 +223,6 @@ def main():
     if SALVAR_GRAFICOS:
         os.makedirs(PASTA_SAIDA, exist_ok=True)
 
-    gwo_cfg = GWOConfig(seed=42, n_iterations=200, n_wolves=30, max_hops=80)
     terreno = Terrain()          # reaproveitado (cache de tiles) em todos os casos
     vento = Wind()               # idem — cache de tiles de vento em todos os casos
     if vento.disponivel():
@@ -245,7 +243,7 @@ def main():
         try:
             graph, meta = loader.build_subgraph(origin, dest,
                                                 chart_radius_nm=60.0, link_radius_nm=30.0)
-            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+            result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"],
                                    origin_gate_ids=meta.get("origin_gate_ids"),
                                    dest_gate_ids=meta.get("dest_gate_ids"))
         except Exception as e:

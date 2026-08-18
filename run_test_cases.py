@@ -30,7 +30,6 @@ except ImportError:
     sys.exit("Instale o driver: pip install psycopg2-binary")
 
 from nexatlas_router.db import PostgisLoader
-from nexatlas_router.gwo import GWOConfig
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.plot_route import plot_v1_combined
 from nexatlas_router.portoes import PortaoError
@@ -75,7 +74,7 @@ def load_cases(path: str, group_filter: str | None) -> list[dict]:
     return flat
 
 
-def run_case(loader: PostgisLoader, gwo_cfg: GWOConfig, case: dict,
+def run_case(loader: PostgisLoader, case: dict,
             idx: int, png_dir: str | None) -> dict:
     partida, destino = case["partida"], case["destino"]
     t0 = time.time()
@@ -83,7 +82,7 @@ def run_case(loader: PostgisLoader, gwo_cfg: GWOConfig, case: dict,
         # Mesmos parâmetros que o CLI usa (nexatlas_cli.py: build_subgraph).
         graph, meta = loader.build_subgraph(
             partida, destino, chart_radius_nm=60.0, link_radius_nm=30.0)
-        result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"], gwo_cfg,
+        result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"],
                                origin_gate_ids=meta.get("origin_gate_ids"),
                                dest_gate_ids=meta.get("dest_gate_ids"))
 
@@ -218,16 +217,13 @@ def main() -> None:
 
     conn = get_conn()
     loader = PostgisLoader(conn)
-    # Mesmo GWOConfig que o CLI monta (nexatlas_cli.py) — dormant em plan_v1_route,
-    # mas passado igual para não haver nenhuma divergência de comportamento.
-    gwo_cfg = GWOConfig(seed=42, n_iterations=200, n_wolves=30, max_hops=80)
 
     print(f"Rodando {len(cases)} casos "
           f"({'com' if png_dir else 'sem'} geração de PNG)...\n")
 
     rows: list[dict] = []
     for i, case in enumerate(cases, 1):
-        row = run_case(loader, gwo_cfg, case, i, png_dir)
+        row = run_case(loader, case, i, png_dir)
         print_case_line(i, len(cases), row)
         rows.append(row)
 

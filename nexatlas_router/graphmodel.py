@@ -53,6 +53,20 @@ class Edge:
     geom: Optional[tuple] = None        # traçado real do corredor: ((lon,lat), ...) — só nas arestas reais
 
 
+@dataclass
+class DecodedRoute:
+    """Uma rota decodificada: sequência de nós + arestas percorridas.
+
+    Produzida por dijkstra.py (shortest_route/k_shortest_routes), consumida
+    por v1.py. `fitness` é o custo total usado no caminho mínimo (distância
+    de otimização, com a penalidade leve de trechos sintéticos)."""
+    node_ids: list[str]
+    edges: list[Edge]
+    distance_m: float
+    complete: bool
+    fitness: float = float("inf")
+
+
 # PONTO 3 — score de fronteira da malha (proximidade à borda da TMA da carta).
 # Usado SÓ para ponderar as pontes de voo direto entre cartas (nunca a entrada/
 # saída do aeródromo, que seguem por mínimo-local). Score alto = provável PORTÃO
