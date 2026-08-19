@@ -20,6 +20,7 @@ from typing import Any, Optional
 from .geo import m_to_nm, haversine_m, initial_bearing, progresso_nm as _progresso_nm
 from .graphmodel import Edge, RouteGraph, DEDUP_DEST_RADIUS_M, DecodedRoute
 from .dijkstra import shortest_route, k_shortest_routes
+from .portoes import carta_de
 
 # TAREFA_coerencia_geometrica.md (II)/(II.b): limiares de coerência geométrica
 # e fator relativo pra preferir a rota direta. Pesos expostos pra calibrar
@@ -36,6 +37,15 @@ CURVA_LIMIAR_DEG = 120.0         # mudança de rumo tolerada — mesmo limiar pr
 # só a cadeia (ver _mesma_malha, que garante a direta apareça como alternativa
 # quando a malha vence por estar tudo na mesma carta).
 FATOR_RELATIVO_DIRETO = 1.7
+
+# Feedback do Ivan 19/08/26: fora do caso "aeródromos próximos", um portão
+# obrigatório documentado NUNCA pode ser descartado pela heurística de
+# coerência/cadeia/fator acima — só nos casos de proximidade (mesma carta REA
+# E até este limiar) o Vinícius já validou que a rota direta é aceitável
+# mesmo passando perto de um portão (gabarito 003 SBBH->SBCF, 006 SBCY->SIAQ,
+# 020 SBVT->SIVU). Reaproveita o raio de busca de carta (chart_radius_nm em
+# db.build_subgraph) como referência de "mesma vizinhança operacional".
+PORTAO_PROXIMIDADE_LIMIAR_NM = 60.0
 
 
 def _real_distance_m(graph: RouteGraph, route) -> float:
@@ -168,6 +178,27 @@ def _colisao_portao(graph: RouteGraph, route: DecodedRoute, dest_pos,
     if not entrada and not saida:
         return None
     return {"entrada": entrada, "saida": saida}
+
+
+def _aerodromos_proximos(origin_icao: str, dest_icao: str, direct_nm: float) -> bool:
+    """Origem e destino são "aeródromos próximos" (feedback do Ivan 19/08/26)?
+    Só nesse caso a rota direta pode dispensar um portão obrigatório
+    documentado — fora dele (carta diferente OU mais de
+    PORTAO_PROXIMIDADE_LIMIAR_NM um do outro), o portão nunca pode ser
+    inteiramente descartado, ver uso em plan_v1_route.
+
+    Critério: cartas DIFERENTES e as duas conhecidas força sempre (não
+    importa a distância — é o caso das 4 "entre regiões" que motivaram este
+    ajuste). Fora disso (mesma carta, OU uma ponta fora do documento e por
+    isso sem carta pra comparar — casos 009 SBFZ->SNFF, 011 SISM->SBMQ, 012
+    SBNT->SBSG, 015 SBPS->SBTV do gabarito antigo, todos de proximidade),
+    decide só a distância direta: tratar "carta desconhecida" como
+    "diferente" forçaria esses 4 pares de vizinhança também, contradizendo o
+    veredito já validado."""
+    carta_o, carta_d = carta_de(origin_icao), carta_de(dest_icao)
+    if carta_o is not None and carta_d is not None and carta_o != carta_d:
+        return False
+    return direct_nm <= PORTAO_PROXIMIDADE_LIMIAR_NM
 
 
 def _mesma_malha(points: list[dict]) -> bool:
@@ -340,6 +371,22 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
     colisao_portao = _colisao_portao(graph, route, graph.nodes[dest_id].pos, pernas_portao)
     fator = (total_nm / direct_nm) if direct_nm > 1e-6 else float("inf")
     preferir_direto = (not tem_cadeia_real) or incoerente or (fator > FATOR_RELATIVO_DIRETO)
+
+    # Ajuste 19/08/26 (feedback do Ivan): a checagem de coerência acima só
+    # protege a perna ADJACENTE ao portão (pernas_portao) — uma curva ou
+    # retrocesso em QUALQUER outro trecho da malha (ou a ausência de cadeia
+    # real, ou o fator relativo) ainda descartava a rota inteira, portão
+    # incluso, quando origem/destino não são "aeródromos próximos" (ver
+    # _aerodromos_proximos) isso está ERRADO: o portão documentado é
+    # autoridade publicada, não deve depender da geometria do resto do
+    # traçado. Fora da proximidade, o portão NUNCA é descartado por conta da
+    # heurística — só dentro dela (003 SBBH->SBCF, 006 SBCY->SIAQ, 020
+    # SBVT->SIVU) a direta continua podendo vencer como hoje.
+    portao_aplica = origin_gate_ids is not None or dest_gate_ids is not None
+    portao_forcado = portao_aplica and not _aerodromos_proximos(
+        graph.nodes[origin_id].name, graph.nodes[dest_id].name, direct_nm)
+    if portao_forcado:
+        preferir_direto = False
 
     route_source_final = route_source
     direto_extra = None
