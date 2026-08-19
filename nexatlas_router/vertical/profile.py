@@ -88,13 +88,13 @@ class PerfilVertical:
     descida: FaseTempo
     terreno_perfil: list = field(default_factory=list)   # [(dist_nm, elev_ft)]
     avisos: list = field(default_factory=list)
-    # Trechos (fora ou dentro de corredor) onde a descida necessária excedeu a
-    # razão máxima do banco — TAREFA_descida_transicao_e_aviso.md (trecho final)
-    # e a extensão do mesmo princípio para transições entre corredores (é
-    # obrigatório estar no higher_limit; se a razão do banco não permite
-    # chegar lá a tempo, aceita a razão necessária e avisa — nunca "carrega" a
-    # violação silenciosamente). list[(x0_nm, x1_nm)]. Usado só pelo gráfico
-    # para pintar os segmentos em vermelho.
+    # Só o TRECHO FINAL (fora de corredor, até o destino) alimenta isto —
+    # TAREFA_descida_transicao_e_aviso.md, refinado por TAREFA_descida_refino.md
+    # (19-20/08): cross no 1º corredor de chegada e start entre corredores
+    # seguintes são ALVOS best-effort (nunca extrapolam a razão máxima, nunca
+    # entram aqui); só quando a razão máxima não basta no trecho final é que
+    # ela é de fato excedida. list[(x0_nm, x1_nm)]. Usado só pelo gráfico para
+    # pintar os segmentos em vermelho.
     descida_ingreme_nm: list = field(default_factory=list)
     diag: dict = field(default_factory=dict)
     # Combustível por fase (na unidade nativa do banco — ver aircraft.py); None
@@ -336,19 +336,20 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
         return alt0 + (alt_target - alt0) * frac        # rampa parcial (carrega)
 
     # Descida FINAL — TAREFA_descida_transicao_e_aviso.md (validado com o Vinícius
-    # 12/08): só o 1º corredor de chegada é "cross" (vindo do cruzeiro, mantém a
-    # altitude o máximo possível e desce na razão do banco para chegar EXATAMENTE
-    # no seu higher_limit, na entrada — é o TOD). Os corredores de chegada
-    # SEGUINTES são "start": a aeronave mantém o higher_limit do corredor atual
-    # até o PONTO (mesmo atravessando trechos DIRETO entre corredores) e só desce,
-    # na razão do banco, DENTRO da perna do próximo corredor — igual à subida em
-    # degraus (`start_to`, reaproveitada aqui). Isso faz a aeronave ficar sempre no
-    # higher_limit (a máxima), respeitando [lower_limit, higher_limit] de cada
-    # perna por construção (nunca fica abaixo do teto que está perseguindo). O
-    # trecho final (fora de corredor, até o destino) desce na razão MÁXIMA do
-    # banco; se não couber (trecho curto demais), aceita o trecho íngreme — é
-    # situação real, o piloto reduz velocidade / espiral — e emite aviso (também
-    # marcado em vermelho no gráfico via `descida_ingreme_nm`).
+    # 12/08) + TAREFA_descida_refino.md (refinado 19-20/08): só o 1º corredor de
+    # chegada é "cross" (vindo do cruzeiro, mantém a altitude o máximo possível e
+    # desce na razão do banco rumo ao seu higher_limit, na entrada — é o TOD). Os
+    # corredores de chegada SEGUINTES são "start": a aeronave mantém o higher_limit
+    # do corredor atual até o PONTO (mesmo atravessando trechos DIRETO entre
+    # corredores) e só desce, na razão do banco, DENTRO da perna do próximo
+    # corredor — igual à subida em degraus (`start_to`, reaproveitada aqui). O
+    # higher_limit de um corredor de chegada — seja o 1º (cross) ou um seguinte
+    # (start) — é ALVO, não obrigação: a aeronave NUNCA extrapola a razão máxima
+    # para encaixá-lo; se não alcançar a tempo, passa ACIMA do teto e continua na
+    # razão máxima (sem aviso/vermelho) — só o trecho final (fora de corredor, até
+    # o destino) pode extrapolar a razão máxima, e é aí — SÓ aí — que aparece o
+    # trecho íngreme (aviso + vermelho no gráfico via `descida_ingreme_nm`; o
+    # piloto reduz velocidade / espiral).
     def _descida_final(x_start, alt_start):
         slope = (ac.rate_dc_fpm * 60.0 / ac.speed_dc_kt
                  if (ac.rate_dc_fpm > 0 and ac.speed_dc_kt > 0) else 0.0)
@@ -369,25 +370,16 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
                     xs = cum[k0] - dist_nec
                     if xs > x + 1e-6:
                         poly.append((xs, cur))
+                    cur = alvo0
                 else:
                     # nem descendo na razão máxima desde x_start dá tempo de
-                    # entrar no corredor já no higher_limit — mesma lógica do
-                    # trecho final: é a única opção física, calcula a razão
-                    # REALMENTE necessária e avisa que o limite foi ultrapassado
-                    # (em vez de só "deveria" ser ultrapassado).
-                    tempo_min = (dist_disp / ac.speed_dc_kt * 60.0
-                                 if ac.speed_dc_kt > 0 and dist_disp > 0 else 0.0)
-                    razao_nec = (cur - alvo0) / tempo_min if tempo_min > 0 else float("inf")
-                    avisos.append(
-                        f"corredor {legs[k0].from_name} -> {legs[k0].to_name}: razão de "
-                        f"descida necessária ~{razao_nec:.0f} fpm para entrar no "
-                        f"higher_limit ({alvo0:.0f} ft) excede a máxima do banco "
-                        f"({ac.rate_dc_fpm:.0f} fpm); higher_limit ultrapassado até a "
-                        f"entrada do corredor — trecho íngreme (piloto reduz velocidade "
-                        f"/ espiral).")
-                    ingreme_ranges.append((x, cum[k0]))
-                poly.append((cum[k0], alvo0))
-                cur = alvo0
+                    # entrar no corredor já no higher_limit — o higher_limit do
+                    # 1º corredor de chegada é ALVO, não obrigação (TAREFA_
+                    # descida_refino.md, 19-20/08): desce na razão máxima
+                    # disponível (nunca mais) e passa ACIMA do teto, sem aviso/
+                    # vermelho — só o trecho final pode extrapolar.
+                    cur = cur - slope * dist_disp
+                poly.append((cum[k0], cur))
             x = cum[k0]
 
             # corredores de chegada SEGUINTES = start (cada perna, na sua própria
@@ -424,14 +416,13 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
                         cur = cur_antes + (tgt - cur_antes) * frac
                         poly.append((x1, cur))
                 else:
-                    # descendo para um teto mais baixo: é OBRIGATÓRIO estar no
-                    # higher_limit desta perna — enquanto não chegar lá, a
-                    # aeronave fica ACIMA do teto dela (violação real, não só
-                    # quando "não cabe"). Se a razão do banco não dá tempo de
-                    # chegar até o fim da perna, usa a MESMA lógica do trecho
-                    # final: aceita a razão necessária (é a única opção
-                    # física) e avisa com a razão real — nunca "carrega" a
-                    # violação, silenciosamente, para a perna seguinte.
+                    # descendo para um teto mais baixo: o higher_limit de um
+                    # corredor de chegada INTERMEDIÁRIO é ALVO, não obrigação
+                    # (TAREFA_descida_refino.md, 19-20/08) — a aeronave desce na
+                    # razão máxima em direção a ele, mas NUNCA extrapola essa
+                    # razão para encaixá-lo. Se não chegar até o fim da perna,
+                    # passa ACIMA do teto e continua (sem aviso/vermelho); só o
+                    # trecho final pode extrapolar a razão máxima.
                     d = _trans_dist(cur - tgt, ac.rate_dc_fpm, ac.speed_dc_kt)
                     if d <= (x1 - x0) + 1e-9:
                         poly.append((x0 + d, tgt))
@@ -439,19 +430,9 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
                             poly.append((x1, tgt))    # nivela até o fim da perna
                         cur = tgt
                     else:
-                        tempo_min = ((x1 - x0) / ac.speed_dc_kt * 60.0
-                                     if ac.speed_dc_kt > 0 else 0.0)
-                        razao_nec = (cur_antes - tgt) / tempo_min if tempo_min > 0 else float("inf")
-                        avisos.append(
-                            f"perna {legs[i].from_name} -> {legs[i].to_name}: razão de "
-                            f"descida necessária ~{razao_nec:.0f} fpm para chegar no "
-                            f"higher_limit ({tgt:.0f} ft) até o fim da perna excede a "
-                            f"máxima do banco ({ac.rate_dc_fpm:.0f} fpm); higher_limit "
-                            f"ultrapassado durante a perna — trecho íngreme (piloto "
-                            f"reduz velocidade / espiral).")
-                        ingreme_ranges.append((x0, x1))
-                        poly.append((x1, tgt))
-                        cur = tgt
+                        frac = (x1 - x0) / d if d > 0 else 1.0
+                        cur = cur_antes - (cur_antes - tgt) * frac
+                        poly.append((x1, cur))
                 x = x1
 
         # trecho final (fora de corredor) até o destino: razão MÁXIMA do banco; se
