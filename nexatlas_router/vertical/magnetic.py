@@ -1,21 +1,31 @@
 """Rumo verdadeiro -> magnético (para a regra par/ímpar das pernas DIRETO).
 
-MODELO (explícito): World Magnetic Model (WMM), via `pygeomag` (coeficientes
-embutidos). Declinação D negativa a Oeste (Brasil ~ -17° a -23°).
-Convenção ICA 100-12: rumo_magnético = rumo_verdadeiro - D.
+MODELO (explícito): World Magnetic Model (WMM), via `pygeomag`, com os
+coeficientes carregados de `wmm/wmm-2025.json` — cópia espelho do modelo usado
+pelo produto TS (`@cristianob/geomagnetism`; ver `wmm/README.md`). Declinação D
+negativa a Oeste (Brasil ~ -17° a -23°). Convenção ICA 100-12:
+rumo_magnético = rumo_verdadeiro - D.
 
 Os corredores REA já trazem proa MAGNÉTICA no banco (Edge.heading); isto é só
 para as pernas DIRETO, cujo rumo é geométrico.
+
+Edição WMM em uso — travada explicitamente, sem auto-seleção por data
+(`high_resolution=False`, `base_year` não usado). Revisar quando sair o
+WMM-2030 (início de 2030); até lá a janela inteira de testes (meados de 2027)
+cai dentro da validade do WMM-2025 (2024-11-13 a 2029-11-13).
 """
 from __future__ import annotations
 
 import datetime as dt
 
 from ..geo import LonLat, initial_bearing
+from .wmm.loader import load_wmm_2025_coefficients_data
+
+WMM_EDITION = "WMM-2025"
 
 try:
     from pygeomag import GeoMag
-    _GM = GeoMag()
+    _GM = GeoMag(coefficients_data=load_wmm_2025_coefficients_data())
     _HAS_WMM = True
 except Exception:            # pragma: no cover
     _GM = None
