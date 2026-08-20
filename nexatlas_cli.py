@@ -30,6 +30,7 @@ except ImportError:
 
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.v1 import plan_v1_route
+from nexatlas_router.portoes import aerodromo_exige_pista
 try:
     from nexatlas_router.plot_route import plot_v1_combined
     _HAS_LATERAL_PLOT = True
@@ -391,10 +392,28 @@ def main() -> None:
         if dest in ("Q", "SAIR", "EXIT", ""):
             print(f"\n  {DIM}Encerrando.{RST}\n"); break
 
+        # TAREFA_pista.md: só pergunta a cabeceira quando o aeródromo TEM
+        # regra de portão por pista — pra maioria, segue direto (comportamento
+        # inalterado). Opcional/não-bloqueante: Enter = não informar, e nesse
+        # caso roda sem portão forçado naquele extremo (nunca falha).
+        pista_origem = pista_destino = None
+        try:
+            if aerodromo_exige_pista(origin):
+                pista_origem = input(
+                    f"  {BLD}{origin} tem regra de portão por pista — cabeceira de "
+                    f"decolagem [Enter p/ não informar]:{RST} ").strip() or None
+            if aerodromo_exige_pista(dest):
+                pista_destino = input(
+                    f"  {BLD}{dest} tem regra de portão por pista — cabeceira de "
+                    f"pouso [Enter p/ não informar]:{RST} ").strip() or None
+        except (EOFError, KeyboardInterrupt):
+            print(f"\n  {DIM}Encerrando.{RST}\n"); break
+
         print(f"\n  {DIM}Calculando rota {origin} → {dest}...{RST}")
         try:
             graph, meta = loader.build_subgraph(
-                origin, dest, chart_radius_nm=60.0, link_radius_nm=30.0)
+                origin, dest, chart_radius_nm=60.0, link_radius_nm=30.0,
+                pista_origem=pista_origem, pista_destino=pista_destino)
         except LookupError as e:
             print(f"\n  {RED}✗ Aeródromo não encontrado:{RST} {e}\n"); continue
         except Exception as e:

@@ -213,7 +213,9 @@ class PostgisLoader:
     # ------------------------------------------------------------------ graph
     def build_subgraph(self, origin_icao: str, dest_icao: str,
                        chart_radius_nm: float = 60.0,
-                       link_radius_nm: float = 30.0) -> tuple[RouteGraph, dict]:
+                       link_radius_nm: float = 30.0,
+                       pista_origem: Optional[str] = None,
+                       pista_destino: Optional[str] = None) -> tuple[RouteGraph, dict]:
         # link_radius_nm é mantido por compatibilidade da assinatura, mas o
         # modelo de arestas sintéticas agora decide entrada/saída por "está em
         # TMA REA?" (k-vizinhos) em vez de um raio fixo — ver add_synthetic_edges.
@@ -258,8 +260,14 @@ class PostgisLoader:
         # resolvido AQUI (não em graphmodel.py, que fica agnóstico ao
         # documento) porque só aqui se conhece o ICAO de cada ponta. None
         # quando o aeródromo não tem regra: comportamento inalterado.
-        origin_forced = resolver_pontos_obrigatorios(g, origin_icao, "partida", dest_icao)
-        dest_forced = resolver_pontos_obrigatorios(g, dest_icao, "destino", origin_icao)
+        # `pista_origem`/`pista_destino` (TAREFA_pista.md) são opcionais e
+        # só têm efeito nos poucos aeródromos com regra por cabeceira — sem
+        # informar (ou informando uma sem regra), o resultado é o mesmo None
+        # de antes.
+        origin_forced = resolver_pontos_obrigatorios(g, origin_icao, "partida", dest_icao,
+                                                      pista_origem)
+        dest_forced = resolver_pontos_obrigatorios(g, dest_icao, "destino", origin_icao,
+                                                    pista_destino)
 
         diag = g.add_synthetic_edges(origin.id, dest.id,
                                      origin_forced=origin_forced, dest_forced=dest_forced)
