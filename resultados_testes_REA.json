@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-18T19:33:17.893807+00:00",
+  "gerado_em": "2026-08-20T15:29:35.425876+00:00",
   "arquivo_casos": "casos_teste_algoritmo_rotas_REA.json",
   "filtro_grupo": null,
   "total": 100,
@@ -17,19 +17,19 @@
       }
     },
     {
-      "partida": "SBPS",
-      "destino": "SBTV",
+      "partida": "SBBH",
+      "destino": "SBCF",
       "colisao": {
         "entrada": false,
         "saida": true
       }
     },
     {
-      "partida": "SBBH",
-      "destino": "SBFZ",
+      "partida": "SBPS",
+      "destino": "SBTV",
       "colisao": {
-        "entrada": true,
-        "saida": false
+        "entrada": false,
+        "saida": true
       }
     },
     {
@@ -156,8 +156,8 @@
       "destino": "SBNV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.33,
-      "plot_path": null
+      "elapsed_s": 3.1,
+      "plot_path": "resultados_testes_REA_pngs/001_SBGO_SBNV.png"
     },
     {
       "points": [
@@ -405,8 +405,8 @@
       "destino": "SWEQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.93,
-      "plot_path": null
+      "elapsed_s": 2.3,
+      "plot_path": "resultados_testes_REA_pngs/002_SBBE_SWEQ.png"
     },
     {
       "points": [
@@ -438,26 +438,94 @@
       ],
       "direct_distance_nm": 13.7,
       "total_distance_nm": 13.7,
-      "reason": "Rota direta preferida (13.7 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "reason": "Rota direta preferida (13.7 NM): a malha REA não oferece cadeia de corredor com progresso contínuo até o destino (ponto isolado).",
       "meta": {
-        "alternatives": [],
-        "n_alternatives": 0,
+        "alternatives": [
+          {
+            "points": [
+              {
+                "id": "ADHP:SBBH",
+                "name": "SBBH",
+                "kind": "aerodrome",
+                "lon": -43.950555555556,
+                "lat": -19.851944444444,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CH60YTT93KE4KR28KW1",
+                "name": "ANDIROBA",
+                "kind": "waypoint",
+                "lon": -44.23027777777778,
+                "lat": -19.65,
+                "chart": "REA Belo Horizonte"
+              },
+              {
+                "id": "ADHP:SBCF",
+                "name": "SBCF",
+                "kind": "aerodrome",
+                "lon": -43.971944444444,
+                "lat": -19.624444444444,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 34.6,
+            "overhead_nm": 20.9,
+            "corridors_used": [],
+            "n_points": 3
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBBH",
+                "name": "SBBH",
+                "kind": "aerodrome",
+                "lon": -43.950555555556,
+                "lat": -19.851944444444,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CH8ZS9X5SHVQH5Y22B8",
+                "name": "CIRRUS",
+                "kind": "waypoint",
+                "lon": -43.899166666666666,
+                "lat": -19.428611111111113,
+                "chart": "REA Belo Horizonte"
+              },
+              {
+                "id": "ADHP:SBCF",
+                "name": "SBCF",
+                "kind": "aerodrome",
+                "lon": -43.971944444444,
+                "lat": -19.624444444444,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 38.0,
+            "overhead_nm": 24.3,
+            "corridors_used": [],
+            "n_points": 3
+          }
+        ],
+        "n_alternatives": 2,
         "final_fitness_m": 25395.737886800358,
         "used_direct_fallback": false,
         "route_source": "direto-preferido",
         "preferiu_direto": true,
-        "malha_tem_cadeia_real": true,
-        "malha_incoerente": true,
-        "malha_fator_relativo": 4.68,
-        "colisao_portao_coerencia": null
+        "malha_tem_cadeia_real": false,
+        "malha_incoerente": false,
+        "malha_fator_relativo": 2.52,
+        "colisao_portao_coerencia": {
+          "entrada": false,
+          "saida": true
+        }
       },
       "grupo": "Dentro da mesma região de corredores",
       "partida": "SBBH",
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.04,
-      "plot_path": null
+      "elapsed_s": 2.58,
+      "plot_path": "resultados_testes_REA_pngs/003_SBBH_SBCF.png"
     },
     {
       "points": [
@@ -654,8 +722,8 @@
       "destino": "SIQE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.9,
-      "plot_path": null
+      "elapsed_s": 3.14,
+      "plot_path": "resultados_testes_REA_pngs/004_SBBR_SIQE.png"
     },
     {
       "points": [
@@ -763,8 +831,8 @@
       "destino": "SDTS",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
-      "plot_path": null
+      "elapsed_s": 3.04,
+      "plot_path": "resultados_testes_REA_pngs/005_SBCG_SDTS.png"
     },
     {
       "points": [
@@ -814,8 +882,8 @@
       "destino": "SIAQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.23,
-      "plot_path": null
+      "elapsed_s": 2.51,
+      "plot_path": "resultados_testes_REA_pngs/006_SBCY_SIAQ.png"
     },
     {
       "points": [
@@ -975,8 +1043,8 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.96,
-      "plot_path": null
+      "elapsed_s": 3.29,
+      "plot_path": "resultados_testes_REA_pngs/007_SBBI_SBCT.png"
     },
     {
       "points": [
@@ -1528,8 +1596,8 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
-      "plot_path": null
+      "elapsed_s": 2.56,
+      "plot_path": "resultados_testes_REA_pngs/008_SBNF_SBFL.png"
     },
     {
       "points": [
@@ -1579,8 +1647,8 @@
       "destino": "SNFF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
-      "plot_path": null
+      "elapsed_s": 2.07,
+      "plot_path": "resultados_testes_REA_pngs/009_SBFZ_SNFF.png"
     },
     {
       "points": [
@@ -1767,8 +1835,8 @@
       "destino": "SBLO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.04,
-      "plot_path": null
+      "elapsed_s": 2.86,
+      "plot_path": "resultados_testes_REA_pngs/010_SBMG_SBLO.png"
     },
     {
       "points": [
@@ -1851,8 +1919,8 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.06,
-      "plot_path": null
+      "elapsed_s": 2.71,
+      "plot_path": "resultados_testes_REA_pngs/011_SISM_SBMQ.png"
     },
     {
       "points": [
@@ -1884,9 +1952,73 @@
       ],
       "direct_distance_nm": 10.9,
       "total_distance_nm": 10.9,
-      "reason": "Rota direta preferida (10.9 NM): a rota por corredor é 2.09x mais longa que a direta (acima do fator relativo 1.7x).",
+      "reason": "Rota direta preferida (10.9 NM): a malha REA não oferece cadeia de corredor com progresso contínuo até o destino (ponto isolado).",
       "meta": {
         "alternatives": [
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK35BMAQ0NAE8MR32VH",
+                "name": "PONTEGI",
+                "kind": "waypoint",
+                "lon": -35.263333333333335,
+                "lat": -5.806111111111111,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "ADHP:SBSG",
+                "name": "SBSG",
+                "kind": "aerodrome",
+                "lon": -35.366388888889,
+                "lat": -5.768888888889,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 12.7,
+            "overhead_nm": 1.8,
+            "corridors_used": [],
+            "n_points": 3
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
+                "kind": "waypoint",
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "ADHP:SBSG",
+                "name": "SBSG",
+                "kind": "aerodrome",
+                "lon": -35.366388888889,
+                "lat": -5.768888888889,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 13.7,
+            "overhead_nm": 2.8,
+            "corridors_used": [],
+            "n_points": 3
+          },
           {
             "points": [
               {
@@ -1943,81 +2075,16 @@
               }
             ],
             "n_points": 5
-          },
-          {
-            "points": [
-              {
-                "id": "ADHP:SBNT",
-                "name": "SBNT",
-                "kind": "aerodrome",
-                "lon": -35.249166666667,
-                "lat": -5.908333333333,
-                "chart": null
-              },
-              {
-                "id": "01KSJD4CK3MYBQ9S3B1K4XTCR1",
-                "name": "PIRANGI",
-                "kind": "waypoint",
-                "lon": -35.12138888888889,
-                "lat": -5.977777777777778,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CK3CKGAP2KGEZ38MVW0",
-                "name": "PRAIA",
-                "kind": "waypoint",
-                "lon": -35.18222222222222,
-                "lat": -5.8625,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CK28DQR1A11WQ9AVA55",
-                "name": "FORTE",
-                "kind": "waypoint",
-                "lon": -35.195277777777775,
-                "lat": -5.756111111111111,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CK35BMAQ0NAE8MR32VH",
-                "name": "PONTEGI",
-                "kind": "waypoint",
-                "lon": -35.263333333333335,
-                "lat": -5.806111111111111,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "ADHP:SBSG",
-                "name": "SBSG",
-                "kind": "aerodrome",
-                "lon": -35.366388888889,
-                "lat": -5.768888888889,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 34.5,
-            "overhead_nm": 23.6,
-            "corridors_used": [
-              {
-                "name": "CHARLIE",
-                "is_mandatory": true
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": true
-              }
-            ],
-            "n_points": 6
           }
         ],
-        "n_alternatives": 2,
+        "n_alternatives": 3,
         "final_fitness_m": 20212.928598472423,
         "used_direct_fallback": false,
         "route_source": "direto-preferido",
         "preferiu_direto": true,
-        "malha_tem_cadeia_real": true,
+        "malha_tem_cadeia_real": false,
         "malha_incoerente": false,
-        "malha_fator_relativo": 2.09,
+        "malha_fator_relativo": 1.17,
         "colisao_portao_coerencia": null
       },
       "grupo": "Dentro da mesma região de corredores",
@@ -2025,8 +2092,8 @@
       "destino": "SBSG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.39,
+      "plot_path": "resultados_testes_REA_pngs/012_SBNT_SBSG.png"
     },
     {
       "points": [
@@ -2076,8 +2143,8 @@
       "destino": "SJ9A",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.96,
-      "plot_path": null
+      "elapsed_s": 2.35,
+      "plot_path": "resultados_testes_REA_pngs/013_SWPI_SJ9A.png"
     },
     {
       "points": [
@@ -2510,8 +2577,8 @@
       "destino": "SBCX",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
-      "plot_path": null
+      "elapsed_s": 2.69,
+      "plot_path": "resultados_testes_REA_pngs/014_SBPA_SBCX.png"
     },
     {
       "points": [
@@ -2610,8 +2677,8 @@
       "destino": "SBTV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.15,
-      "plot_path": null
+      "elapsed_s": 2.61,
+      "plot_path": "resultados_testes_REA_pngs/015_SBPS_SBTV.png"
     },
     {
       "points": [
@@ -2872,8 +2939,8 @@
       "destino": "SWDU",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
-      "plot_path": null
+      "elapsed_s": 3.52,
+      "plot_path": "resultados_testes_REA_pngs/016_SBRF_SWDU.png"
     },
     {
       "points": [
@@ -2923,8 +2990,8 @@
       "destino": "SDJN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.86,
-      "plot_path": null
+      "elapsed_s": 3.15,
+      "plot_path": "resultados_testes_REA_pngs/017_SBRP_SDJN.png"
     },
     {
       "points": [
@@ -3082,8 +3149,8 @@
       "destino": "SNCL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.95,
-      "plot_path": null
+      "elapsed_s": 2.92,
+      "plot_path": "resultados_testes_REA_pngs/018_SBSV_SNCL.png"
     },
     {
       "points": [
@@ -3191,8 +3258,8 @@
       "destino": "SNCJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.57,
+      "plot_path": "resultados_testes_REA_pngs/019_SBSN_SNCJ.png"
     },
     {
       "points": [
@@ -3353,8 +3420,8 @@
       "destino": "SIVU",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.24,
-      "plot_path": null
+      "elapsed_s": 3.34,
+      "plot_path": "resultados_testes_REA_pngs/020_SBVT_SIVU.png"
     },
     {
       "points": [
@@ -3367,6 +3434,62 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CH3H15TB6EDWSJY47YC",
+          "name": "TEREZÓPOLIS",
+          "kind": "waypoint",
+          "lon": -49.094722222222224,
+          "lat": -16.488055555555558,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH2MJ3T7BH7QWXTEEXK",
+          "name": "NOVA VENEZA",
+          "kind": "waypoint",
+          "lon": -49.323055555555555,
+          "lat": -16.371111111111112,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH2KPWB3F6BTP9PQ97J",
+          "name": "PETROLINA",
+          "kind": "waypoint",
+          "lon": -49.338055555555556,
+          "lat": -16.095,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH35142RAXGR8ACS72M",
+          "name": "PIRENÓPOLIS",
+          "kind": "waypoint",
+          "lon": -48.984722222222224,
+          "lat": -15.8475,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH6Q70H4YSH797Y03C2",
+          "name": "TREVO",
+          "kind": "waypoint",
+          "lon": -48.62916666666667,
+          "lat": -1.6719444444444442,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH5VH6TTK571AFSBDFV",
+          "name": "PONTE DA ALÇA VIÁRIA",
+          "kind": "waypoint",
+          "lon": -48.29944444444444,
+          "lat": -1.4755555555555557,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH4X6AZY5V3EB7E52GZ",
+          "name": "ILHA GRANDE",
+          "kind": "waypoint",
+          "lon": -48.38972222222222,
+          "lat": -1.4725000000000001,
+          "chart": "REA Belém"
+        },
+        {
           "id": "ADHP:SBBE",
           "name": "SBBE",
           "kind": "aerodrome",
@@ -3375,18 +3498,81 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "NEROPÓLIS",
+          "is_mandatory": true
+        },
+        {
+          "name": "NOVA VENEZA",
+          "is_mandatory": true
+        },
+        {
+          "name": "PETROLINA",
+          "is_mandatory": true
+        },
+        {
+          "name": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "name": "JULIET",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBGO",
+          "to": "TEREZÓPOLIS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TEREZÓPOLIS",
+          "to": "NOVA VENEZA",
+          "corridor": "NEROPÓLIS",
+          "is_mandatory": true
+        },
+        {
+          "from": "NOVA VENEZA",
+          "to": "PETROLINA",
+          "corridor": "NOVA VENEZA",
+          "is_mandatory": true
+        },
+        {
+          "from": "PETROLINA",
+          "to": "PIRENÓPOLIS",
+          "corridor": "PETROLINA",
+          "is_mandatory": true
+        },
+        {
+          "from": "PIRENÓPOLIS",
+          "to": "TREVO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TREVO",
+          "to": "PONTE DA ALÇA VIÁRIA",
+          "corridor": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "from": "PONTE DA ALÇA VIÁRIA",
+          "to": "ILHA GRANDE",
+          "corridor": "JULIET",
+          "is_mandatory": true
+        },
+        {
+          "from": "ILHA GRANDE",
           "to": "SBBE",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 916.5,
-      "total_distance_nm": 916.5,
-      "reason": "Rota direta preferida (916.5 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 955.3,
+      "reason": "Rota usa o(s) corredor(es) REA NEROPÓLIS [Obrigatório], NOVA VENEZA [Obrigatório], PETROLINA [Obrigatório], LIMA [Obrigatório], JULIET [Obrigatório], com acréscimo de 38.8 NM sobre a rota direta (916.5 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
           {
@@ -3536,10 +3722,10 @@
           }
         ],
         "n_alternatives": 1,
-        "final_fitness_m": 1697423.759417829,
+        "final_fitness_m": 1816944.6381203902,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.04,
@@ -3550,8 +3736,8 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.14,
-      "plot_path": null
+      "elapsed_s": 2.67,
+      "plot_path": "resultados_testes_REA_pngs/021_SBGO_SBBE.png"
     },
     {
       "points": [
@@ -3564,6 +3750,70 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CH369DAF9SZNPNF015J",
+          "name": "TRINDADE",
+          "kind": "waypoint",
+          "lon": -49.473333333333336,
+          "lat": -16.65722222222222,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH0ZC3T98QZHVVY0Z32",
+          "name": "ABADIA",
+          "kind": "waypoint",
+          "lon": -49.441111111111105,
+          "lat": -16.75722222222222,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH2P7SYCNT1ARR3J1PN",
+          "name": "HIDROLÂNDIA",
+          "kind": "waypoint",
+          "lon": -49.233333333333334,
+          "lat": -16.966666666666665,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CH1GXBK9J18JPAMKZS8",
+          "name": "BELA VISTA",
+          "kind": "waypoint",
+          "lon": -48.95305555555556,
+          "lat": -16.973055555555554,
+          "chart": "REA Anápolis"
+        },
+        {
+          "id": "01KSJD4CHDMMBQBC7CTHMG25R7",
+          "name": "MARAVILHAS",
+          "kind": "waypoint",
+          "lon": -44.67833333333333,
+          "lat": -19.513055555555557,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHE9M1TP3503DN1J2KE",
+          "name": "PRATA",
+          "kind": "waypoint",
+          "lon": -44.45472222222222,
+          "lat": -19.524166666666666,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CH7FYEJR6M6TKMGDZMH",
+          "name": "BENTO",
+          "kind": "waypoint",
+          "lon": -44.41,
+          "lat": -19.698611111111113,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CH60YTT93KE4KR28KW1",
+          "name": "ANDIROBA",
+          "kind": "waypoint",
+          "lon": -44.23027777777778,
+          "lat": -19.65,
+          "chart": "REA Belo Horizonte"
+        },
+        {
           "id": "ADHP:SBCF",
           "name": "SBCF",
           "kind": "aerodrome",
@@ -3572,25 +3822,98 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "ABADIA",
+          "is_mandatory": true
+        },
+        {
+          "name": "HIDROLÂNDIA",
+          "is_mandatory": true
+        },
+        {
+          "name": "BELA VISTA",
+          "is_mandatory": true
+        },
+        {
+          "name": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "name": "NOVEMBER",
+          "is_mandatory": true
+        },
+        {
+          "name": "UNIFORM",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBNV",
+          "to": "TRINDADE",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TRINDADE",
+          "to": "ABADIA",
+          "corridor": "ABADIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "ABADIA",
+          "to": "HIDROLÂNDIA",
+          "corridor": "HIDROLÂNDIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "HIDROLÂNDIA",
+          "to": "BELA VISTA",
+          "corridor": "BELA VISTA",
+          "is_mandatory": true
+        },
+        {
+          "from": "BELA VISTA",
+          "to": "MARAVILHAS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "MARAVILHAS",
+          "to": "PRATA",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "PRATA",
+          "to": "BENTO",
+          "corridor": "NOVEMBER",
+          "is_mandatory": true
+        },
+        {
+          "from": "BENTO",
+          "to": "ANDIROBA",
+          "corridor": "UNIFORM",
+          "is_mandatory": true
+        },
+        {
+          "from": "ANDIROBA",
           "to": "SBCF",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 355.7,
-      "total_distance_nm": 355.7,
-      "reason": "Rota direta preferida (355.7 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 383.3,
+      "reason": "Rota usa o(s) corredor(es) REA ABADIA [Obrigatório], HIDROLÂNDIA [Obrigatório], BELA VISTA [Obrigatório], MIKE [Obrigatório], NOVEMBER [Obrigatório], UNIFORM [Obrigatório], com acréscimo de 27.5 NM sobre a rota direta (355.7 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 658801.8311012306,
+        "final_fitness_m": 753051.1470730792,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.08,
@@ -3601,8 +3924,8 @@
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.94,
-      "plot_path": null
+      "elapsed_s": 2.61,
+      "plot_path": "resultados_testes_REA_pngs/022_SBNV_SBCF.png"
     },
     {
       "points": [
@@ -3934,8 +4257,8 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
-      "plot_path": null
+      "elapsed_s": 2.7,
+      "plot_path": "resultados_testes_REA_pngs/023_SWDT_SBBR.png"
     },
     {
       "points": [
@@ -4208,8 +4531,8 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.27,
-      "plot_path": null
+      "elapsed_s": 2.86,
+      "plot_path": "resultados_testes_REA_pngs/024_SSLM_SBCG.png"
     },
     {
       "points": [
@@ -4222,6 +4545,54 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CH4X6AZY5V3EB7E52GZ",
+          "name": "ILHA GRANDE",
+          "kind": "waypoint",
+          "lon": -48.38972222222222,
+          "lat": -1.4725000000000001,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH5VH6TTK571AFSBDFV",
+          "name": "PONTE DA ALÇA VIÁRIA",
+          "kind": "waypoint",
+          "lon": -48.29944444444444,
+          "lat": -1.4755555555555557,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH6Q70H4YSH797Y03C2",
+          "name": "TREVO",
+          "kind": "waypoint",
+          "lon": -48.62916666666667,
+          "lat": -1.6719444444444442,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CJ05CFP11HHCPHAGXQ1",
+          "name": "TREVO DO MANSO",
+          "kind": "waypoint",
+          "lon": -56.02027777777778,
+          "lat": -15.429722222222221,
+          "chart": "REA Cuiabá"
+        },
+        {
+          "id": "01KSJD4CHW91ZD2RT904D92MZ2",
+          "name": "GARIMPO",
+          "kind": "waypoint",
+          "lon": -55.82083333333334,
+          "lat": -15.558333333333334,
+          "chart": "REA Cuiabá"
+        },
+        {
+          "id": "01KSJD4CHWM6NAFBWCK8X84DEW",
+          "name": "CONDOMÍNIO",
+          "kind": "waypoint",
+          "lon": -56.021388888888886,
+          "lat": -15.61,
+          "chart": "REA Cuiabá"
+        },
+        {
           "id": "ADHP:SBCY",
           "name": "SBCY",
           "kind": "aerodrome",
@@ -4230,25 +4601,78 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "JULIET",
+          "is_mandatory": true
+        },
+        {
+          "name": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "name": "ALFA",
+          "is_mandatory": true
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBBE",
+          "to": "ILHA GRANDE",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "ILHA GRANDE",
+          "to": "PONTE DA ALÇA VIÁRIA",
+          "corridor": "JULIET",
+          "is_mandatory": true
+        },
+        {
+          "from": "PONTE DA ALÇA VIÁRIA",
+          "to": "TREVO",
+          "corridor": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "from": "TREVO",
+          "to": "TREVO DO MANSO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TREVO DO MANSO",
+          "to": "GARIMPO",
+          "corridor": "ALFA",
+          "is_mandatory": true
+        },
+        {
+          "from": "GARIMPO",
+          "to": "CONDOMÍNIO",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "CONDOMÍNIO",
           "to": "SBCY",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 968.6,
-      "total_distance_nm": 968.6,
-      "reason": "Rota direta preferida (968.6 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1002.7,
+      "reason": "Rota usa o(s) corredor(es) REA JULIET [Obrigatório], LIMA [Obrigatório], ALFA [Obrigatório], BRAVO [Obrigatório], com acréscimo de 34.1 NM sobre a rota direta (968.6 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 1793827.1274641284,
+        "final_fitness_m": 1931141.315392788,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.04,
@@ -4259,8 +4683,8 @@
       "destino": "SBCY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
-      "plot_path": null
+      "elapsed_s": 2.65,
+      "plot_path": "resultados_testes_REA_pngs/025_SBBE_SBCY.png"
     },
     {
       "points": [
@@ -4698,8 +5122,8 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.94,
-      "plot_path": null
+      "elapsed_s": 3.05,
+      "plot_path": "resultados_testes_REA_pngs/026_SWEQ_SBCT.png"
     },
     {
       "points": [
@@ -5399,8 +5823,8 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
-      "plot_path": null
+      "elapsed_s": 3.0,
+      "plot_path": "resultados_testes_REA_pngs/027_SD69_SBFL.png"
     },
     {
       "points": [
@@ -5413,6 +5837,62 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CH8ZS9X5SHVQH5Y22B8",
+          "name": "CIRRUS",
+          "kind": "waypoint",
+          "lon": -43.899166666666666,
+          "lat": -19.428611111111113,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHDASZJJKGVYAYWR8C7",
+          "name": "ONÇA",
+          "kind": "waypoint",
+          "lon": -43.975833333333334,
+          "lat": -19.14611111111111,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHAZ2Q5FFYNXBF2AJAQ",
+          "name": "LAPINHA",
+          "kind": "waypoint",
+          "lon": -43.76138888888889,
+          "lat": -19.10888888888889,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CH8KFWE1QMK9K44W0YK",
+          "name": "CONCEIÇÃO",
+          "kind": "waypoint",
+          "lon": -43.415277777777774,
+          "lat": -19.04888888888889,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CJPRKH1RWF16PWRG384",
+          "name": "ESTÁDIO DOMINGÃO",
+          "kind": "waypoint",
+          "lon": -38.486111111111114,
+          "lat": -4.102777777777778,
+          "chart": "REA Fortaleza"
+        },
+        {
+          "id": "01KSJD4CJPWXH84WHESTMN4T73",
+          "name": "FÁBRICA FORTALEZA",
+          "kind": "waypoint",
+          "lon": -38.48638888888889,
+          "lat": -3.9194444444444443,
+          "chart": "REA Fortaleza"
+        },
+        {
+          "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
+          "name": "BEACH PARK",
+          "kind": "waypoint",
+          "lon": -38.385555555555555,
+          "lat": -3.840277777777778,
+          "chart": "REA Fortaleza"
+        },
+        {
           "id": "ADHP:SBFZ",
           "name": "SBFZ",
           "kind": "aerodrome",
@@ -5421,40 +5901,96 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "TANGO",
+          "is_mandatory": true
+        },
+        {
+          "name": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "name": "HORIZONTE",
+          "is_mandatory": false
+        },
+        {
+          "name": "BEACH PARK",
+          "is_mandatory": false
+        }
+      ],
       "legs": [
         {
           "from": "SBBH",
+          "to": "CIRRUS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "CIRRUS",
+          "to": "ONÇA",
+          "corridor": "TANGO",
+          "is_mandatory": true
+        },
+        {
+          "from": "ONÇA",
+          "to": "LAPINHA",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "LAPINHA",
+          "to": "CONCEIÇÃO",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "CONCEIÇÃO",
+          "to": "ESTÁDIO DOMINGÃO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "ESTÁDIO DOMINGÃO",
+          "to": "FÁBRICA FORTALEZA",
+          "corridor": "HORIZONTE",
+          "is_mandatory": false
+        },
+        {
+          "from": "FÁBRICA FORTALEZA",
+          "to": "BEACH PARK",
+          "corridor": "BEACH PARK",
+          "is_mandatory": false
+        },
+        {
+          "from": "BEACH PARK",
           "to": "SBFZ",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1016.0,
-      "total_distance_nm": 1016.0,
-      "reason": "Rota direta preferida (1016.0 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1046.4,
+      "reason": "Rota usa o(s) corredor(es) REA TANGO [Obrigatório], CHARLIE [Obrigatório], HORIZONTE [Opcional], BEACH PARK [Opcional], com acréscimo de 30.4 NM sobre a rota direta (1016.0 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 1881659.4241982542,
+        "final_fitness_m": 1974934.1881470096,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
-        "malha_incoerente": true,
-        "malha_fator_relativo": 1.08,
-        "colisao_portao_coerencia": {
-          "entrada": true,
-          "saida": false
-        }
+        "malha_incoerente": false,
+        "malha_fator_relativo": 1.03,
+        "colisao_portao_coerencia": null
       },
       "grupo": "Entre regiões de corredores diferentes",
       "partida": "SBBH",
       "destino": "SBFZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.2,
-      "plot_path": null
+      "elapsed_s": 2.69,
+      "plot_path": "resultados_testes_REA_pngs/028_SBBH_SBFZ.png"
     },
     {
       "points": [
@@ -5647,8 +6183,8 @@
       "destino": "SBLO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
-      "plot_path": null
+      "elapsed_s": 2.74,
+      "plot_path": "resultados_testes_REA_pngs/029_SBCF_SBLO.png"
     },
     {
       "points": [
@@ -5661,6 +6197,70 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CH8ZS9X5SHVQH5Y22B8",
+          "name": "CIRRUS",
+          "kind": "waypoint",
+          "lon": -43.899166666666666,
+          "lat": -19.428611111111113,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHDASZJJKGVYAYWR8C7",
+          "name": "ONÇA",
+          "kind": "waypoint",
+          "lon": -43.975833333333334,
+          "lat": -19.14611111111111,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CH7WCH1VZ494GXH8M21",
+          "name": "ARAÇAÍ",
+          "kind": "waypoint",
+          "lon": -44.24861111111111,
+          "lat": -19.20111111111111,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHE9X4R8FT89TWVE6YE",
+          "name": "PARAOPEBA",
+          "kind": "waypoint",
+          "lon": -44.40277777777778,
+          "lat": -19.27777777777778,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CHDTHVY96H8N6ASJ6Q5",
+          "name": "MASCARENHAS",
+          "kind": "waypoint",
+          "lon": -44.355555555555554,
+          "lat": -18.97833333333333,
+          "chart": "REA Belo Horizonte"
+        },
+        {
+          "id": "01KSJD4CJYRXYX85GBJAWFRHEA",
+          "name": "MAZAGÃO",
+          "kind": "waypoint",
+          "lon": -51.28805555555555,
+          "lat": -0.1138888888888889,
+          "chart": "REA Macapá"
+        },
+        {
+          "id": "01KSJD4CJYK5RZQ96TB56DYSS8",
+          "name": "RIO MATAPÍ",
+          "kind": "waypoint",
+          "lon": -51.231944444444444,
+          "lat": 0.035555555555555556,
+          "chart": "REA Macapá"
+        },
+        {
+          "id": "01KSJD4CJZ2QDD9ERNPPEXRS7Q",
+          "name": "ROTATÓRIA KM9 BR156",
+          "kind": "waypoint",
+          "lon": -51.126111111111115,
+          "lat": 0.10472222222222223,
+          "chart": "REA Macapá"
+        },
+        {
           "id": "ADHP:SBMQ",
           "name": "SBMQ",
           "kind": "aerodrome",
@@ -5669,25 +6269,90 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "TANGO",
+          "is_mandatory": true
+        },
+        {
+          "name": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "name": "PAPA",
+          "is_mandatory": true
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SIVJ",
+          "to": "CIRRUS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "CIRRUS",
+          "to": "ONÇA",
+          "corridor": "TANGO",
+          "is_mandatory": true
+        },
+        {
+          "from": "ONÇA",
+          "to": "ARAÇAÍ",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "ARAÇAÍ",
+          "to": "PARAOPEBA",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "PARAOPEBA",
+          "to": "MASCARENHAS",
+          "corridor": "PAPA",
+          "is_mandatory": true
+        },
+        {
+          "from": "MASCARENHAS",
+          "to": "MAZAGÃO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "MAZAGÃO",
+          "to": "RIO MATAPÍ",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "RIO MATAPÍ",
+          "to": "ROTATÓRIA KM9 BR156",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "ROTATÓRIA KM9 BR156",
           "to": "SBMQ",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1244.7,
-      "total_distance_nm": 1244.7,
-      "reason": "Rota direta preferida (1244.7 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1288.3,
+      "reason": "Rota usa o(s) corredor(es) REA TANGO [Obrigatório], CHARLIE [Obrigatório], PAPA [Obrigatório], BRAVO [Obrigatório], com acréscimo de 43.7 NM sobre a rota direta (1244.7 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 2305116.4984392445,
+        "final_fitness_m": 2413697.6341404445,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.04,
@@ -5698,8 +6363,8 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.09,
-      "plot_path": null
+      "elapsed_s": 2.76,
+      "plot_path": "resultados_testes_REA_pngs/030_SIVJ_SBMQ.png"
     },
     {
       "points": [
@@ -6277,8 +6942,8 @@
       "destino": "SBNT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.16,
-      "plot_path": null
+      "elapsed_s": 2.34,
+      "plot_path": "resultados_testes_REA_pngs/031_SBBR_SBNT.png"
     },
     {
       "points": [
@@ -7186,8 +7851,8 @@
       "destino": "SBPA",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.27,
-      "plot_path": null
+      "elapsed_s": 2.5,
+      "plot_path": "resultados_testes_REA_pngs/032_SIQE_SBPA.png"
     },
     {
       "points": [
@@ -7490,8 +8155,8 @@
       "destino": "SBPS",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
-      "plot_path": null
+      "elapsed_s": 2.39,
+      "plot_path": "resultados_testes_REA_pngs/033_SDCB_SBPS.png"
     },
     {
       "points": [
@@ -7504,6 +8169,70 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CHSNK0SE4CT9DSYWAWQ",
+          "name": "ESTUFA",
+          "kind": "waypoint",
+          "lon": -54.37777777777778,
+          "lat": -20.465555555555554,
+          "chart": "REA Campo Grande"
+        },
+        {
+          "id": "01KSJD4CHV6F69KZYV3S1ZZQW2",
+          "name": "TRAVÉS REPRESA",
+          "kind": "waypoint",
+          "lon": -54.28333333333333,
+          "lat": -20.43138888888889,
+          "chart": "REA Campo Grande"
+        },
+        {
+          "id": "01KSJD4CHTT8A2B81N2BB2Y5NC",
+          "name": "REPRESA",
+          "kind": "waypoint",
+          "lon": -54.2525,
+          "lat": -20.509166666666665,
+          "chart": "REA Campo Grande"
+        },
+        {
+          "id": "01KSJD4CHQV93GK0W3BJ7913Z8",
+          "name": "BASTIÃO",
+          "kind": "waypoint",
+          "lon": -54.05166666666666,
+          "lat": -20.179166666666667,
+          "chart": "REA Campo Grande"
+        },
+        {
+          "id": "01KSJD4CKC1FJBHJRZ1ASJWT1V",
+          "name": "PORTO DE GALINHAS",
+          "kind": "waypoint",
+          "lon": -35.000277777777775,
+          "lat": -8.508611111111112,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKCP2WA11Z0S7K85X0J",
+          "name": "MURO ALTO",
+          "kind": "waypoint",
+          "lon": -34.98388888888889,
+          "lat": -8.45111111111111,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKB68FK1SER74BM3656",
+          "name": "BARRAGEM",
+          "kind": "waypoint",
+          "lon": -35.07194444444445,
+          "lat": -8.286944444444444,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKC0M5283Y7RR8TT1RC",
+          "name": "LAGOA AZUL",
+          "kind": "waypoint",
+          "lon": -34.98888888888889,
+          "lat": -8.151944444444444,
+          "chart": "REA Recife"
+        },
+        {
           "id": "ADHP:SBRF",
           "name": "SBRF",
           "kind": "aerodrome",
@@ -7512,18 +8241,83 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "ZULU",
+          "is_mandatory": true
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "name": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "name": "ECHO",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBCG",
+          "to": "ESTUFA",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "ESTUFA",
+          "to": "TRAVÉS REPRESA",
+          "corridor": "ZULU",
+          "is_mandatory": true
+        },
+        {
+          "from": "TRAVÉS REPRESA",
+          "to": "REPRESA",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "REPRESA",
+          "to": "BASTIÃO",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "BASTIÃO",
+          "to": "PORTO DE GALINHAS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "PORTO DE GALINHAS",
+          "to": "MURO ALTO",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "MURO ALTO",
+          "to": "BARRAGEM",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "BARRAGEM",
+          "to": "LAGOA AZUL",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "LAGOA AZUL",
           "to": "SBRF",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1364.7,
-      "total_distance_nm": 1364.7,
-      "reason": "Rota direta preferida (1364.7 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1387.1,
+      "reason": "Rota usa o(s) corredor(es) REA ZULU [Obrigatório], BRAVO [Obrigatório], FOXTROT [Obrigatório], ECHO [Obrigatório], com acréscimo de 22.5 NM sobre a rota direta (1364.7 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
           {
@@ -7641,10 +8435,10 @@
           }
         ],
         "n_alternatives": 1,
-        "final_fitness_m": 2527355.471099921,
+        "final_fitness_m": 2607521.7599579864,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.02,
@@ -7655,8 +8449,8 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.07,
-      "plot_path": null
+      "elapsed_s": 2.64,
+      "plot_path": "resultados_testes_REA_pngs/034_SBCG_SBRF.png"
     },
     {
       "points": [
@@ -7915,8 +8709,8 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.1,
-      "plot_path": null
+      "elapsed_s": 2.41,
+      "plot_path": "resultados_testes_REA_pngs/035_SDTS_SBRP.png"
     },
     {
       "points": [
@@ -8586,8 +9380,8 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.27,
-      "plot_path": null
+      "elapsed_s": 2.93,
+      "plot_path": "resultados_testes_REA_pngs/036_SNNF_SBRJ.png"
     },
     {
       "points": [
@@ -8770,8 +9564,8 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 1.91,
+      "plot_path": "resultados_testes_REA_pngs/037_SBCY_SBSV.png"
     },
     {
       "points": [
@@ -8886,8 +9680,8 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
-      "plot_path": null
+      "elapsed_s": 2.02,
+      "plot_path": "resultados_testes_REA_pngs/038_SIAQ_SBSN.png"
     },
     {
       "points": [
@@ -9296,8 +10090,8 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
-      "plot_path": null
+      "elapsed_s": 2.1,
+      "plot_path": "resultados_testes_REA_pngs/039_SJCY_SBSL.png"
     },
     {
       "points": [
@@ -9858,8 +10652,8 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
-      "plot_path": null
+      "elapsed_s": 2.27,
+      "plot_path": "resultados_testes_REA_pngs/040_SBCT_SBVT.png"
     },
     {
       "points": [
@@ -10122,8 +10916,8 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
-      "plot_path": null
+      "elapsed_s": 2.59,
+      "plot_path": "resultados_testes_REA_pngs/041_SBBI_SBTT.png"
     },
     {
       "points": [
@@ -10288,8 +11082,8 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.14,
-      "plot_path": null
+      "elapsed_s": 2.2,
+      "plot_path": "resultados_testes_REA_pngs/042_SSCF_SBEG.png"
     },
     {
       "points": [
@@ -11155,8 +11949,8 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.96,
-      "plot_path": null
+      "elapsed_s": 2.53,
+      "plot_path": "resultados_testes_REA_pngs/043_SBFL_SBGO.png"
     },
     {
       "points": [
@@ -11169,6 +11963,70 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CJH3QKF9GJWGZHXM37N",
+          "name": "RODOVIA",
+          "kind": "waypoint",
+          "lon": -49.00555555555555,
+          "lat": -26.86861111111111,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJB923MZT9PV2EVE217",
+          "name": "BLUMENAU",
+          "kind": "waypoint",
+          "lon": -49.080555555555556,
+          "lat": -26.890833333333333,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJBPX2FEP8ASCGJHWVN",
+          "name": "BRUSQUE",
+          "kind": "waypoint",
+          "lon": -48.91611111111111,
+          "lat": -27.10138888888889,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJGY7G962J3RM1WSZ49",
+          "name": "PARQUE",
+          "kind": "waypoint",
+          "lon": -49.2,
+          "lat": -27.106944444444444,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJ9RCX7YA3D1WQNP107",
+          "name": "TUNAS",
+          "kind": "waypoint",
+          "lon": -49.080555555555556,
+          "lat": -24.97222222222222,
+          "chart": "REA Curitiba"
+        },
+        {
+          "id": "01KSJD4CH6Q70H4YSH797Y03C2",
+          "name": "TREVO",
+          "kind": "waypoint",
+          "lon": -48.62916666666667,
+          "lat": -1.6719444444444442,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH5VH6TTK571AFSBDFV",
+          "name": "PONTE DA ALÇA VIÁRIA",
+          "kind": "waypoint",
+          "lon": -48.29944444444444,
+          "lat": -1.4755555555555557,
+          "chart": "REA Belém"
+        },
+        {
+          "id": "01KSJD4CH4X6AZY5V3EB7E52GZ",
+          "name": "ILHA GRANDE",
+          "kind": "waypoint",
+          "lon": -48.38972222222222,
+          "lat": -1.4725000000000001,
+          "chart": "REA Belém"
+        },
+        {
           "id": "ADHP:SBBE",
           "name": "SBBE",
           "kind": "aerodrome",
@@ -11177,25 +12035,94 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "NORTE",
+          "is_mandatory": true
+        },
+        {
+          "name": "EUROPA",
+          "is_mandatory": true
+        },
+        {
+          "name": "SERRA DO ITAJAÍ",
+          "is_mandatory": false
+        },
+        {
+          "name": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "name": "JULIET",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBNF",
+          "to": "RODOVIA",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "RODOVIA",
+          "to": "BLUMENAU",
+          "corridor": "NORTE",
+          "is_mandatory": true
+        },
+        {
+          "from": "BLUMENAU",
+          "to": "BRUSQUE",
+          "corridor": "EUROPA",
+          "is_mandatory": true
+        },
+        {
+          "from": "BRUSQUE",
+          "to": "PARQUE",
+          "corridor": "SERRA DO ITAJAÍ",
+          "is_mandatory": false
+        },
+        {
+          "from": "PARQUE",
+          "to": "TUNAS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TUNAS",
+          "to": "TREVO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TREVO",
+          "to": "PONTE DA ALÇA VIÁRIA",
+          "corridor": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "from": "PONTE DA ALÇA VIÁRIA",
+          "to": "ILHA GRANDE",
+          "corridor": "JULIET",
+          "is_mandatory": true
+        },
+        {
+          "from": "ILHA GRANDE",
           "to": "SBBE",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1530.7,
-      "total_distance_nm": 1530.7,
-      "reason": "Rota direta preferida (1530.7 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1617.3,
+      "reason": "Rota usa o(s) corredor(es) REA NORTE [Obrigatório], EUROPA [Obrigatório], SERRA DO ITAJAÍ [Opcional], LIMA [Obrigatório], JULIET [Obrigatório], com acréscimo de 86.6 NM sobre a rota direta (1530.7 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 2834854.4550281367,
+        "final_fitness_m": 3074274.5389151014,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.06,
@@ -11206,8 +12133,8 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.28,
-      "plot_path": null
+      "elapsed_s": 2.66,
+      "plot_path": "resultados_testes_REA_pngs/044_SBNF_SBBE.png"
     },
     {
       "points": [
@@ -11642,8 +12569,8 @@
       "destino": "SBBH",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 2.75,
+      "plot_path": "resultados_testes_REA_pngs/045_SBFZ_SBBH.png"
     },
     {
       "points": [
@@ -11790,8 +12717,8 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
-      "plot_path": null
+      "elapsed_s": 2.66,
+      "plot_path": "resultados_testes_REA_pngs/046_SNFF_SBBR.png"
     },
     {
       "points": [
@@ -12329,8 +13256,8 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.44,
-      "plot_path": null
+      "elapsed_s": 2.66,
+      "plot_path": "resultados_testes_REA_pngs/047_SBLO_SBCG.png"
     },
     {
       "points": [
@@ -12601,8 +13528,8 @@
       "destino": "SBCY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.29,
-      "plot_path": null
+      "elapsed_s": 2.44,
+      "plot_path": "resultados_testes_REA_pngs/048_SBMG_SBCY.png"
     },
     {
       "points": [
@@ -12959,8 +13886,8 @@
       "destino": "SBCT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.12,
-      "plot_path": null
+      "elapsed_s": 2.03,
+      "plot_path": "resultados_testes_REA_pngs/049_SBMQ_SBCT.png"
     },
     {
       "points": [
@@ -12973,6 +13900,102 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CJZ2QDD9ERNPPEXRS7Q",
+          "name": "ROTATÓRIA KM9 BR156",
+          "kind": "waypoint",
+          "lon": -51.126111111111115,
+          "lat": 0.10472222222222223,
+          "chart": "REA Macapá"
+        },
+        {
+          "id": "01KSJD4CJYK5RZQ96TB56DYSS8",
+          "name": "RIO MATAPÍ",
+          "kind": "waypoint",
+          "lon": -51.231944444444444,
+          "lat": 0.035555555555555556,
+          "chart": "REA Macapá"
+        },
+        {
+          "id": "01KSJD4CJYRXYX85GBJAWFRHEA",
+          "name": "MAZAGÃO",
+          "kind": "waypoint",
+          "lon": -51.28805555555555,
+          "lat": -0.1138888888888889,
+          "chart": "REA Macapá"
+        },
+        {
+          "id": "01KSJD4CJAYCJMS4VYDYG3T7K9",
+          "name": "BARRA VELHA",
+          "kind": "waypoint",
+          "lon": -48.68277777777777,
+          "lat": -26.628888888888888,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJA9KKRZPCZVKDHW45E",
+          "name": "ARMAÇÃO",
+          "kind": "waypoint",
+          "lon": -48.52444444444444,
+          "lat": -26.71972222222222,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJFWFFQ29341T49N6JK",
+          "name": "NAVEGA",
+          "kind": "waypoint",
+          "lon": -48.42305555555555,
+          "lat": -26.853611111111114,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJCB27AE9Y0ZCHRP6SV",
+          "name": "ESTALEIRINHO",
+          "kind": "waypoint",
+          "lon": -48.57222222222222,
+          "lat": -27.054722222222225,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJCM8QR83PZ15D9Y9VN",
+          "name": "COSTA ESMERALDA",
+          "kind": "waypoint",
+          "lon": -48.62166666666667,
+          "lat": -27.166666666666668,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJDQF0SZ21JY3SHE8J6",
+          "name": "GANCHOS",
+          "kind": "waypoint",
+          "lon": -48.60444444444445,
+          "lat": -27.256944444444443,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJDGKX16QTXCHNJPVT4",
+          "name": "FLY VILLE",
+          "kind": "waypoint",
+          "lon": -48.614444444444445,
+          "lat": -27.369444444444444,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJBPCAPW12AE1ZJRWYP",
+          "name": "BIGUAÇU",
+          "kind": "waypoint",
+          "lon": -48.59,
+          "lat": -27.484444444444446,
+          "chart": "REA Florianópolis"
+        },
+        {
+          "id": "01KSJD4CJJGSHTQEACXXD0ZNMA",
+          "name": "TRAPICHE",
+          "kind": "waypoint",
+          "lon": -48.57666666666667,
+          "lat": -27.550555555555555,
+          "chart": "REA Florianópolis"
+        },
+        {
           "id": "ADHP:SBFL",
           "name": "SBFL",
           "kind": "aerodrome",
@@ -12981,25 +14004,110 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "name": "BAIA",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SISM",
+          "to": "ROTATÓRIA KM9 BR156",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "ROTATÓRIA KM9 BR156",
+          "to": "RIO MATAPÍ",
+          "corridor": "CHARLIE",
+          "is_mandatory": true
+        },
+        {
+          "from": "RIO MATAPÍ",
+          "to": "MAZAGÃO",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "MAZAGÃO",
+          "to": "BARRA VELHA",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "BARRA VELHA",
+          "to": "ARMAÇÃO",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "ARMAÇÃO",
+          "to": "NAVEGA",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "NAVEGA",
+          "to": "ESTALEIRINHO",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "ESTALEIRINHO",
+          "to": "COSTA ESMERALDA",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "COSTA ESMERALDA",
+          "to": "GANCHOS",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "GANCHOS",
+          "to": "FLY VILLE",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "FLY VILLE",
+          "to": "BIGUAÇU",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "BIGUAÇU",
+          "to": "TRAPICHE",
+          "corridor": "BAIA",
+          "is_mandatory": true
+        },
+        {
+          "from": "TRAPICHE",
           "to": "SBFL",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1670.5,
-      "total_distance_nm": 1670.5,
-      "reason": "Rota direta preferida (1670.5 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 1692.3,
+      "reason": "Rota usa o(s) corredor(es) REA CHARLIE [Obrigatório], BRAVO [Obrigatório], BAIA [Obrigatório], com acréscimo de 21.8 NM sobre a rota direta (1670.5 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 3093716.134287439,
+        "final_fitness_m": 3166517.4896332305,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.01,
@@ -13010,8 +14118,8 @@
       "destino": "SBFL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.13,
+      "plot_path": "resultados_testes_REA_pngs/050_SISM_SBFL.png"
     },
     {
       "points": [
@@ -13024,11 +14132,11 @@
           "chart": null
         },
         {
-          "id": "01KSJD4CK3CKGAP2KGEZ38MVW0",
-          "name": "PRAIA",
+          "id": "01KSJD4CK35BMAQ0NAE8MR32VH",
+          "name": "PONTEGI",
           "kind": "waypoint",
-          "lon": -35.18222222222222,
-          "lat": -5.8625,
+          "lon": -35.263333333333335,
+          "lat": -5.806111111111111,
           "chart": "REA Natal"
         },
         {
@@ -13098,7 +14206,7 @@
       ],
       "corridors_used": [
         {
-          "name": "CHARLIE",
+          "name": "BRAVO",
           "is_mandatory": true
         },
         {
@@ -13113,14 +14221,14 @@
       "legs": [
         {
           "from": "SBNT",
-          "to": "PRAIA",
+          "to": "PONTEGI",
           "corridor": "DIRETO",
           "is_mandatory": false
         },
         {
-          "from": "PRAIA",
+          "from": "PONTEGI",
           "to": "FORTE",
-          "corridor": "CHARLIE",
+          "corridor": "BRAVO",
           "is_mandatory": true
         },
         {
@@ -13168,94 +14276,9 @@
       ],
       "direct_distance_nm": 234.4,
       "total_distance_nm": 249.1,
-      "reason": "Rota usa o(s) corredor(es) REA CHARLIE [Obrigatório], ALFA [Obrigatório], CAPONGA [Opcional], com acréscimo de 14.7 NM sobre a rota direta (234.4 NM) — menor distância total entre as alternativas disponíveis.",
+      "reason": "Rota usa o(s) corredor(es) REA BRAVO [Obrigatório], ALFA [Obrigatório], CAPONGA [Opcional], com acréscimo de 14.7 NM sobre a rota direta (234.4 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
-          {
-            "points": [
-              {
-                "id": "ADHP:SBNT",
-                "name": "SBNT",
-                "kind": "aerodrome",
-                "lon": -35.249166666667,
-                "lat": -5.908333333333,
-                "chart": null
-              },
-              {
-                "id": "01KSJD4CK3CKGAP2KGEZ38MVW0",
-                "name": "PRAIA",
-                "kind": "waypoint",
-                "lon": -35.18222222222222,
-                "lat": -5.8625,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CK28DQR1A11WQ9AVA55",
-                "name": "FORTE",
-                "kind": "waypoint",
-                "lon": -35.195277777777775,
-                "lat": -5.756111111111111,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CK35BMAQ0NAE8MR32VH",
-                "name": "PONTEGI",
-                "kind": "waypoint",
-                "lon": -35.263333333333335,
-                "lat": -5.806111111111111,
-                "chart": "REA Natal"
-              },
-              {
-                "id": "01KSJD4CJPV6T0X3HVK8W197Z1",
-                "name": "CAPONGA",
-                "kind": "waypoint",
-                "lon": -38.18888888888888,
-                "lat": -4.038888888888889,
-                "chart": "REA Fortaleza"
-              },
-              {
-                "id": "01KSJD4CJPFKC1NSYDR9GAC1W9",
-                "name": "IGUAPE",
-                "kind": "waypoint",
-                "lon": -38.274166666666666,
-                "lat": -3.943611111111111,
-                "chart": "REA Fortaleza"
-              },
-              {
-                "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
-                "name": "BEACH PARK",
-                "kind": "waypoint",
-                "lon": -38.385555555555555,
-                "lat": -3.840277777777778,
-                "chart": "REA Fortaleza"
-              },
-              {
-                "id": "ADHP:SBFZ",
-                "name": "SBFZ",
-                "kind": "aerodrome",
-                "lon": -38.532222222222,
-                "lat": -3.775833333333,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 247.3,
-            "overhead_nm": 12.8,
-            "corridors_used": [
-              {
-                "name": "CHARLIE",
-                "is_mandatory": true
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": true
-              },
-              {
-                "name": "CAPONGA",
-                "is_mandatory": false
-              }
-            ],
-            "n_points": 8
-          },
           {
             "points": [
               {
@@ -13307,19 +14330,19 @@
                 "chart": "REA Natal"
               },
               {
-                "id": "01KSJD4CJPRKH1RWF16PWRG384",
-                "name": "ESTÁDIO DOMINGÃO",
+                "id": "01KSJD4CJPV6T0X3HVK8W197Z1",
+                "name": "CAPONGA",
                 "kind": "waypoint",
-                "lon": -38.486111111111114,
-                "lat": -4.102777777777778,
+                "lon": -38.18888888888888,
+                "lat": -4.038888888888889,
                 "chart": "REA Fortaleza"
               },
               {
-                "id": "01KSJD4CJPWXH84WHESTMN4T73",
-                "name": "FÁBRICA FORTALEZA",
+                "id": "01KSJD4CJPFKC1NSYDR9GAC1W9",
+                "name": "IGUAPE",
                 "kind": "waypoint",
-                "lon": -38.48638888888889,
-                "lat": -3.9194444444444443,
+                "lon": -38.274166666666666,
+                "lat": -3.943611111111111,
                 "chart": "REA Fortaleza"
               },
               {
@@ -13339,8 +14362,8 @@
                 "chart": null
               }
             ],
-            "total_distance_nm": 265.4,
-            "overhead_nm": 31.0,
+            "total_distance_nm": 249.1,
+            "overhead_nm": 14.7,
             "corridors_used": [
               {
                 "name": "CHARLIE",
@@ -13351,19 +14374,173 @@
                 "is_mandatory": true
               },
               {
-                "name": "HORIZONTE",
-                "is_mandatory": false
-              },
-              {
-                "name": "BEACH PARK",
+                "name": "CAPONGA",
                 "is_mandatory": false
               }
             ],
             "n_points": 10
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
+                "kind": "waypoint",
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK2VWSSBYVZ4ZMB8YBT",
+                "name": "IELMO MARINHO",
+                "kind": "waypoint",
+                "lon": -35.55361111111111,
+                "lat": -5.8225,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CJPV6T0X3HVK8W197Z1",
+                "name": "CAPONGA",
+                "kind": "waypoint",
+                "lon": -38.18888888888888,
+                "lat": -4.038888888888889,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "01KSJD4CJPFKC1NSYDR9GAC1W9",
+                "name": "IGUAPE",
+                "kind": "waypoint",
+                "lon": -38.274166666666666,
+                "lat": -3.943611111111111,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
+                "name": "BEACH PARK",
+                "kind": "waypoint",
+                "lon": -38.385555555555555,
+                "lat": -3.840277777777778,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "ADHP:SBFZ",
+                "name": "SBFZ",
+                "kind": "aerodrome",
+                "lon": -38.532222222222,
+                "lat": -3.775833333333,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 235.9,
+            "overhead_nm": 1.5,
+            "corridors_used": [
+              {
+                "name": "DELTA",
+                "is_mandatory": true
+              },
+              {
+                "name": "CAPONGA",
+                "is_mandatory": false
+              }
+            ],
+            "n_points": 7
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
+                "kind": "waypoint",
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK1Q71B3HB8BBWP35EG",
+                "name": "BARRAGEM",
+                "kind": "waypoint",
+                "lon": -35.4175,
+                "lat": -5.948055555555555,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK2VWSSBYVZ4ZMB8YBT",
+                "name": "IELMO MARINHO",
+                "kind": "waypoint",
+                "lon": -35.55361111111111,
+                "lat": -5.8225,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CJPV6T0X3HVK8W197Z1",
+                "name": "CAPONGA",
+                "kind": "waypoint",
+                "lon": -38.18888888888888,
+                "lat": -4.038888888888889,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "01KSJD4CJPFKC1NSYDR9GAC1W9",
+                "name": "IGUAPE",
+                "kind": "waypoint",
+                "lon": -38.274166666666666,
+                "lat": -3.943611111111111,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
+                "name": "BEACH PARK",
+                "kind": "waypoint",
+                "lon": -38.385555555555555,
+                "lat": -3.840277777777778,
+                "chart": "REA Fortaleza"
+              },
+              {
+                "id": "ADHP:SBFZ",
+                "name": "SBFZ",
+                "kind": "aerodrome",
+                "lon": -38.532222222222,
+                "lat": -3.775833333333,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 242.6,
+            "overhead_nm": 8.2,
+            "corridors_used": [
+              {
+                "name": "ECHO",
+                "is_mandatory": true
+              },
+              {
+                "name": "KILO",
+                "is_mandatory": true
+              },
+              {
+                "name": "CAPONGA",
+                "is_mandatory": false
+              }
+            ],
+            "n_points": 8
           }
         ],
-        "n_alternatives": 2,
-        "final_fitness_m": 521168.92110870127,
+        "n_alternatives": 3,
+        "final_fitness_m": 510916.4354901627,
         "used_direct_fallback": false,
         "route_source": "dijkstra-fase",
         "preferiu_direto": false,
@@ -13377,8 +14554,8 @@
       "destino": "SBFZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.15,
-      "plot_path": null
+      "elapsed_s": 2.45,
+      "plot_path": "resultados_testes_REA_pngs/051_SBNT_SBFZ.png"
     },
     {
       "points": [
@@ -13876,8 +15053,8 @@
       "destino": "SBMG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.17,
-      "plot_path": null
+      "elapsed_s": 2.33,
+      "plot_path": "resultados_testes_REA_pngs/052_SBSG_SBMG.png"
     },
     {
       "points": [
@@ -14506,8 +15683,8 @@
       "destino": "SBMQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.1,
-      "plot_path": null
+      "elapsed_s": 2.12,
+      "plot_path": "resultados_testes_REA_pngs/053_SBPA_SBMQ.png"
     },
     {
       "points": [
@@ -14658,8 +15835,8 @@
       "destino": "SBNT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
-      "plot_path": null
+      "elapsed_s": 2.2,
+      "plot_path": "resultados_testes_REA_pngs/054_SBCX_SBNT.png"
     },
     {
       "points": [
@@ -15189,8 +16366,8 @@
       "destino": "SBPA",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.21,
-      "plot_path": null
+      "elapsed_s": 2.25,
+      "plot_path": "resultados_testes_REA_pngs/055_SBPS_SBPA.png"
     },
     {
       "points": [
@@ -15203,6 +16380,54 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CKAFJAGHRDT4HGQVY2W",
+          "name": "TRANCOSO",
+          "kind": "waypoint",
+          "lon": -39.08694444444445,
+          "lat": -16.591388888888886,
+          "chart": "REA Porto Seguro"
+        },
+        {
+          "id": "01KSJD4CKAYB54P7Y15CJ1G2Q3",
+          "name": "ARRAIAL D’AJUDA",
+          "kind": "waypoint",
+          "lon": -39.06888888888889,
+          "lat": -16.490833333333335,
+          "chart": "REA Porto Seguro"
+        },
+        {
+          "id": "01KSJD4CKC1FJBHJRZ1ASJWT1V",
+          "name": "PORTO DE GALINHAS",
+          "kind": "waypoint",
+          "lon": -35.000277777777775,
+          "lat": -8.508611111111112,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKCP2WA11Z0S7K85X0J",
+          "name": "MURO ALTO",
+          "kind": "waypoint",
+          "lon": -34.98388888888889,
+          "lat": -8.45111111111111,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKB68FK1SER74BM3656",
+          "name": "BARRAGEM",
+          "kind": "waypoint",
+          "lon": -35.07194444444445,
+          "lat": -8.286944444444444,
+          "chart": "REA Recife"
+        },
+        {
+          "id": "01KSJD4CKC0M5283Y7RR8TT1RC",
+          "name": "LAGOA AZUL",
+          "kind": "waypoint",
+          "lon": -34.98888888888889,
+          "lat": -8.151944444444444,
+          "chart": "REA Recife"
+        },
+        {
           "id": "ADHP:SBRF",
           "name": "SBRF",
           "kind": "aerodrome",
@@ -15211,25 +16436,70 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBTV",
+          "to": "TRANCOSO",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "TRANCOSO",
+          "to": "ARRAIAL D’AJUDA",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "ARRAIAL D’AJUDA",
+          "to": "PORTO DE GALINHAS",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "PORTO DE GALINHAS",
+          "to": "MURO ALTO",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "MURO ALTO",
+          "to": "BARRAGEM",
+          "corridor": "BRAVO",
+          "is_mandatory": true
+        },
+        {
+          "from": "BARRAGEM",
+          "to": "LAGOA AZUL",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "LAGOA AZUL",
           "to": "SBRF",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 561.6,
-      "total_distance_nm": 561.6,
-      "reason": "Rota direta preferida (561.6 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 572.9,
+      "reason": "Rota usa o(s) corredor(es) REA ECHO [Obrigatório], BRAVO [Obrigatório], com acréscimo de 11.3 NM sobre a rota direta (561.6 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 1040103.8233424086,
+        "final_fitness_m": 1135114.9132640364,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.02,
@@ -15240,8 +16510,8 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.21,
-      "plot_path": null
+      "elapsed_s": 2.07,
+      "plot_path": "resultados_testes_REA_pngs/056_SBTV_SBRF.png"
     },
     {
       "points": [
@@ -15388,8 +16658,8 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.06,
+      "plot_path": "resultados_testes_REA_pngs/057_SBRF_SBRP.png"
     },
     {
       "points": [
@@ -16262,8 +17532,8 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 2.55,
+      "plot_path": "resultados_testes_REA_pngs/058_SWDU_SBRJ.png"
     },
     {
       "points": [
@@ -16428,8 +17698,8 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 1.91,
+      "plot_path": "resultados_testes_REA_pngs/059_SBRP_SBSV.png"
     },
     {
       "points": [
@@ -16526,8 +17796,8 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.09,
-      "plot_path": null
+      "elapsed_s": 1.92,
+      "plot_path": "resultados_testes_REA_pngs/060_SDJN_SBSN.png"
     },
     {
       "points": [
@@ -16688,8 +17958,8 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 1.95,
+      "plot_path": "resultados_testes_REA_pngs/061_SBSV_SBSL.png"
     },
     {
       "points": [
@@ -16896,8 +18166,8 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
-      "plot_path": null
+      "elapsed_s": 2.2,
+      "plot_path": "resultados_testes_REA_pngs/062_SNCL_SBVT.png"
     },
     {
       "points": [
@@ -17044,8 +18314,8 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.06,
-      "plot_path": null
+      "elapsed_s": 1.95,
+      "plot_path": "resultados_testes_REA_pngs/063_SBSN_SBTT.png"
     },
     {
       "points": [
@@ -17192,8 +18462,8 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.09,
-      "plot_path": null
+      "elapsed_s": 1.78,
+      "plot_path": "resultados_testes_REA_pngs/064_SBSL_SBEG.png"
     },
     {
       "points": [
@@ -17519,8 +18789,8 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.24,
-      "plot_path": null
+      "elapsed_s": 2.23,
+      "plot_path": "resultados_testes_REA_pngs/065_SBVT_SBGO.png"
     },
     {
       "points": [
@@ -18228,8 +19498,8 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.22,
-      "plot_path": null
+      "elapsed_s": 2.21,
+      "plot_path": "resultados_testes_REA_pngs/066_SBTT_SBBR.png"
     },
     {
       "points": [
@@ -18337,8 +19607,8 @@
       "destino": "SIBY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.18,
-      "plot_path": null
+      "elapsed_s": 2.4,
+      "plot_path": "resultados_testes_REA_pngs/067_SBGO_SIBY.png"
     },
     {
       "points": [
@@ -18756,8 +20026,8 @@
       "destino": "SS6L",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.1,
-      "plot_path": null
+      "elapsed_s": 2.87,
+      "plot_path": "resultados_testes_REA_pngs/068_SBBE_SS6L.png"
     },
     {
       "points": [
@@ -19094,8 +20364,8 @@
       "destino": "SIOZ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.98,
-      "plot_path": null
+      "elapsed_s": 3.1,
+      "plot_path": "resultados_testes_REA_pngs/069_SBCF_SIOZ.png"
     },
     {
       "points": [
@@ -19412,8 +20682,8 @@
       "destino": "SWKO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
-      "plot_path": null
+      "elapsed_s": 2.18,
+      "plot_path": "resultados_testes_REA_pngs/070_SBBR_SWKO.png"
     },
     {
       "points": [
@@ -19762,8 +21032,8 @@
       "destino": "SJFY",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.88,
-      "plot_path": null
+      "elapsed_s": 2.17,
+      "plot_path": "resultados_testes_REA_pngs/071_SBCG_SJFY.png"
     },
     {
       "points": [
@@ -19871,8 +21141,8 @@
       "destino": "SDPH",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.9,
-      "plot_path": null
+      "elapsed_s": 1.91,
+      "plot_path": "resultados_testes_REA_pngs/072_SBCY_SDPH.png"
     },
     {
       "points": [
@@ -20238,8 +21508,8 @@
       "destino": "SNIE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.0,
-      "plot_path": null
+      "elapsed_s": 2.09,
+      "plot_path": "resultados_testes_REA_pngs/073_SBCT_SNIE.png"
     },
     {
       "points": [
@@ -20613,8 +21883,8 @@
       "destino": "SDYI",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.55,
+      "plot_path": "resultados_testes_REA_pngs/074_SBFL_SDYI.png"
     },
     {
       "points": [
@@ -20824,8 +22094,8 @@
       "destino": "SD2X",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.79,
-      "plot_path": null
+      "elapsed_s": 2.11,
+      "plot_path": "resultados_testes_REA_pngs/075_SBFZ_SD2X.png"
     },
     {
       "points": [
@@ -21111,8 +22381,8 @@
       "destino": "SJ3C",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.8,
-      "plot_path": null
+      "elapsed_s": 2.04,
+      "plot_path": "resultados_testes_REA_pngs/076_SBLO_SJ3C.png"
     },
     {
       "points": [
@@ -21241,8 +22511,8 @@
       "destino": "SSPS",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.77,
-      "plot_path": null
+      "elapsed_s": 1.93,
+      "plot_path": "resultados_testes_REA_pngs/077_SBMQ_SSPS.png"
     },
     {
       "points": [
@@ -21255,27 +22525,27 @@
           "chart": null
         },
         {
-          "id": "01KSJD4CK3MYBQ9S3B1K4XTCR1",
-          "name": "PIRANGI",
+          "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+          "name": "VILA OLÍMPICA",
           "kind": "waypoint",
-          "lon": -35.12138888888889,
-          "lat": -5.977777777777778,
+          "lon": -35.38138888888889,
+          "lat": -5.852777777777778,
           "chart": "REA Natal"
         },
         {
-          "id": "01KSJD4CK2RNAVQE62W00ES08E",
-          "name": "BÚZIOS",
+          "id": "01KSJD4CK1Q71B3HB8BBWP35EG",
+          "name": "BARRAGEM",
           "kind": "waypoint",
-          "lon": -35.10611111111111,
-          "lat": -6.006666666666667,
+          "lon": -35.4175,
+          "lat": -5.948055555555555,
           "chart": "REA Natal"
         },
         {
-          "id": "01KSJD4CK4YHA3KB9GS6MZGCZ6",
-          "name": "TIBAU",
+          "id": "01KSJD4CK3DGB9YBVZP0NBQK9Q",
+          "name": "SERRA CAIADA",
           "kind": "waypoint",
-          "lon": -35.089444444444446,
-          "lat": -6.196666666666667,
+          "lon": -35.71194444444445,
+          "lat": -6.106111111111111,
           "chart": "REA Natal"
         },
         {
@@ -21289,39 +22559,43 @@
       ],
       "corridors_used": [
         {
-          "name": "CHARLIE",
+          "name": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "name": "FOXTROT",
           "is_mandatory": true
         }
       ],
       "legs": [
         {
           "from": "SBNT",
-          "to": "PIRANGI",
+          "to": "VILA OLÍMPICA",
           "corridor": "DIRETO",
           "is_mandatory": false
         },
         {
-          "from": "PIRANGI",
-          "to": "BÚZIOS",
-          "corridor": "CHARLIE",
+          "from": "VILA OLÍMPICA",
+          "to": "BARRAGEM",
+          "corridor": "ECHO",
           "is_mandatory": true
         },
         {
-          "from": "BÚZIOS",
-          "to": "TIBAU",
-          "corridor": "CHARLIE",
+          "from": "BARRAGEM",
+          "to": "SERRA CAIADA",
+          "corridor": "FOXTROT",
           "is_mandatory": true
         },
         {
-          "from": "TIBAU",
+          "from": "SERRA CAIADA",
           "to": "SWDI",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 1314.6,
-      "total_distance_nm": 1328.2,
-      "reason": "Rota usa o(s) corredor(es) REA CHARLIE [Obrigatório], com acréscimo de 13.6 NM sobre a rota direta (1314.6 NM) — menor distância total entre as alternativas disponíveis.",
+      "total_distance_nm": 1323.7,
+      "reason": "Rota usa o(s) corredor(es) REA ECHO [Obrigatório], FOXTROT [Obrigatório], com acréscimo de 9.0 NM sobre a rota direta (1314.6 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
           {
@@ -21359,35 +22633,35 @@
                 "chart": null
               },
               {
-                "id": "01KSJD4CK3CKGAP2KGEZ38MVW0",
-                "name": "PRAIA",
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
                 "kind": "waypoint",
-                "lon": -35.18222222222222,
-                "lat": -5.8625,
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
                 "chart": "REA Natal"
               },
               {
-                "id": "01KSJD4CK3MYBQ9S3B1K4XTCR1",
-                "name": "PIRANGI",
+                "id": "01KSJD4CK1Q71B3HB8BBWP35EG",
+                "name": "BARRAGEM",
                 "kind": "waypoint",
-                "lon": -35.12138888888889,
-                "lat": -5.977777777777778,
+                "lon": -35.4175,
+                "lat": -5.948055555555555,
                 "chart": "REA Natal"
               },
               {
-                "id": "01KSJD4CK2RNAVQE62W00ES08E",
-                "name": "BÚZIOS",
+                "id": "01KSJD4CK2TK5G2C4ZHKMZ6SCP",
+                "name": "MONTE ALEGRE",
                 "kind": "waypoint",
-                "lon": -35.10611111111111,
-                "lat": -6.006666666666667,
+                "lon": -35.33444444444444,
+                "lat": -6.068611111111111,
                 "chart": "REA Natal"
               },
               {
-                "id": "01KSJD4CK4YHA3KB9GS6MZGCZ6",
-                "name": "TIBAU",
+                "id": "01KSJD4CK3H5S77FSEB63V6B5K",
+                "name": "SANTO ANTÔNIO",
                 "kind": "waypoint",
-                "lon": -35.089444444444446,
-                "lat": -6.196666666666667,
+                "lon": -35.47888888888889,
+                "lat": -6.311944444444444,
                 "chart": "REA Natal"
               },
               {
@@ -21399,19 +22673,153 @@
                 "chart": null
               }
             ],
-            "total_distance_nm": 1332.2,
-            "overhead_nm": 17.5,
+            "total_distance_nm": 1327.3,
+            "overhead_nm": 12.6,
             "corridors_used": [
               {
-                "name": "CHARLIE",
+                "name": "ECHO",
+                "is_mandatory": true
+              },
+              {
+                "name": "GOLF",
+                "is_mandatory": true
+              },
+              {
+                "name": "HOTEL",
+                "is_mandatory": true
+              }
+            ],
+            "n_points": 6
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
+                "kind": "waypoint",
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK2VWSSBYVZ4ZMB8YBT",
+                "name": "IELMO MARINHO",
+                "kind": "waypoint",
+                "lon": -35.55361111111111,
+                "lat": -5.8225,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK3DGB9YBVZP0NBQK9Q",
+                "name": "SERRA CAIADA",
+                "kind": "waypoint",
+                "lon": -35.71194444444445,
+                "lat": -6.106111111111111,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "ADHP:SWDI",
+                "name": "SWDI",
+                "kind": "aerodrome",
+                "lon": -48.866388888889,
+                "lat": -23.446944444444,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 1327.5,
+            "overhead_nm": 12.8,
+            "corridors_used": [
+              {
+                "name": "DELTA",
+                "is_mandatory": true
+              },
+              {
+                "name": "INDIA",
+                "is_mandatory": true
+              }
+            ],
+            "n_points": 5
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBNT",
+                "name": "SBNT",
+                "kind": "aerodrome",
+                "lon": -35.249166666667,
+                "lat": -5.908333333333,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CK4X2K8Y9RXS0CDB500",
+                "name": "VILA OLÍMPICA",
+                "kind": "waypoint",
+                "lon": -35.38138888888889,
+                "lat": -5.852777777777778,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK1Q71B3HB8BBWP35EG",
+                "name": "BARRAGEM",
+                "kind": "waypoint",
+                "lon": -35.4175,
+                "lat": -5.948055555555555,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK2VWSSBYVZ4ZMB8YBT",
+                "name": "IELMO MARINHO",
+                "kind": "waypoint",
+                "lon": -35.55361111111111,
+                "lat": -5.8225,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "01KSJD4CK3DGB9YBVZP0NBQK9Q",
+                "name": "SERRA CAIADA",
+                "kind": "waypoint",
+                "lon": -35.71194444444445,
+                "lat": -6.106111111111111,
+                "chart": "REA Natal"
+              },
+              {
+                "id": "ADHP:SWDI",
+                "name": "SWDI",
+                "kind": "aerodrome",
+                "lon": -48.866388888889,
+                "lat": -23.446944444444,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 1334.2,
+            "overhead_nm": 19.5,
+            "corridors_used": [
+              {
+                "name": "ECHO",
+                "is_mandatory": true
+              },
+              {
+                "name": "KILO",
+                "is_mandatory": true
+              },
+              {
+                "name": "INDIA",
                 "is_mandatory": true
               }
             ],
             "n_points": 6
           }
         ],
-        "n_alternatives": 2,
-        "final_fitness_m": 2467414.1995528275,
+        "n_alternatives": 4,
+        "final_fitness_m": 2451445.638389366,
         "used_direct_fallback": false,
         "route_source": "dijkstra-fase",
         "preferiu_direto": false,
@@ -21425,8 +22833,8 @@
       "destino": "SWDI",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.96,
-      "plot_path": null
+      "elapsed_s": 3.22,
+      "plot_path": "resultados_testes_REA_pngs/078_SBNT_SWDI.png"
     },
     {
       "points": [
@@ -21765,8 +23173,8 @@
       "destino": "SSIQ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.89,
-      "plot_path": null
+      "elapsed_s": 2.29,
+      "plot_path": "resultados_testes_REA_pngs/079_SBPA_SSIQ.png"
     },
     {
       "points": [
@@ -21953,8 +23361,8 @@
       "destino": "SSAE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.93,
-      "plot_path": null
+      "elapsed_s": 3.09,
+      "plot_path": "resultados_testes_REA_pngs/080_SBPS_SSAE.png"
     },
     {
       "points": [
@@ -22214,8 +23622,8 @@
       "destino": "SBRF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.9,
-      "plot_path": null
+      "elapsed_s": 2.32,
+      "plot_path": "resultados_testes_REA_pngs/081_SIG6_SBRF.png"
     },
     {
       "points": [
@@ -22413,8 +23821,8 @@
       "destino": "SBRP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.13,
-      "plot_path": null
+      "elapsed_s": 2.33,
+      "plot_path": "resultados_testes_REA_pngs/082_SD7F_SBRP.png"
     },
     {
       "points": [
@@ -22427,6 +23835,86 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CKF7BZYA68PXYE5M41V",
+          "name": "GRANDE",
+          "kind": "waypoint",
+          "lon": -44.12027777777778,
+          "lat": -23.24527777777778,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
+          "name": "MARA",
+          "kind": "waypoint",
+          "lon": -43.86944444444445,
+          "lat": -23.199444444444445,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
+          "name": "GRAMA",
+          "kind": "waypoint",
+          "lon": -43.68861111111111,
+          "lat": -23.150277777777777,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
+          "name": "PONTAL",
+          "kind": "waypoint",
+          "lon": -43.475,
+          "lat": -23.091666666666665,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKMP6M91R14WSNX2ABS",
+          "name": "SENNA",
+          "kind": "waypoint",
+          "lon": -43.376111111111115,
+          "lat": -23.084444444444443,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
+          "name": "TIJUCAS",
+          "kind": "waypoint",
+          "lon": -43.2675,
+          "lat": -23.078333333333333,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
+          "name": "RONDA",
+          "kind": "waypoint",
+          "lon": -43.19444444444444,
+          "lat": -23.070833333333333,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
+          "name": "ILHA",
+          "kind": "waypoint",
+          "lon": -43.145833333333336,
+          "lat": -23.06361111111111,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKFK0DK1TJ6VDA612DV",
+          "name": "FANTE",
+          "kind": "waypoint",
+          "lon": -43.00527777777778,
+          "lat": -23.040277777777778,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKG3WDKBQATS95ASZZG",
+          "name": "ITAIPU (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -43.06027777777778,
+          "lat": -23.001666666666665,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
           "id": "ADHP:SBRJ",
           "name": "SBRJ",
           "kind": "aerodrome",
@@ -22435,20 +23923,113 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "name": "PORTÃO ITAIPU",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SDBV",
+          "to": "GRANDE",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "GRANDE",
+          "to": "MARA",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "MARA",
+          "to": "GRAMA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "GRAMA",
+          "to": "PONTAL",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "PONTAL",
+          "to": "SENNA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "SENNA",
+          "to": "TIJUCAS",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "TIJUCAS",
+          "to": "RONDA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "RONDA",
+          "to": "ILHA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "ILHA",
+          "to": "FANTE",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "FANTE",
+          "to": "ITAIPU (PORTÃO)",
+          "corridor": "PORTÃO ITAIPU",
+          "is_mandatory": true
+        },
+        {
+          "from": "ITAIPU (PORTÃO)",
           "to": "SBRJ",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 278.4,
-      "total_distance_nm": 278.4,
-      "reason": "Rota direta preferida (278.4 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 296.8,
+      "reason": "Rota usa o(s) corredor(es) REA FOXTROT [Obrigatório], PORTÃO ITAIPU [Obrigatório], com acréscimo de 18.4 NM sobre a rota direta (278.4 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
+          {
+            "points": [
+              {
+                "id": "ADHP:SDBV",
+                "name": "SDBV",
+                "kind": "aerodrome",
+                "lon": -47.758333333333,
+                "lat": -24.870833333333,
+                "chart": null
+              },
+              {
+                "id": "ADHP:SBRJ",
+                "name": "SBRJ",
+                "kind": "aerodrome",
+                "lon": -43.1625,
+                "lat": -22.91,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 278.4,
+            "overhead_nm": 0.0,
+            "corridors_used": [],
+            "n_points": 2
+          },
           {
             "points": [
               {
@@ -22833,11 +24414,11 @@
             "n_points": 15
           }
         ],
-        "n_alternatives": 3,
-        "final_fitness_m": 515566.0269307629,
+        "n_alternatives": 4,
+        "final_fitness_m": 549721.1500813174,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.07,
@@ -22848,8 +24429,8 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.94,
-      "plot_path": null
+      "elapsed_s": 2.4,
+      "plot_path": "resultados_testes_REA_pngs/083_SDBV_SBRJ.png"
     },
     {
       "points": [
@@ -23032,8 +24613,8 @@
       "destino": "SBSV",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.01,
-      "plot_path": null
+      "elapsed_s": 2.43,
+      "plot_path": "resultados_testes_REA_pngs/084_SIBY_SBSV.png"
     },
     {
       "points": [
@@ -23216,8 +24797,8 @@
       "destino": "SBSN",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.77,
-      "plot_path": null
+      "elapsed_s": 1.86,
+      "plot_path": "resultados_testes_REA_pngs/085_SS6L_SBSN.png"
     },
     {
       "points": [
@@ -23558,8 +25139,8 @@
       "destino": "SBSL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.87,
-      "plot_path": null
+      "elapsed_s": 2.29,
+      "plot_path": "resultados_testes_REA_pngs/086_SIOZ_SBSL.png"
     },
     {
       "points": [
@@ -23923,8 +25504,8 @@
       "destino": "SBVT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.82,
-      "plot_path": null
+      "elapsed_s": 2.53,
+      "plot_path": "resultados_testes_REA_pngs/087_SWKO_SBVT.png"
     },
     {
       "points": [
@@ -24046,8 +25627,8 @@
       "destino": "SBTT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.17,
-      "plot_path": null
+      "elapsed_s": 2.2,
+      "plot_path": "resultados_testes_REA_pngs/088_SJFY_SBTT.png"
     },
     {
       "points": [
@@ -24169,8 +25750,8 @@
       "destino": "SBEG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.92,
-      "plot_path": null
+      "elapsed_s": 2.2,
+      "plot_path": "resultados_testes_REA_pngs/089_SDPH_SBEG.png"
     },
     {
       "points": [
@@ -24359,8 +25940,8 @@
       "destino": "SBGO",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.84,
-      "plot_path": null
+      "elapsed_s": 1.83,
+      "plot_path": "resultados_testes_REA_pngs/090_SNIE_SBGO.png"
     },
     {
       "points": [
@@ -24733,8 +26314,8 @@
       "destino": "SBBE",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.05,
-      "plot_path": null
+      "elapsed_s": 2.02,
+      "plot_path": "resultados_testes_REA_pngs/091_SDYI_SBBE.png"
     },
     {
       "points": [
@@ -24994,8 +26575,8 @@
       "destino": "SBCF",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.03,
-      "plot_path": null
+      "elapsed_s": 2.05,
+      "plot_path": "resultados_testes_REA_pngs/092_SD2X_SBCF.png"
     },
     {
       "points": [
@@ -25465,8 +27046,8 @@
       "destino": "SBBR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.23,
-      "plot_path": null
+      "elapsed_s": 2.13,
+      "plot_path": "resultados_testes_REA_pngs/093_SJ3C_SBBR.png"
     },
     {
       "points": [
@@ -25860,8 +27441,8 @@
       "destino": "SBCG",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.02,
-      "plot_path": null
+      "elapsed_s": 2.57,
+      "plot_path": "resultados_testes_REA_pngs/094_SSPS_SBCG.png"
     },
     {
       "points": [
@@ -25874,6 +27455,166 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CMDWGQ3R74F43EV4J9W",
+          "name": "DUTRA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -46.590833333333336,
+          "lat": -23.529166666666665,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMNHDJBTRDC8W5JSYZT",
+          "name": "PARQUE DO CARMO (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -46.489444444444445,
+          "lat": -23.587777777777777,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMS5SDP1NG1AN6X7767",
+          "name": "RODOANEL SUL",
+          "kind": "waypoint",
+          "lon": -46.36762619,
+          "lat": -23.62227134,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMMVMNKNSTTY3J63HGD",
+          "name": "PALMEIRAS",
+          "kind": "waypoint",
+          "lon": -46.31055555555555,
+          "lat": -23.642777777777777,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMMVR3SNE3XP1WN4J5Y",
+          "name": "MOGI BERTIOGA",
+          "kind": "waypoint",
+          "lon": -46.11694444444444,
+          "lat": -23.647777777777776,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMRMCR1SVNMZRYT2P4J",
+          "name": "REPRESA RIBEIRÃO",
+          "kind": "waypoint",
+          "lon": -45.823055555555555,
+          "lat": -23.654166666666665,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMX3E5Y5FHX948HXXSN",
+          "name": "USINA CARAGUÁ",
+          "kind": "waypoint",
+          "lon": -45.49166666666667,
+          "lat": -23.660833333333333,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
+          "name": "ILHA ANCHIETA",
+          "kind": "waypoint",
+          "lon": -45.081944444444446,
+          "lat": -23.521944444444443,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMK3MR076GDTCEV6R5S",
+          "name": "LARANJEIRAS",
+          "kind": "waypoint",
+          "lon": -44.650277777777774,
+          "lat": -23.37361111111111,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMP4Q1B788M15RC81ST",
+          "name": "PONTA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -44.45,
+          "lat": -23.30527777777778,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CKF7BZYA68PXYE5M41V",
+          "name": "GRANDE",
+          "kind": "waypoint",
+          "lon": -44.12027777777778,
+          "lat": -23.24527777777778,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
+          "name": "MARA",
+          "kind": "waypoint",
+          "lon": -43.86944444444445,
+          "lat": -23.199444444444445,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
+          "name": "GRAMA",
+          "kind": "waypoint",
+          "lon": -43.68861111111111,
+          "lat": -23.150277777777777,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
+          "name": "PONTAL",
+          "kind": "waypoint",
+          "lon": -43.475,
+          "lat": -23.091666666666665,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKMP6M91R14WSNX2ABS",
+          "name": "SENNA",
+          "kind": "waypoint",
+          "lon": -43.376111111111115,
+          "lat": -23.084444444444443,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
+          "name": "TIJUCAS",
+          "kind": "waypoint",
+          "lon": -43.2675,
+          "lat": -23.078333333333333,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
+          "name": "RONDA",
+          "kind": "waypoint",
+          "lon": -43.19444444444444,
+          "lat": -23.070833333333333,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
+          "name": "ILHA",
+          "kind": "waypoint",
+          "lon": -43.145833333333336,
+          "lat": -23.06361111111111,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKFK0DK1TJ6VDA612DV",
+          "name": "FANTE",
+          "kind": "waypoint",
+          "lon": -43.00527777777778,
+          "lat": -23.040277777777778,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKG3WDKBQATS95ASZZG",
+          "name": "ITAIPU (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -43.06027777777778,
+          "lat": -23.001666666666665,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
           "id": "ADHP:SBRJ",
           "name": "SBRJ",
           "kind": "aerodrome",
@@ -25882,259 +27623,162 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "PORTÃO DUTRA",
+          "is_mandatory": true
+        },
+        {
+          "name": "QUEBEC",
+          "is_mandatory": true
+        },
+        {
+          "name": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "name": "PORTÃO ITAIPU",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBMT",
+          "to": "DUTRA (PORTÃO)",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "DUTRA (PORTÃO)",
+          "to": "PARQUE DO CARMO (PORTÃO)",
+          "corridor": "PORTÃO DUTRA",
+          "is_mandatory": true
+        },
+        {
+          "from": "PARQUE DO CARMO (PORTÃO)",
+          "to": "RODOANEL SUL",
+          "corridor": "QUEBEC",
+          "is_mandatory": true
+        },
+        {
+          "from": "RODOANEL SUL",
+          "to": "PALMEIRAS",
+          "corridor": "QUEBEC",
+          "is_mandatory": true
+        },
+        {
+          "from": "PALMEIRAS",
+          "to": "MOGI BERTIOGA",
+          "corridor": "QUEBEC",
+          "is_mandatory": false
+        },
+        {
+          "from": "MOGI BERTIOGA",
+          "to": "REPRESA RIBEIRÃO",
+          "corridor": "QUEBEC",
+          "is_mandatory": false
+        },
+        {
+          "from": "REPRESA RIBEIRÃO",
+          "to": "USINA CARAGUÁ",
+          "corridor": "QUEBEC",
+          "is_mandatory": false
+        },
+        {
+          "from": "USINA CARAGUÁ",
+          "to": "ILHA ANCHIETA",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "ILHA ANCHIETA",
+          "to": "LARANJEIRAS",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "LARANJEIRAS",
+          "to": "PONTA (PORTÃO)",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "PONTA (PORTÃO)",
+          "to": "GRANDE",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "GRANDE",
+          "to": "MARA",
+          "corridor": "FOXTROT",
+          "is_mandatory": false
+        },
+        {
+          "from": "MARA",
+          "to": "GRAMA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "GRAMA",
+          "to": "PONTAL",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "PONTAL",
+          "to": "SENNA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "SENNA",
+          "to": "TIJUCAS",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "TIJUCAS",
+          "to": "RONDA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "RONDA",
+          "to": "ILHA",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "ILHA",
+          "to": "FANTE",
+          "corridor": "FOXTROT",
+          "is_mandatory": true
+        },
+        {
+          "from": "FANTE",
+          "to": "ITAIPU (PORTÃO)",
+          "corridor": "PORTÃO ITAIPU",
+          "is_mandatory": true
+        },
+        {
+          "from": "ITAIPU (PORTÃO)",
           "to": "SBRJ",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 195.1,
-      "total_distance_nm": 195.1,
-      "reason": "Rota direta preferida (195.1 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 219.6,
+      "reason": "Rota usa o(s) corredor(es) REA PORTÃO DUTRA [Obrigatório], QUEBEC [Obrigatório], FOXTROT [Obrigatório], PORTÃO ITAIPU [Obrigatório], com acréscimo de 24.5 NM sobre a rota direta (195.1 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
-        "alternatives": [
-          {
-            "points": [
-              {
-                "id": "ADHP:SBMT",
-                "name": "SBMT",
-                "kind": "aerodrome",
-                "lon": -46.6375,
-                "lat": -23.509166666667,
-                "chart": null
-              },
-              {
-                "id": "01KSJD4CMDWGQ3R74F43EV4J9W",
-                "name": "DUTRA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.590833333333336,
-                "lat": -23.529166666666665,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMNHDJBTRDC8W5JSYZT",
-                "name": "PARQUE DO CARMO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.489444444444445,
-                "lat": -23.587777777777777,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMS5SDP1NG1AN6X7767",
-                "name": "RODOANEL SUL",
-                "kind": "waypoint",
-                "lon": -46.36762619,
-                "lat": -23.62227134,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMVMNKNSTTY3J63HGD",
-                "name": "PALMEIRAS",
-                "kind": "waypoint",
-                "lon": -46.31055555555555,
-                "lat": -23.642777777777777,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMVR3SNE3XP1WN4J5Y",
-                "name": "MOGI BERTIOGA",
-                "kind": "waypoint",
-                "lon": -46.11694444444444,
-                "lat": -23.647777777777776,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRMCR1SVNMZRYT2P4J",
-                "name": "REPRESA RIBEIRÃO",
-                "kind": "waypoint",
-                "lon": -45.823055555555555,
-                "lat": -23.654166666666665,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMX3E5Y5FHX948HXXSN",
-                "name": "USINA CARAGUÁ",
-                "kind": "waypoint",
-                "lon": -45.49166666666667,
-                "lat": -23.660833333333333,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-                "name": "LARANJEIRAS",
-                "kind": "waypoint",
-                "lon": -44.650277777777774,
-                "lat": -23.37361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMP4Q1B788M15RC81ST",
-                "name": "PONTA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -44.45,
-                "lat": -23.30527777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CKF7BZYA68PXYE5M41V",
-                "name": "GRANDE",
-                "kind": "waypoint",
-                "lon": -44.12027777777778,
-                "lat": -23.24527777777778,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKGYM7ZZW6N5NNPSV5N",
-                "name": "MANGA",
-                "kind": "waypoint",
-                "lon": -44.05638888888888,
-                "lat": -23.023888888888887,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKN35AJM6VYZRG03767",
-                "name": "SERRA",
-                "kind": "waypoint",
-                "lon": -44.005,
-                "lat": -22.84361111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKEV6SSP9VNZ93TW21B",
-                "name": "ARARA",
-                "kind": "waypoint",
-                "lon": -43.875,
-                "lat": -22.652777777777775,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKFM1E1ZPQ61RFX8QXM",
-                "name": "GUANDU",
-                "kind": "waypoint",
-                "lon": -43.78138888888889,
-                "lat": -22.690833333333334,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKPSEHRZW9S76D9EKQK",
-                "name": "VIUVA",
-                "kind": "waypoint",
-                "lon": -43.71944444444445,
-                "lat": -22.71611111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKGVYEFMJV11854514X",
-                "name": "KEMA",
-                "kind": "waypoint",
-                "lon": -43.58111111111111,
-                "lat": -22.703611111111112,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKJEJ83GFWYZS9CZ4R8",
-                "name": "METROPOLITANO",
-                "kind": "waypoint",
-                "lon": -43.441111111111105,
-                "lat": -22.690833333333334,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKJWM4012G0QNF41WTD",
-                "name": "OUTLET",
-                "kind": "waypoint",
-                "lon": -43.28777777777778,
-                "lat": -22.675555555555558,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKJPA9XK6JNCPEJCRG2",
-                "name": "MIRIM",
-                "kind": "waypoint",
-                "lon": -43.19444444444444,
-                "lat": -22.66777777777778,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKGP1DWS7Z4KKVG521Y",
-                "name": "MAGÉ (REA)",
-                "kind": "waypoint",
-                "lon": -43.03916666666667,
-                "lat": -22.65361111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKH4DGWQKAVP31Q2QP4",
-                "name": "MANI",
-                "kind": "waypoint",
-                "lon": -42.922777777777775,
-                "lat": -22.77111111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKMR677KKW7V0NRK2MS",
-                "name": "SÃO GONÇALO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -43.09444444444445,
-                "lat": -22.826944444444443,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "ADHP:SBRJ",
-                "name": "SBRJ",
-                "kind": "aerodrome",
-                "lon": -43.1625,
-                "lat": -22.91,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 256.4,
-            "overhead_nm": 61.3,
-            "corridors_used": [
-              {
-                "name": "PORTÃO DUTRA",
-                "is_mandatory": true
-              },
-              {
-                "name": "QUEBEC",
-                "is_mandatory": true
-              },
-              {
-                "name": "FOXTROT",
-                "is_mandatory": false
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              },
-              {
-                "name": "ECHO",
-                "is_mandatory": true
-              },
-              {
-                "name": "PORTÃO SÃO GONÇALO",
-                "is_mandatory": true
-              }
-            ],
-            "n_points": 25
-          }
-        ],
-        "n_alternatives": 1,
-        "final_fitness_m": 361315.8126136727,
+        "alternatives": [],
+        "n_alternatives": 0,
+        "final_fitness_m": 406645.4797514896,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.13,
@@ -26145,8 +27789,8 @@
       "destino": "SBRJ",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.17,
-      "plot_path": null
+      "elapsed_s": 2.7,
+      "plot_path": "resultados_testes_REA_pngs/095_SBMT_SBRJ.png"
     },
     {
       "points": [
@@ -26159,6 +27803,190 @@
           "chart": null
         },
         {
+          "id": "01KSJD4CMPH5RHGCXS7VYEHVZD",
+          "name": "PENTEADO (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -46.691111111111105,
+          "lat": -23.489444444444445,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMPCK0MDNQFQDKWTP05",
+          "name": "PEDREIRA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -46.711111111111116,
+          "lat": -23.461388888888887,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMPKN27CYV0F40XV9WH",
+          "name": "PERUS",
+          "kind": "waypoint",
+          "lon": -46.751666666666665,
+          "lat": -23.426111111111112,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMMVTMQBBYRZPMTYK31",
+          "name": "MORATO",
+          "kind": "waypoint",
+          "lon": -46.746944444444445,
+          "lat": -23.255555555555556,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMA92C0D9DG1229K891",
+          "name": "ATIBAIA",
+          "kind": "waypoint",
+          "lon": -46.56944444444445,
+          "lat": -23.10027777777778,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMWVYWRMBT8T2MKDGRS",
+          "name": "TRAVÉS NORTE IGARATÁ",
+          "kind": "waypoint",
+          "lon": -46.15611111111111,
+          "lat": -23.124444444444446,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMWV2VTR72NFG1J6JKZ",
+          "name": "TRAVÉS NORTE SÃO JOSÉ",
+          "kind": "waypoint",
+          "lon": -45.901111111111106,
+          "lat": -23.081666666666667,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMCWTWW05F8XVYE5FSW",
+          "name": "CAÇAPAVA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -45.72027777777778,
+          "lat": -23.118055555555557,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMWRGQCW7RBQNN9KNBA",
+          "name": "TREVO CARVALHO PINTO",
+          "kind": "waypoint",
+          "lon": -45.614444444444445,
+          "lat": -23.06277777777778,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMVC93VV2WSAECKBH9W",
+          "name": "TAUBATÉ",
+          "kind": "waypoint",
+          "lon": -45.53527777777778,
+          "lat": -23.021666666666665,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMNG51J3KZQP6TXMGXM",
+          "name": "PEDÁGIO DUTRA",
+          "kind": "waypoint",
+          "lon": -45.36055555555556,
+          "lat": -22.93027777777778,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMS3AQ9HRWHG071ERRC",
+          "name": "ROSEIRA",
+          "kind": "waypoint",
+          "lon": -45.30638888888888,
+          "lat": -22.901944444444442,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMTKN88XF2MZP83QAPF",
+          "name": "SUL BASÍLICA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -45.20666666666667,
+          "lat": -22.950555555555553,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMD6W76PTSXRQXSN4HR",
+          "name": "CUNHA",
+          "kind": "waypoint",
+          "lon": -44.958333333333336,
+          "lat": -23.07111111111111,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CMAH3V9QV8AQ8HV6EVS",
+          "name": "BAÍA (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -44.55611111111111,
+          "lat": -23.1675,
+          "chart": "REA São Paulo"
+        },
+        {
+          "id": "01KSJD4CKGYM7ZZW6N5NNPSV5N",
+          "name": "MANGA",
+          "kind": "waypoint",
+          "lon": -44.05638888888888,
+          "lat": -23.023888888888887,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKN35AJM6VYZRG03767",
+          "name": "SERRA",
+          "kind": "waypoint",
+          "lon": -44.005,
+          "lat": -22.84361111111111,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKEV6SSP9VNZ93TW21B",
+          "name": "ARARA",
+          "kind": "waypoint",
+          "lon": -43.875,
+          "lat": -22.652777777777775,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKFM1E1ZPQ61RFX8QXM",
+          "name": "GUANDU",
+          "kind": "waypoint",
+          "lon": -43.78138888888889,
+          "lat": -22.690833333333334,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKPSEHRZW9S76D9EKQK",
+          "name": "VIUVA",
+          "kind": "waypoint",
+          "lon": -43.71944444444445,
+          "lat": -22.71611111111111,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKGVYEFMJV11854514X",
+          "name": "KEMA",
+          "kind": "waypoint",
+          "lon": -43.58111111111111,
+          "lat": -22.703611111111112,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKJEJ83GFWYZS9CZ4R8",
+          "name": "METROPOLITANO",
+          "kind": "waypoint",
+          "lon": -43.441111111111105,
+          "lat": -22.690833333333334,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
+          "id": "01KSJD4CKMTW57YHJJ1AX4WCV8",
+          "name": "ROXO (PORTÃO)",
+          "kind": "waypoint",
+          "lon": -43.367777777777775,
+          "lat": -22.744444444444447,
+          "chart": "REA Rio de Janeiro"
+        },
+        {
           "id": "ADHP:SBGL",
           "name": "SBGL",
           "kind": "aerodrome",
@@ -26167,25 +27995,192 @@
           "chart": null
         }
       ],
-      "corridors_used": [],
+      "corridors_used": [
+        {
+          "name": "PORTÃO PENTEADO",
+          "is_mandatory": true
+        },
+        {
+          "name": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "name": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "name": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "name": "GOLF",
+          "is_mandatory": false
+        },
+        {
+          "name": "BRAVO",
+          "is_mandatory": false
+        },
+        {
+          "name": "PORTÃO ROXO",
+          "is_mandatory": true
+        }
+      ],
       "legs": [
         {
           "from": "SBGR",
+          "to": "PENTEADO (PORTÃO)",
+          "corridor": "DIRETO",
+          "is_mandatory": false
+        },
+        {
+          "from": "PENTEADO (PORTÃO)",
+          "to": "PEDREIRA (PORTÃO)",
+          "corridor": "PORTÃO PENTEADO",
+          "is_mandatory": true
+        },
+        {
+          "from": "PEDREIRA (PORTÃO)",
+          "to": "PERUS",
+          "corridor": "PORTÃO PENTEADO",
+          "is_mandatory": true
+        },
+        {
+          "from": "PERUS",
+          "to": "MORATO",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "MORATO",
+          "to": "ATIBAIA",
+          "corridor": "LIMA",
+          "is_mandatory": true
+        },
+        {
+          "from": "ATIBAIA",
+          "to": "TRAVÉS NORTE IGARATÁ",
+          "corridor": "MIKE",
+          "is_mandatory": false
+        },
+        {
+          "from": "TRAVÉS NORTE IGARATÁ",
+          "to": "TRAVÉS NORTE SÃO JOSÉ",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "TRAVÉS NORTE SÃO JOSÉ",
+          "to": "CAÇAPAVA (PORTÃO)",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "CAÇAPAVA (PORTÃO)",
+          "to": "TREVO CARVALHO PINTO",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "TREVO CARVALHO PINTO",
+          "to": "TAUBATÉ",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "TAUBATÉ",
+          "to": "PEDÁGIO DUTRA",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "PEDÁGIO DUTRA",
+          "to": "ROSEIRA",
+          "corridor": "MIKE",
+          "is_mandatory": true
+        },
+        {
+          "from": "ROSEIRA",
+          "to": "SUL BASÍLICA (PORTÃO)",
+          "corridor": "GOLF",
+          "is_mandatory": false
+        },
+        {
+          "from": "SUL BASÍLICA (PORTÃO)",
+          "to": "CUNHA",
+          "corridor": "GOLF",
+          "is_mandatory": false
+        },
+        {
+          "from": "CUNHA",
+          "to": "BAÍA (PORTÃO)",
+          "corridor": "GOLF",
+          "is_mandatory": false
+        },
+        {
+          "from": "BAÍA (PORTÃO)",
+          "to": "MANGA",
+          "corridor": "GOLF",
+          "is_mandatory": false
+        },
+        {
+          "from": "MANGA",
+          "to": "SERRA",
+          "corridor": "BRAVO",
+          "is_mandatory": false
+        },
+        {
+          "from": "SERRA",
+          "to": "ARARA",
+          "corridor": "BRAVO",
+          "is_mandatory": false
+        },
+        {
+          "from": "ARARA",
+          "to": "GUANDU",
+          "corridor": "ECHO",
+          "is_mandatory": false
+        },
+        {
+          "from": "GUANDU",
+          "to": "VIUVA",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "VIUVA",
+          "to": "KEMA",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "KEMA",
+          "to": "METROPOLITANO",
+          "corridor": "ECHO",
+          "is_mandatory": true
+        },
+        {
+          "from": "METROPOLITANO",
+          "to": "ROXO (PORTÃO)",
+          "corridor": "PORTÃO ROXO",
+          "is_mandatory": true
+        },
+        {
+          "from": "ROXO (PORTÃO)",
           "to": "SBGL",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 181.9,
-      "total_distance_nm": 181.9,
-      "reason": "Rota direta preferida (181.9 NM): a rota por corredor tem um trecho com retrocesso ou curva acentuada.",
+      "total_distance_nm": 251.1,
+      "reason": "Rota usa o(s) corredor(es) REA PORTÃO PENTEADO [Obrigatório], ECHO [Obrigatório], LIMA [Obrigatório], MIKE [Obrigatório], GOLF [Opcional], BRAVO [Opcional], PORTÃO ROXO [Obrigatório], com acréscimo de 69.2 NM sobre a rota direta (181.9 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [],
         "n_alternatives": 0,
-        "final_fitness_m": 336792.3044132703,
+        "final_fitness_m": 464973.0950707081,
         "used_direct_fallback": false,
-        "route_source": "direto-preferido",
-        "preferiu_direto": true,
+        "route_source": "dijkstra-fase",
+        "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": true,
         "malha_fator_relativo": 1.38,
@@ -26196,8 +28191,8 @@
       "destino": "SBGL",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.97,
-      "plot_path": null
+      "elapsed_s": 2.66,
+      "plot_path": "resultados_testes_REA_pngs/096_SBGR_SBGL.png"
     },
     {
       "points": [
@@ -26477,171 +28472,6 @@
       "reason": "Rota usa o(s) corredor(es) REA BRAVO [Opcional], MIKE [Obrigatório], UNIFORM [Obrigatório], FOXTROT [Obrigatório], PORTÃO MARAPENDI [Obrigatório], com acréscimo de 38.7 NM sobre a rota direta (208.1 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
-          {
-            "points": [
-              {
-                "id": "ADHP:SBKP",
-                "name": "SBKP",
-                "kind": "aerodrome",
-                "lon": -47.134444444444,
-                "lat": -23.006944444444,
-                "chart": null
-              },
-              {
-                "id": "01KSJD4CMJHWVKFFBTYJW0BQY1",
-                "name": "JAGUARIÚNA",
-                "kind": "waypoint",
-                "lon": -46.97,
-                "lat": -22.70888888888889,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMRZBPPZCPSMCVB43Q",
-                "name": "MORUNGABA",
-                "kind": "waypoint",
-                "lon": -46.79361111111111,
-                "lat": -22.877222222222223,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMA92C0D9DG1229K891",
-                "name": "ATIBAIA",
-                "kind": "waypoint",
-                "lon": -46.56944444444445,
-                "lat": -23.10027777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMWVYWRMBT8T2MKDGRS",
-                "name": "TRAVÉS NORTE IGARATÁ",
-                "kind": "waypoint",
-                "lon": -46.15611111111111,
-                "lat": -23.124444444444446,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMWV2VTR72NFG1J6JKZ",
-                "name": "TRAVÉS NORTE SÃO JOSÉ",
-                "kind": "waypoint",
-                "lon": -45.901111111111106,
-                "lat": -23.081666666666667,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMCWTWW05F8XVYE5FSW",
-                "name": "CAÇAPAVA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.72027777777778,
-                "lat": -23.118055555555557,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMQ0XPW45GD446CYHKR",
-                "name": "REDENÇÃO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.566111111111105,
-                "lat": -23.261111111111113,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-                "name": "LARANJEIRAS",
-                "kind": "waypoint",
-                "lon": -44.650277777777774,
-                "lat": -23.37361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMP4Q1B788M15RC81ST",
-                "name": "PONTA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -44.45,
-                "lat": -23.30527777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CKF7BZYA68PXYE5M41V",
-                "name": "GRANDE",
-                "kind": "waypoint",
-                "lon": -44.12027777777778,
-                "lat": -23.24527777777778,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
-                "name": "MARA",
-                "kind": "waypoint",
-                "lon": -43.86944444444445,
-                "lat": -23.199444444444445,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
-                "name": "GRAMA",
-                "kind": "waypoint",
-                "lon": -43.68861111111111,
-                "lat": -23.150277777777777,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
-                "name": "PONTAL",
-                "kind": "waypoint",
-                "lon": -43.475,
-                "lat": -23.091666666666665,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKFYYZ17BRSXYEAQWQ2",
-                "name": "CURICICA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -43.386944444444445,
-                "lat": -22.940277777777776,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "ADHP:SBJR",
-                "name": "SBJR",
-                "kind": "aerodrome",
-                "lon": -43.37,
-                "lat": -22.9875,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 248.7,
-            "overhead_nm": 40.7,
-            "corridors_used": [
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              },
-              {
-                "name": "MIKE",
-                "is_mandatory": true
-              },
-              {
-                "name": "UNIFORM",
-                "is_mandatory": true
-              },
-              {
-                "name": "FOXTROT",
-                "is_mandatory": true
-              },
-              {
-                "name": "PORTÃO CURICICA",
-                "is_mandatory": true
-              }
-            ],
-            "n_points": 17
-          },
           {
             "points": [
               {
@@ -27017,7 +28847,7 @@
             "n_points": 19
           }
         ],
-        "n_alternatives": 3,
+        "n_alternatives": 2,
         "final_fitness_m": 457050.5098572984,
         "used_direct_fallback": false,
         "route_source": "dijkstra-fase",
@@ -27032,8 +28862,8 @@
       "destino": "SBJR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.84,
-      "plot_path": null
+      "elapsed_s": 2.83,
+      "plot_path": "resultados_testes_REA_pngs/097_SBKP_SBJR.png"
     },
     {
       "points": [
@@ -27046,35 +28876,11 @@
           "chart": null
         },
         {
-          "id": "01KSJD4CKEYMPRFVJF333TVY75",
-          "name": "BOCA (PORTÃO)",
+          "id": "01KSJD4CKHWJBYSQF68QSR1AAW",
+          "name": "PORTÃO MARAPENDI",
           "kind": "waypoint",
-          "lon": -43.13944444444444,
-          "lat": -23.0075,
-          "chart": "REA Rio de Janeiro"
-        },
-        {
-          "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
-          "name": "ILHA",
-          "kind": "waypoint",
-          "lon": -43.145833333333336,
-          "lat": -23.06361111111111,
-          "chart": "REA Rio de Janeiro"
-        },
-        {
-          "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
-          "name": "RONDA",
-          "kind": "waypoint",
-          "lon": -43.19444444444444,
-          "lat": -23.070833333333333,
-          "chart": "REA Rio de Janeiro"
-        },
-        {
-          "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
-          "name": "TIJUCAS",
-          "kind": "waypoint",
-          "lon": -43.2675,
-          "lat": -23.078333333333333,
+          "lon": -43.37611111111111,
+          "lat": -23.04277777777778,
           "chart": "REA Rio de Janeiro"
         },
         {
@@ -27126,70 +28932,6 @@
           "chart": "REA São Paulo"
         },
         {
-          "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-          "name": "LARANJEIRAS",
-          "kind": "waypoint",
-          "lon": -44.650277777777774,
-          "lat": -23.37361111111111,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-          "name": "ILHA ANCHIETA",
-          "kind": "waypoint",
-          "lon": -45.081944444444446,
-          "lat": -23.521944444444443,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMREW75R5KJ26S924VG",
-          "name": "REPRESA PARAIBUNA",
-          "kind": "waypoint",
-          "lon": -45.48694444444445,
-          "lat": -23.526944444444442,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMSPSEZEW5JPRH7HYKD",
-          "name": "SALESÓPOLIS",
-          "kind": "waypoint",
-          "lon": -45.846111111111114,
-          "lat": -23.530277777777776,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMRY77927P1Y2RG6X53",
-          "name": "REPRESA SUZANO",
-          "kind": "waypoint",
-          "lon": -46.263333333333335,
-          "lat": -23.594444444444445,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMRG9ZAQ0JTZE3P3ZZ5",
-          "name": "RODOANEL NORTE",
-          "kind": "waypoint",
-          "lon": -46.34666666666667,
-          "lat": -23.577222222222222,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMH1TNVHMAWEHQTY0VZ",
-          "name": "ITAQUERA (PORTÃO)",
-          "kind": "waypoint",
-          "lon": -46.46611111111111,
-          "lat": -23.542222222222225,
-          "chart": "REA São Paulo"
-        },
-        {
-          "id": "01KSJD4CMDG95HGM0Z6ADSRYAG",
-          "name": "COMETA (PORTÃO)",
-          "kind": "waypoint",
-          "lon": -46.57777777777778,
-          "lat": -23.517777777777777,
-          "chart": "REA São Paulo"
-        },
-        {
           "id": "ADHP:SBMT",
           "name": "SBMT",
           "kind": "aerodrome",
@@ -27200,51 +28942,25 @@
       ],
       "corridors_used": [
         {
-          "name": "PORTÃO BOCA",
+          "name": "PORTÃO MARAPENDI",
           "is_mandatory": true
         },
         {
           "name": "FOXTROT",
-          "is_mandatory": true
-        },
-        {
-          "name": "ROMEO",
-          "is_mandatory": true
-        },
-        {
-          "name": "PORTÃO COMETA",
           "is_mandatory": true
         }
       ],
       "legs": [
         {
           "from": "SBRJ",
-          "to": "BOCA (PORTÃO)",
+          "to": "PORTÃO MARAPENDI",
           "corridor": "DIRETO",
           "is_mandatory": false
         },
         {
-          "from": "BOCA (PORTÃO)",
-          "to": "ILHA",
-          "corridor": "PORTÃO BOCA",
-          "is_mandatory": true
-        },
-        {
-          "from": "ILHA",
-          "to": "RONDA",
-          "corridor": "FOXTROT",
-          "is_mandatory": true
-        },
-        {
-          "from": "RONDA",
-          "to": "TIJUCAS",
-          "corridor": "FOXTROT",
-          "is_mandatory": true
-        },
-        {
-          "from": "TIJUCAS",
+          "from": "PORTÃO MARAPENDI",
           "to": "SENNA",
-          "corridor": "FOXTROT",
+          "corridor": "PORTÃO MARAPENDI",
           "is_mandatory": true
         },
         {
@@ -27279,62 +28995,14 @@
         },
         {
           "from": "PONTA (PORTÃO)",
-          "to": "LARANJEIRAS",
-          "corridor": "FOXTROT",
-          "is_mandatory": false
-        },
-        {
-          "from": "LARANJEIRAS",
-          "to": "ILHA ANCHIETA",
-          "corridor": "FOXTROT",
-          "is_mandatory": false
-        },
-        {
-          "from": "ILHA ANCHIETA",
-          "to": "REPRESA PARAIBUNA",
-          "corridor": "ROMEO",
-          "is_mandatory": false
-        },
-        {
-          "from": "REPRESA PARAIBUNA",
-          "to": "SALESÓPOLIS",
-          "corridor": "ROMEO",
-          "is_mandatory": false
-        },
-        {
-          "from": "SALESÓPOLIS",
-          "to": "REPRESA SUZANO",
-          "corridor": "ROMEO",
-          "is_mandatory": false
-        },
-        {
-          "from": "REPRESA SUZANO",
-          "to": "RODOANEL NORTE",
-          "corridor": "ROMEO",
-          "is_mandatory": true
-        },
-        {
-          "from": "RODOANEL NORTE",
-          "to": "ITAQUERA (PORTÃO)",
-          "corridor": "ROMEO",
-          "is_mandatory": true
-        },
-        {
-          "from": "ITAQUERA (PORTÃO)",
-          "to": "COMETA (PORTÃO)",
-          "corridor": "PORTÃO COMETA",
-          "is_mandatory": true
-        },
-        {
-          "from": "COMETA (PORTÃO)",
           "to": "SBMT",
           "corridor": "DIRETO",
           "is_mandatory": false
         }
       ],
       "direct_distance_nm": 195.1,
-      "total_distance_nm": 207.0,
-      "reason": "Rota usa o(s) corredor(es) REA PORTÃO BOCA [Obrigatório], FOXTROT [Obrigatório], ROMEO [Obrigatório], PORTÃO COMETA [Obrigatório], com acréscimo de 11.9 NM sobre a rota direta (195.1 NM) — menor distância total entre as alternativas disponíveis.",
+      "total_distance_nm": 198.8,
+      "reason": "Rota usa o(s) corredor(es) REA PORTÃO MARAPENDI [Obrigatório], FOXTROT [Obrigatório], com acréscimo de 3.7 NM sobre a rota direta (195.1 NM) — menor distância total entre as alternativas disponíveis.",
       "meta": {
         "alternatives": [
           {
@@ -27348,35 +29016,11 @@
                 "chart": null
               },
               {
-                "id": "01KSJD4CKEYMPRFVJF333TVY75",
-                "name": "BOCA (PORTÃO)",
+                "id": "01KSJD4CKHWJBYSQF68QSR1AAW",
+                "name": "PORTÃO MARAPENDI",
                 "kind": "waypoint",
-                "lon": -43.13944444444444,
-                "lat": -23.0075,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
-                "name": "ILHA",
-                "kind": "waypoint",
-                "lon": -43.145833333333336,
-                "lat": -23.06361111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
-                "name": "RONDA",
-                "kind": "waypoint",
-                "lon": -43.19444444444444,
-                "lat": -23.070833333333333,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
-                "name": "TIJUCAS",
-                "kind": "waypoint",
-                "lon": -43.2675,
-                "lat": -23.078333333333333,
+                "lon": -43.37611111111111,
+                "lat": -23.04277777777778,
                 "chart": "REA Rio de Janeiro"
               },
               {
@@ -27436,70 +29080,6 @@
                 "chart": "REA São Paulo"
               },
               {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMREW75R5KJ26S924VG",
-                "name": "REPRESA PARAIBUNA",
-                "kind": "waypoint",
-                "lon": -45.48694444444445,
-                "lat": -23.526944444444442,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMSPSEZEW5JPRH7HYKD",
-                "name": "SALESÓPOLIS",
-                "kind": "waypoint",
-                "lon": -45.846111111111114,
-                "lat": -23.530277777777776,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMFJEA88DN0H34B1QPC",
-                "name": "GUARAREMA",
-                "kind": "waypoint",
-                "lon": -46.036944444444444,
-                "lat": -23.41361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRY77927P1Y2RG6X53",
-                "name": "REPRESA SUZANO",
-                "kind": "waypoint",
-                "lon": -46.263333333333335,
-                "lat": -23.594444444444445,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRG9ZAQ0JTZE3P3ZZ5",
-                "name": "RODOANEL NORTE",
-                "kind": "waypoint",
-                "lon": -46.34666666666667,
-                "lat": -23.577222222222222,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMH1TNVHMAWEHQTY0VZ",
-                "name": "ITAQUERA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.46611111111111,
-                "lat": -23.542222222222225,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMDG95HGM0Z6ADSRYAG",
-                "name": "COMETA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.57777777777778,
-                "lat": -23.517777777777777,
-                "chart": "REA São Paulo"
-              },
-              {
                 "id": "ADHP:SBMT",
                 "name": "SBMT",
                 "kind": "aerodrome",
@@ -27508,35 +29088,19 @@
                 "chart": null
               }
             ],
-            "total_distance_nm": 212.9,
-            "overhead_nm": 17.8,
+            "total_distance_nm": 199.2,
+            "overhead_nm": 4.1,
             "corridors_used": [
               {
-                "name": "PORTÃO BOCA",
+                "name": "PORTÃO MARAPENDI",
                 "is_mandatory": true
               },
               {
                 "name": "FOXTROT",
                 "is_mandatory": true
-              },
-              {
-                "name": "ROMEO",
-                "is_mandatory": true
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              },
-              {
-                "name": "SIERRA",
-                "is_mandatory": false
-              },
-              {
-                "name": "PORTÃO COMETA",
-                "is_mandatory": true
               }
             ],
-            "n_points": 21
+            "n_points": 10
           },
           {
             "points": [
@@ -27549,43 +29113,11 @@
                 "chart": null
               },
               {
-                "id": "01KSJD4CKEYMPRFVJF333TVY75",
-                "name": "BOCA (PORTÃO)",
+                "id": "01KSJD4CKFYYZ17BRSXYEAQWQ2",
+                "name": "CURICICA (PORTÃO)",
                 "kind": "waypoint",
-                "lon": -43.13944444444444,
-                "lat": -23.0075,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
-                "name": "ILHA",
-                "kind": "waypoint",
-                "lon": -43.145833333333336,
-                "lat": -23.06361111111111,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
-                "name": "RONDA",
-                "kind": "waypoint",
-                "lon": -43.19444444444444,
-                "lat": -23.070833333333333,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
-                "name": "TIJUCAS",
-                "kind": "waypoint",
-                "lon": -43.2675,
-                "lat": -23.078333333333333,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKMP6M91R14WSNX2ABS",
-                "name": "SENNA",
-                "kind": "waypoint",
-                "lon": -43.376111111111115,
-                "lat": -23.084444444444443,
+                "lon": -43.386944444444445,
+                "lat": -22.940277777777776,
                 "chart": "REA Rio de Janeiro"
               },
               {
@@ -27629,78 +29161,6 @@
                 "chart": "REA São Paulo"
               },
               {
-                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-                "name": "LARANJEIRAS",
-                "kind": "waypoint",
-                "lon": -44.650277777777774,
-                "lat": -23.37361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMQ0XPW45GD446CYHKR",
-                "name": "REDENÇÃO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.566111111111105,
-                "lat": -23.261111111111113,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMQBT2F5JS7XMAMYMS",
-                "name": "PARAIBUNA",
-                "kind": "waypoint",
-                "lon": -45.6625,
-                "lat": -23.388333333333332,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMSPSEZEW5JPRH7HYKD",
-                "name": "SALESÓPOLIS",
-                "kind": "waypoint",
-                "lon": -45.846111111111114,
-                "lat": -23.530277777777776,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRY77927P1Y2RG6X53",
-                "name": "REPRESA SUZANO",
-                "kind": "waypoint",
-                "lon": -46.263333333333335,
-                "lat": -23.594444444444445,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRG9ZAQ0JTZE3P3ZZ5",
-                "name": "RODOANEL NORTE",
-                "kind": "waypoint",
-                "lon": -46.34666666666667,
-                "lat": -23.577222222222222,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMH1TNVHMAWEHQTY0VZ",
-                "name": "ITAQUERA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.46611111111111,
-                "lat": -23.542222222222225,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMDG95HGM0Z6ADSRYAG",
-                "name": "COMETA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.57777777777778,
-                "lat": -23.517777777777777,
-                "chart": "REA São Paulo"
-              },
-              {
                 "id": "ADHP:SBMT",
                 "name": "SBMT",
                 "kind": "aerodrome",
@@ -27709,35 +29169,19 @@
                 "chart": null
               }
             ],
-            "total_distance_nm": 218.3,
-            "overhead_nm": 23.2,
+            "total_distance_nm": 199.4,
+            "overhead_nm": 4.3,
             "corridors_used": [
               {
-                "name": "PORTÃO BOCA",
+                "name": "PORTÃO CURICICA",
                 "is_mandatory": true
               },
               {
                 "name": "FOXTROT",
                 "is_mandatory": true
-              },
-              {
-                "name": "UNIFORM",
-                "is_mandatory": false
-              },
-              {
-                "name": "TANGO",
-                "is_mandatory": false
-              },
-              {
-                "name": "ROMEO",
-                "is_mandatory": true
-              },
-              {
-                "name": "PORTÃO COMETA",
-                "is_mandatory": true
               }
             ],
-            "n_points": 21
+            "n_points": 8
           },
           {
             "points": [
@@ -27750,35 +29194,100 @@
                 "chart": null
               },
               {
-                "id": "01KSJD4CKEYMPRFVJF333TVY75",
-                "name": "BOCA (PORTÃO)",
+                "id": "01KSJD4CKFYYZ17BRSXYEAQWQ2",
+                "name": "CURICICA (PORTÃO)",
                 "kind": "waypoint",
-                "lon": -43.13944444444444,
-                "lat": -23.0075,
+                "lon": -43.386944444444445,
+                "lat": -22.940277777777776,
                 "chart": "REA Rio de Janeiro"
               },
               {
-                "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
-                "name": "ILHA",
+                "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
+                "name": "PONTAL",
                 "kind": "waypoint",
-                "lon": -43.145833333333336,
-                "lat": -23.06361111111111,
+                "lon": -43.475,
+                "lat": -23.091666666666665,
                 "chart": "REA Rio de Janeiro"
               },
               {
-                "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
-                "name": "RONDA",
+                "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
+                "name": "GRAMA",
                 "kind": "waypoint",
-                "lon": -43.19444444444444,
-                "lat": -23.070833333333333,
+                "lon": -43.68861111111111,
+                "lat": -23.150277777777777,
                 "chart": "REA Rio de Janeiro"
               },
               {
-                "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
-                "name": "TIJUCAS",
+                "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
+                "name": "MARA",
                 "kind": "waypoint",
-                "lon": -43.2675,
-                "lat": -23.078333333333333,
+                "lon": -43.86944444444445,
+                "lat": -23.199444444444445,
+                "chart": "REA Rio de Janeiro"
+              },
+              {
+                "id": "01KSJD4CKF7BZYA68PXYE5M41V",
+                "name": "GRANDE",
+                "kind": "waypoint",
+                "lon": -44.12027777777778,
+                "lat": -23.24527777777778,
+                "chart": "REA Rio de Janeiro"
+              },
+              {
+                "id": "01KSJD4CMP4Q1B788M15RC81ST",
+                "name": "PONTA (PORTÃO)",
+                "kind": "waypoint",
+                "lon": -44.45,
+                "lat": -23.30527777777778,
+                "chart": "REA São Paulo"
+              },
+              {
+                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
+                "name": "LARANJEIRAS",
+                "kind": "waypoint",
+                "lon": -44.650277777777774,
+                "lat": -23.37361111111111,
+                "chart": "REA São Paulo"
+              },
+              {
+                "id": "ADHP:SBMT",
+                "name": "SBMT",
+                "kind": "aerodrome",
+                "lon": -46.6375,
+                "lat": -23.509166666667,
+                "chart": null
+              }
+            ],
+            "total_distance_nm": 199.8,
+            "overhead_nm": 4.7,
+            "corridors_used": [
+              {
+                "name": "PORTÃO CURICICA",
+                "is_mandatory": true
+              },
+              {
+                "name": "FOXTROT",
+                "is_mandatory": true
+              }
+            ],
+            "n_points": 9
+          },
+          {
+            "points": [
+              {
+                "id": "ADHP:SBRJ",
+                "name": "SBRJ",
+                "kind": "aerodrome",
+                "lon": -43.1625,
+                "lat": -22.91,
+                "chart": null
+              },
+              {
+                "id": "01KSJD4CKHWJBYSQF68QSR1AAW",
+                "name": "PORTÃO MARAPENDI",
+                "kind": "waypoint",
+                "lon": -43.37611111111111,
+                "lat": -23.04277777777778,
                 "chart": "REA Rio de Janeiro"
               },
               {
@@ -27846,70 +29355,6 @@
                 "chart": "REA São Paulo"
               },
               {
-                "id": "01KSJD4CMQ0XPW45GD446CYHKR",
-                "name": "REDENÇÃO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.566111111111105,
-                "lat": -23.261111111111113,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMQBT2F5JS7XMAMYMS",
-                "name": "PARAIBUNA",
-                "kind": "waypoint",
-                "lon": -45.6625,
-                "lat": -23.388333333333332,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMSPSEZEW5JPRH7HYKD",
-                "name": "SALESÓPOLIS",
-                "kind": "waypoint",
-                "lon": -45.846111111111114,
-                "lat": -23.530277777777776,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMFJEA88DN0H34B1QPC",
-                "name": "GUARAREMA",
-                "kind": "waypoint",
-                "lon": -46.036944444444444,
-                "lat": -23.41361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRY77927P1Y2RG6X53",
-                "name": "REPRESA SUZANO",
-                "kind": "waypoint",
-                "lon": -46.263333333333335,
-                "lat": -23.594444444444445,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMRG9ZAQ0JTZE3P3ZZ5",
-                "name": "RODOANEL NORTE",
-                "kind": "waypoint",
-                "lon": -46.34666666666667,
-                "lat": -23.577222222222222,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMH1TNVHMAWEHQTY0VZ",
-                "name": "ITAQUERA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.46611111111111,
-                "lat": -23.542222222222225,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMDG95HGM0Z6ADSRYAG",
-                "name": "COMETA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -46.57777777777778,
-                "lat": -23.517777777777777,
-                "chart": "REA São Paulo"
-              },
-              {
                 "id": "ADHP:SBMT",
                 "name": "SBMT",
                 "kind": "aerodrome",
@@ -27918,53 +29363,29 @@
                 "chart": null
               }
             ],
-            "total_distance_nm": 224.2,
-            "overhead_nm": 29.1,
+            "total_distance_nm": 200.5,
+            "overhead_nm": 5.4,
             "corridors_used": [
               {
-                "name": "PORTÃO BOCA",
+                "name": "PORTÃO MARAPENDI",
                 "is_mandatory": true
               },
               {
                 "name": "FOXTROT",
                 "is_mandatory": true
-              },
-              {
-                "name": "UNIFORM",
-                "is_mandatory": false
-              },
-              {
-                "name": "TANGO",
-                "is_mandatory": false
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              },
-              {
-                "name": "SIERRA",
-                "is_mandatory": false
-              },
-              {
-                "name": "ROMEO",
-                "is_mandatory": true
-              },
-              {
-                "name": "PORTÃO COMETA",
-                "is_mandatory": true
               }
             ],
-            "n_points": 22
+            "n_points": 11
           }
         ],
-        "n_alternatives": 3,
-        "final_fitness_m": 384415.24335705664,
+        "n_alternatives": 4,
+        "final_fitness_m": 368207.34197830025,
         "used_direct_fallback": false,
         "route_source": "dijkstra-fase",
         "preferiu_direto": false,
         "malha_tem_cadeia_real": true,
         "malha_incoerente": false,
-        "malha_fator_relativo": 1.06,
+        "malha_fator_relativo": 1.02,
         "colisao_portao_coerencia": null
       },
       "grupo": "São Paulo e Rio de Janeiro",
@@ -27972,8 +29393,8 @@
       "destino": "SBMT",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.02,
-      "plot_path": null
+      "elapsed_s": 2.52,
+      "plot_path": "resultados_testes_REA_pngs/098_SBRJ_SBMT.png"
     },
     {
       "points": [
@@ -28703,8 +30124,8 @@
       "destino": "SBGR",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 1.11,
-      "plot_path": null
+      "elapsed_s": 2.66,
+      "plot_path": "resultados_testes_REA_pngs/099_SBGL_SBGR.png"
     },
     {
       "points": [
@@ -29164,332 +30585,6 @@
                 "chart": null
               },
               {
-                "id": "01KSJD4CKFYYZ17BRSXYEAQWQ2",
-                "name": "CURICICA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -43.386944444444445,
-                "lat": -22.940277777777776,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
-                "name": "PONTAL",
-                "kind": "waypoint",
-                "lon": -43.475,
-                "lat": -23.091666666666665,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
-                "name": "GRAMA",
-                "kind": "waypoint",
-                "lon": -43.68861111111111,
-                "lat": -23.150277777777777,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
-                "name": "MARA",
-                "kind": "waypoint",
-                "lon": -43.86944444444445,
-                "lat": -23.199444444444445,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKF7BZYA68PXYE5M41V",
-                "name": "GRANDE",
-                "kind": "waypoint",
-                "lon": -44.12027777777778,
-                "lat": -23.24527777777778,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CMP4Q1B788M15RC81ST",
-                "name": "PONTA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -44.45,
-                "lat": -23.30527777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-                "name": "LARANJEIRAS",
-                "kind": "waypoint",
-                "lon": -44.650277777777774,
-                "lat": -23.37361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMQ0XPW45GD446CYHKR",
-                "name": "REDENÇÃO (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.566111111111105,
-                "lat": -23.261111111111113,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMCWTWW05F8XVYE5FSW",
-                "name": "CAÇAPAVA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -45.72027777777778,
-                "lat": -23.118055555555557,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMWV2VTR72NFG1J6JKZ",
-                "name": "TRAVÉS NORTE SÃO JOSÉ",
-                "kind": "waypoint",
-                "lon": -45.901111111111106,
-                "lat": -23.081666666666667,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMWVYWRMBT8T2MKDGRS",
-                "name": "TRAVÉS NORTE IGARATÁ",
-                "kind": "waypoint",
-                "lon": -46.15611111111111,
-                "lat": -23.124444444444446,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMA92C0D9DG1229K891",
-                "name": "ATIBAIA",
-                "kind": "waypoint",
-                "lon": -46.56944444444445,
-                "lat": -23.10027777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMRZBPPZCPSMCVB43Q",
-                "name": "MORUNGABA",
-                "kind": "waypoint",
-                "lon": -46.79361111111111,
-                "lat": -22.877222222222223,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMJHWVKFFBTYJW0BQY1",
-                "name": "JAGUARIÚNA",
-                "kind": "waypoint",
-                "lon": -46.97,
-                "lat": -22.70888888888889,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "ADHP:SBKP",
-                "name": "SBKP",
-                "kind": "aerodrome",
-                "lon": -47.134444444444,
-                "lat": -23.006944444444,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 248.7,
-            "overhead_nm": 40.7,
-            "corridors_used": [
-              {
-                "name": "PORTÃO CURICICA",
-                "is_mandatory": true
-              },
-              {
-                "name": "FOXTROT",
-                "is_mandatory": true
-              },
-              {
-                "name": "UNIFORM",
-                "is_mandatory": true
-              },
-              {
-                "name": "MIKE",
-                "is_mandatory": true
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              }
-            ],
-            "n_points": 17
-          },
-          {
-            "points": [
-              {
-                "id": "ADHP:SBJR",
-                "name": "SBJR",
-                "kind": "aerodrome",
-                "lon": -43.37,
-                "lat": -22.9875,
-                "chart": null
-              },
-              {
-                "id": "01KSJD4CKFYYZ17BRSXYEAQWQ2",
-                "name": "CURICICA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -43.386944444444445,
-                "lat": -22.940277777777776,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKKTR0D8N48XZ7MW2PW",
-                "name": "PONTAL",
-                "kind": "waypoint",
-                "lon": -43.475,
-                "lat": -23.091666666666665,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKF1XJ7B0JKKGQ8Z140",
-                "name": "GRAMA",
-                "kind": "waypoint",
-                "lon": -43.68861111111111,
-                "lat": -23.150277777777777,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKHJ2JQAT793CKW5VEJ",
-                "name": "MARA",
-                "kind": "waypoint",
-                "lon": -43.86944444444445,
-                "lat": -23.199444444444445,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CKF7BZYA68PXYE5M41V",
-                "name": "GRANDE",
-                "kind": "waypoint",
-                "lon": -44.12027777777778,
-                "lat": -23.24527777777778,
-                "chart": "REA Rio de Janeiro"
-              },
-              {
-                "id": "01KSJD4CMP4Q1B788M15RC81ST",
-                "name": "PONTA (PORTÃO)",
-                "kind": "waypoint",
-                "lon": -44.45,
-                "lat": -23.30527777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMK3MR076GDTCEV6R5S",
-                "name": "LARANJEIRAS",
-                "kind": "waypoint",
-                "lon": -44.650277777777774,
-                "lat": -23.37361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
-                "name": "ILHA ANCHIETA",
-                "kind": "waypoint",
-                "lon": -45.081944444444446,
-                "lat": -23.521944444444443,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMREW75R5KJ26S924VG",
-                "name": "REPRESA PARAIBUNA",
-                "kind": "waypoint",
-                "lon": -45.48694444444445,
-                "lat": -23.526944444444442,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMSPSEZEW5JPRH7HYKD",
-                "name": "SALESÓPOLIS",
-                "kind": "waypoint",
-                "lon": -45.846111111111114,
-                "lat": -23.530277777777776,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMFJEA88DN0H34B1QPC",
-                "name": "GUARAREMA",
-                "kind": "waypoint",
-                "lon": -46.036944444444444,
-                "lat": -23.41361111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMGW7DD2FWSDK5NKTW3",
-                "name": "IGARATÁ (REA)",
-                "kind": "waypoint",
-                "lon": -46.159444444444446,
-                "lat": -23.20611111111111,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMA92C0D9DG1229K891",
-                "name": "ATIBAIA",
-                "kind": "waypoint",
-                "lon": -46.56944444444445,
-                "lat": -23.10027777777778,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMMRZBPPZCPSMCVB43Q",
-                "name": "MORUNGABA",
-                "kind": "waypoint",
-                "lon": -46.79361111111111,
-                "lat": -22.877222222222223,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "01KSJD4CMJHWVKFFBTYJW0BQY1",
-                "name": "JAGUARIÚNA",
-                "kind": "waypoint",
-                "lon": -46.97,
-                "lat": -22.70888888888889,
-                "chart": "REA São Paulo"
-              },
-              {
-                "id": "ADHP:SBKP",
-                "name": "SBKP",
-                "kind": "aerodrome",
-                "lon": -47.134444444444,
-                "lat": -23.006944444444,
-                "chart": null
-              }
-            ],
-            "total_distance_nm": 250.7,
-            "overhead_nm": 42.6,
-            "corridors_used": [
-              {
-                "name": "PORTÃO CURICICA",
-                "is_mandatory": true
-              },
-              {
-                "name": "FOXTROT",
-                "is_mandatory": true
-              },
-              {
-                "name": "ROMEO",
-                "is_mandatory": false
-              },
-              {
-                "name": "BRAVO",
-                "is_mandatory": false
-              }
-            ],
-            "n_points": 17
-          },
-          {
-            "points": [
-              {
-                "id": "ADHP:SBJR",
-                "name": "SBJR",
-                "kind": "aerodrome",
-                "lon": -43.37,
-                "lat": -22.9875,
-                "chart": null
-              },
-              {
                 "id": "01KSJD4CKHWJBYSQF68QSR1AAW",
                 "name": "PORTÃO MARAPENDI",
                 "kind": "waypoint",
@@ -29677,7 +30772,7 @@
             "n_points": 20
           }
         ],
-        "n_alternatives": 4,
+        "n_alternatives": 2,
         "final_fitness_m": 457050.50985729846,
         "used_direct_fallback": false,
         "route_source": "dijkstra-fase",
@@ -29692,8 +30787,8 @@
       "destino": "SBKP",
       "tipo_corredor": "REA",
       "status": "OK",
-      "elapsed_s": 0.9,
-      "plot_path": null
+      "elapsed_s": 2.54,
+      "plot_path": "resultados_testes_REA_pngs/100_SBJR_SBKP.png"
     }
   ]
 }
