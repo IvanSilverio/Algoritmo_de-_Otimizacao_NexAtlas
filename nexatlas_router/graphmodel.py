@@ -365,7 +365,7 @@ class RouteGraph:
         self,
         origin_id: str,
         dest_id: str,
-        tma_radius_nm: float = 60.0,
+        tma_radius_nm: float = 30.0,
         entry_exit_k: int = 6,
         inter_tma_nm: float = 300.0,
         synth_penalty: float = 1.0,
@@ -389,6 +389,30 @@ class RouteGraph:
         corredores — não existe trecho direto origem->destino "pulando" a REA.
         O direto só vale quando a ponta NÃO está em TMA REA (entrar/sair da
         malha por um voo livre longo) ou quando NENHUMA ponta tem REA.
+
+        TAREFA_malha_de_passagem.md (21/08/26): `tma_radius_nm` (30 NM) é
+        DIFERENTE do raio de descoberta de carta (`chart_radius_nm`=60 NM em
+        db.build_subgraph) — aquele só monta o pool de cartas candidatas;
+        este decide se a ponta "pertence" a uma delas (malha da PONTA) ou só
+        está por perto (malha de PASSAGEM, que não deve ser obrigatória). Um
+        raio único de 60 NM pra ambos deixava passar malhas de passagem
+        coerentes e baratas (SWME->SBAQ via REA Ribeirão Preto, SBFI->SBML
+        via REA Londrina — nenhuma ponta pertence, mas a REA "no meio do
+        caminho" vencia a direta). Testei o polígono oficial de TMA
+        (published.airspaces, já usado no border_score) como critério de
+        pertencimento e DESCARTEI: SBAQ e o próprio SBRP (aeródromo de
+        Ribeirão Preto) caem na MESMA TMA oficial "Academia" — a malha REA é
+        mais granular que a TMA, não há correspondência 1:1. Calibrado ao
+        vivo contra a bateria de 100 + os 52 aeródromos documentados em
+        portoes_rea.json (o gabarito mais forte disponível): nenhuma relação
+        real passa de 13,5 NM; SBAQ está a 35,6 NM e SBML a 59,3 NM — 30 NM
+        cai num vazio real entre aeródromos OACI (SB*) a 29,3 NM (o mais
+        distante ainda claramente "da ponta") e 34,4 NM (SBJA->REA
+        Florianópolis, mesmo padrão de passagem). Há ~12 aeródromos SB*
+        entre 14,6-29,3 NM sem gabarito (documento ou bateria) — ficam
+        deliberadamente ACIMA do limiar (tratados como "da ponta", igual
+        hoje) até confirmação do Vinícius/Cristiano; não foram decididos por
+        heurística sem dado real.
 
         Modelo ASSIMÉTRICO conforme a ponta esteja "em TMA":
           • ponta EM TMA  -> conecta só aos k nós REA MAIS PRÓXIMOS.
