@@ -12,11 +12,20 @@ __pycache__/
 *.png
 airports_world.csv
 analise_voos.csv
+analise_vento.csv
 # resultados_testes_REA.json
 rotas_export.json
 
+# Saídas de validação ad-hoc (testes_referencia_portoes.py) — regeneráveis,
+# não são o gabarito (esse fica em tests/ts_equivalencia/, versionado).
+validacao_portoes/
+validacao_referencia_pdf/
+
 # Dados provisórios baixados (opcional — descomente se não quiser versionar)
 # data/aerodromos_br_ourairports.csv
+
+# Sidecar de metadado do Windows/WSL ao baixar arquivo (não é conteúdo)
+*:Zone.Identifier
 
 # Notas de trabalho / specs de tarefa concluída — locais, não fazem parte do
 # produto do repositório (histórico de decisão fica na mensagem de commit).
