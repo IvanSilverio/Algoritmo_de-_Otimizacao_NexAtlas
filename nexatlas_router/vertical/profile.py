@@ -215,6 +215,21 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     avisos: list[str] = []
     ac = aeronave
 
+    # TAREFA_magnetic_data_voo.md: declinação (WMM) pela DATA DO VOO, não pela
+    # data de execução — senão o rumo verdadeiro/vento e o gabarito congelado
+    # dependeriam de QUANDO se roda, não do voo em si (variação secular do
+    # WMM, ~0,025°/ano). `hora_referencia` também alimenta o vento abaixo —
+    # UMA só amostra de "agora" no fallback, não duas (rota + vento
+    # divergindo por microssegundos entre duas chamadas de time.time()).
+    if hora_partida_utc is not None:
+        hora_referencia = hora_partida_utc
+    else:
+        hora_referencia = time.time()
+        quando = dt.datetime.fromtimestamp(hora_referencia, dt.timezone.utc)
+        avisos.append(f"hora de partida não informada; usando agora ({quando:%Y-%m-%d %H:%M} UTC) "
+                      f"como data do voo para a declinação magnética (WMM) e o vento.")
+    data_voo = dt.datetime.fromtimestamp(hora_referencia, dt.timezone.utc).date()
+
     # Elevação de origem/destino: terreno no ponto (radius_px=0). (Futuro: cota do aeródromo.)
     def _elev(pos):
         try:
@@ -242,7 +257,7 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     # acontece), não a total — senão o cruzeiro fica alto demais e a aeronave sobe
     # mais do que cruza. Sem corredor (DIRETO puro) o en-route é a rota inteira.
     dist_cruz = (cum[ce] - cum[cs]) if tem_cruise_stretch else total
-    route_dir = magnetic_bearing(lateral.origin_pos, lateral.dest_pos)[0]
+    route_dir = magnetic_bearing(lateral.origin_pos, lateral.dest_pos, data_voo)[0]
     cruise = suggest_cruise_altitude(
         dist_cruz, route_dir, elev_o, elev_d, ac.teto_ft,
         ac.rate_ac_fpm, ac.rate_dc_fpm, ac.speed_ac_kt, ac.speed_dc_kt)
@@ -653,18 +668,17 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     # ---- vento: tempo/combustível recalculados por trecho (TAREFA_vento.md,
     #      passo 1). NÃO toca na geometria acima (vértices já estão prontos);
     #      wind=None -> campos ficam None (chamador optou por não calcular). ----
-    hora_vento = hora_partida_utc
+    # `hora_referencia` (com o fallback já avisado lá em cima) alimenta tanto a
+    # declinação quanto o vento — um só "agora", nunca dois valores de
+    # time.time() ligeiramente diferentes para a mesma rota.
+    hora_vento = None
     subida_vento = cruzeiro_vento = descida_vento = None
     comb_subida_vento = comb_cruzeiro_vento = comb_descida_vento = comb_total_vento = None
     segmentos_vento: list = []
     if wind is not None:
-        if hora_vento is None:
-            hora_vento = time.time()
-            quando = dt.datetime.fromtimestamp(hora_vento, dt.timezone.utc)
-            avisos.append("hora de partida não informada; usando agora para o "
-                          f"vento ({quando:%Y-%m-%d %H:%M} UTC).")
+        hora_vento = hora_referencia
         subida_vento, cruzeiro_vento, descida_vento, segmentos_vento = _vento_por_segmento(
-            vertices, legs, cum, ac, wind, hora_vento, avisos)
+            vertices, legs, cum, ac, wind, hora_vento, avisos, data_voo)
         if ac.fuel_ac is not None and ac.fuel_cruise is not None and ac.fuel_dc is not None and ac.fuel_unit:
             comb_subida_vento = ac.fuel_ac * (subida_vento.tempo_min / 60.0)
             comb_cruzeiro_vento = ac.fuel_cruise * (cruzeiro_vento.tempo_min / 60.0)
@@ -722,23 +736,25 @@ def _locate(legs, cum, x):
     return len(legs) - 1, (legs[-1].to_pos.lon, legs[-1].to_pos.lat)
 
 
-def _leg_true_heading(leg: LateralLeg) -> float:
+def _leg_true_heading(leg: LateralLeg, data_voo: dt.date) -> float:
     """Rumo VERDADEIRO da perna, para o triângulo do vento (u/v são leste/norte
     verdadeiros). Corredor: já vem do banco, mas em proa MAGNÉTICA
     (`corridor_heading_mag`, ver contract.py) — reconverte pra verdadeira somando
     a declinação WMM no meio da perna (`verdadeiro = magnético + D`, mesma
-    convenção do magnetic.py). DIRETO: sem rumo de carta (é reta geodésica) —
-    calcula da geometria com `initial_bearing`."""
+    convenção do magnetic.py), calculada na DATA DO VOO (`data_voo`), não na
+    data de execução (TAREFA_magnetic_data_voo.md). DIRETO: sem rumo de carta
+    (é reta geodésica) — calcula da geometria com `initial_bearing` (não
+    depende de declinação, então não usa `data_voo`)."""
     if leg.is_corridor and leg.corridor_heading_mag is not None:
         latm = (leg.from_pos.lat + leg.to_pos.lat) / 2.0
         lonm = (leg.from_pos.lon + leg.to_pos.lon) / 2.0
-        d = declination(latm, lonm)
+        d = declination(latm, lonm, data_voo)
         return (leg.corridor_heading_mag + d) % 360.0
     return initial_bearing(leg.from_pos, leg.to_pos)
 
 
 def _vento_por_segmento(vertices, legs, cum, ac: Aeronave, wind: Wind,
-                        hora_partida_utc: float, avisos: list):
+                        hora_partida_utc: float, avisos: list, data_voo: dt.date):
     """Percorre os mesmos trechos vértice-a-vértice de `_bucket_time`, recalculando
     o tempo com o triângulo do vento (TAREFA_vento.md §3). NÃO toca em x/altitude
     dos vértices — só tempo/combustível.
@@ -754,7 +770,7 @@ def _vento_por_segmento(vertices, legs, cum, ac: Aeronave, wind: Wind,
 
     def heading_da_perna(i):
         if i not in hdg_cache:
-            hdg_cache[i] = _leg_true_heading(legs[i])
+            hdg_cache[i] = _leg_true_heading(legs[i], data_voo)
         return hdg_cache[i]
 
     sub = cru = des = 0.0
