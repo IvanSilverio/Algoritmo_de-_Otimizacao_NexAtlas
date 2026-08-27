@@ -11,10 +11,21 @@ relaxa para o k-mais-próximos nem inventa o ponto.
 
 Pista/cabeceira (TAREFA_pista.md, 20/08/26): em poucos aeródromos (SBBH,
 SBNT, SBJR, SBRJ, SBJD, SBMT, SDCO) a regra depende da cabeceira em uso —
-cada regra do JSON pode trazer `pistas` (lista). Input OPCIONAL e
-NÃO-BLOQUEANTE: sem cabeceira informada (ou informada mas sem regra que
-bata), as regras com `pistas` simplesmente não se aplicam — nunca vira erro,
-nunca inventa união de cabeceiras como fallback (ver `pontos_obrigatorios`).
+cada regra do JSON pode trazer `pistas` (lista).
+
+TAREFA_pista_obrigatoria_e_vento_default.md (26/08/26) — decisão da reunião
+com o Vinícius: pista deixou de ser sempre opcional. Quando uma DIREÇÃO
+(partida/destino) só tem regra(s) condicionada(s) a cabeceira (nenhuma regra
+"geral" cobre o caso — ver `direcao_exige_pista`), a pista vira OBRIGATÓRIA
+pra essa direção: sem ela, `db.build_subgraph` levanta `PistaObrigatoriaError`
+(retorno estruturado, nunca uma rota calculada com portão "meio aplicado").
+Quando a pista informada NÃO casa nenhuma regra daquele aeródromo, ou quando
+o aeródromo/direção não tem regra nenhuma condicionada a cabeceira, o
+comportamento é o de sempre: nunca vira erro, nunca inventa união de
+cabeceiras como fallback (ver `pontos_obrigatorios`). O motor espera a
+string CANÔNICA da cabeceira, exatamente como está no JSON (ex.: "13",
+"16L") — normalizar formas livres ("pista 13", "decolar da 13") é
+responsabilidade de quem chama (orquestrador).
 """
 from __future__ import annotations
 
@@ -37,6 +48,35 @@ class PortaoResolucaoError(PortaoError):
 
 class PortaoDesconectadoError(PortaoError):
     """Forçar o portão obrigatório deixou a rota sem caminho origem->destino."""
+
+
+class PistaObrigatoriaError(PortaoError):
+    """Direção com regra só condicionada a cabeceira, e a pista não foi
+    informada (TAREFA_pista_obrigatoria_e_vento_default.md). Subclasse de
+    `PortaoError` de propósito: os runners de bateria já classificam
+    qualquer `PortaoError` como falha EXPLICADA (ERRO_PORTAO), não erro
+    silencioso — ver CLAUDE.md §3/§4.
+
+    `.to_dict()` é o retorno estruturado que o chamador (CLI, orquestrador,
+    gabarito) deve usar em vez de propagar a exceção crua ao usuário final:
+    `{"status": "faltou_input", "faltando": [...], "aerodromos": {...},
+    "mensagem": "..."}`. `faltando` sempre na ordem ["pista_origem",
+    "pista_destino"] quando os dois faltam.
+    """
+
+    _ACAO = {"pista_origem": "decolagem", "pista_destino": "pouso"}
+
+    def __init__(self, faltando: list[str], aerodromos: dict[str, str]):
+        self.faltando = list(faltando)
+        self.aerodromos = dict(aerodromos)
+        partes = [f"{aerodromos[campo]} tem regra de cabeceira; informe a "
+                  f"pista de {self._ACAO[campo]}" for campo in faltando]
+        self.mensagem = "; ".join(partes) + " para calcular a rota."
+        super().__init__(self.mensagem)
+
+    def to_dict(self) -> dict:
+        return {"status": "faltou_input", "faltando": list(self.faltando),
+                "aerodromos": dict(self.aerodromos), "mensagem": self.mensagem}
 
 
 def _carregar() -> dict:
@@ -101,6 +141,22 @@ def pontos_obrigatorios(icao: str, direcao: str,
                 if p not in pontos:
                     pontos.append(p)
     return pontos
+
+
+def direcao_exige_pista(icao: str, direcao: str) -> bool:
+    """True se TODAS as regras de `icao`/`direcao` são condicionadas a
+    cabeceira (`pistas`) — ou seja, nenhuma regra "geral" cobre essa direção,
+    então sem `pista` informada `pontos_obrigatorios` cairia em None (nenhuma
+    regra aplicável) e o motor rodaria sem NENHUM portão forçado nessa ponta.
+    TAREFA_pista_obrigatoria_e_vento_default.md: nesse caso a pista deixa de
+    ser opcional — `db.build_subgraph` deve recusar a rota (ver
+    `PistaObrigatoriaError`) em vez de cair silenciosamente no mínimo-local.
+
+    Só olha o JSON (sem banco) — checagem é por DIREÇÃO (partida OU destino),
+    nunca pelo aeródromo como um todo: um aeródromo pode exigir pista só numa
+    ponta (ex.: SBBH exige na partida, mas a regra de destino é geral)."""
+    regras = (_carregar().get(icao) or {}).get(direcao) or []
+    return bool(regras) and all(r.get("pistas") for r in regras)
 
 
 def aerodromo_exige_pista(icao: str) -> bool:

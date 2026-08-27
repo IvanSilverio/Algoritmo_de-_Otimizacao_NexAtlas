@@ -19,6 +19,10 @@ bit-a-bit (as duas linguagens usam bibliotecas WMM diferentes; ver §3).
   pontas nunca divergirem na forma de CALCULAR (só o comparador muda).
 - **`gerar_gabarito.py`** — regenera `gabarito_rotas.json` do zero. Só rodar quando o banco
   mudar de forma relevante para algum dos casos (ver §5).
+- **`CONTRATO_ERROS.md`** — o que o motor devolve quando o input está incompleto (pista
+  obrigatória faltando) ou quando um comportamento (não erro) muda o formato da saída (sem
+  hora → sem vento), pro orquestrador (Caio) mapear pra pergunta ao piloto. Separado do que
+  NÃO é do motor (aeronave ausente, ICAO inválido, etc.) — ver TAREFA_gabarito_v2_contrato.md.
 
 ## 1. Como rodar o runner de referência (nosso lado)
 
@@ -40,18 +44,20 @@ recalcula tudo na hora e compara com o congelado no JSON; ele não roda offline.
     "gerado_em": "...",          // timestamp ISO-8601 UTC da geração
     "commit": "0b9327e",          // hash curto do commit em que foi gerado
     "wmm_edition": "WMM-2025",
-    "hora_partida_utc_usada": "24/08/2026 15:00",
+    "vento_offset_h": 6,           // regra usada pelos casos vento_modo=relativo (ver §3)
+    "agora_relativa_usada": "...", // valor resolvido NA GERAÇÃO — informativo, não é relido
     "nota": "..."
   },
   "casos": [
     {
       "id": "lateral_portao_obrigatorio_com_pista",
+      "tipo_caso": "rota",       // "rota" (default) ou "contrato_input" — ver caso-sinal abaixo
       "cobertura": ["lateral:portao_por_cabeceira_pista_informada"],   // só documentação
       "entrada": {
         "origem": "SBBH", "destino": "SBFZ",
         "aeronave": "1n7s5U5J",            // id de published.aircraft_models
         "pista_origem": "13", "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null            // null = SEM vento (default); ver §3
       },
       "esperado": {
         "lateral": {
@@ -69,28 +75,50 @@ recalcula tudo na hora e compara com o congelado no JSON; ele não roda offline.
           "descida_ingreme_nm": [[758.0, 760.1]]   // trechos fora da razão máxima (vermelho)
         },
         "vento": {
-          "segmentos": [{"x0_nm": 0.0, "x1_nm": 12.4, "fase": "subida",
-                        "gs_kt": 92.3, "componente_cauda_kt": 5.1, "deriva_deg": -2.3}, ...],
-          "tempo_min_vento": 236.8,
-          "combustivel_vento": 94.1
+          "segmentos": [],                   // vazio quando entrada.hora_partida_utc é null
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {"corredor": "CEASA", "declinacao_deg": -21.34, "rumo_magnetico_deg": 47.0,
            "rumo_verdadeiro_deg": 25.66}, ...
         ]
       }
+    },
+    {
+      "id": "lateral_portao_obrigatorio_sem_pista",
+      "tipo_caso": "contrato_input",       // caso de CONTRATO — esperado é um SINAL, não rota
+      "cobertura": ["contrato:pista_obrigatoria_faltando"],
+      "entrada": {
+        "origem": "SBBH", "destino": "SBFZ", "aeronave": "1n7s5U5J",
+        "pista_origem": null, "pista_destino": null, "hora_partida_utc": null
+      },
+      "esperado": {
+        "status": "faltou_input",
+        "faltando": ["pista_origem"],
+        "aerodromos": {"pista_origem": "SBBH"},
+        "mensagem": "SBBH tem regra de cabeceira; informe a pista de decolagem para calcular a rota."
+      }
     }
   ]
 }
 ```
+
+Um caso é de **rota** (`esperado` tem as chaves `lateral`/`vertical`/`vento`/`magnetico`) ou de
+**contrato** (`esperado` tem a chave `status` — um sinal estruturado, não uma rota) — ver
+`CONTRATO_ERROS.md` pro contrato completo desses sinais.
 
 Campos de `entrada`:
 - `aeronave`: **id** de `published.aircraft_models` (não o `designator_icao` — não é único
   no banco; ver `nexatlas_router/vertical/aircraft.py`).
 - `pista_origem`/`pista_destino`: cabeceira em uso (ex.: `"13"`), só relevante nos 7
   aeródromos com regra de portão por pista; `null` quando não informada.
-- `hora_partida_utc`: string no formato aceito por `parse_hora_utc` (`wind.py`) — fixa por
-  caso, para o vento ser reprodutível.
+- `hora_partida_utc`: **`null` por padrão** (o motor não calcula vento sem hora — ver §3);
+  string ISO-8601 só nos casos que pedem vento de propósito (`vento_modo` presente).
+- `vento_modo`/`vento_offset_h` (só quando o caso pede vento): sempre `"relativo"`/o número de
+  horas — ver §3, "os dois modos de vento".
+- `vento_par_reciproco` (só nos 2 casos de par ida/volta): mesmo valor nos dois, usado pela
+  checagem cruzada de `verifica_gabarito.py` — ver §3.
 - `aeronave_observacao` (só quando presente): sinaliza que a aeronave é uma **aeronave real
   do banco com o combustível zerado artificialmente** — ver §4, caso
   `vertical_aeronave_sem_combustivel`.
@@ -114,30 +142,60 @@ mude. Por isso a comparação usa tolerância, campo a campo:
 | `vertical.vertices[].tipo` / `.nome` / `.real` | igualdade exata | categórico |
 | `vertical.tempo_min.*` | ± 0,1 min | por fase e total |
 | `vertical.combustivel.*` | ± 0,1 (unidade nativa) | ver `combustivel.unidade` — **nunca normalizar** entre l/h, us gal/h, lb/h |
-| `vento.segmentos[].gs_kt` / `.componente_cauda_kt` | ± 0,1 kt | |
+| `vento.segmentos[].gs_kt` / `.componente_cauda_kt` | ± 0,1 kt | só nos casos **sem** `vento_modo` (comparação exata); ver "os dois modos de vento" abaixo |
 | `magnetico[].declinacao_deg` / `.rumo_magnetico_deg` / `.rumo_verdadeiro_deg` / `vento.segmentos[].deriva_deg` | **± 0,01°** | absorve o ruído ~0,0001° de implementação, mas detecta troca de edição do WMM (muda em graus) |
 | `vertical.avisos` (texto) | **não comparado** | texto livre, específico da implementação/idioma; o que importa estruturalmente já está em `descida_ingreme_nm` |
+| `sinal.status` / `.faltando` / `.aerodromos` (casos `tipo_caso: "contrato_input"`) | igualdade exata | ver `CONTRATO_ERROS.md` — `sinal.mensagem` é texto livre, **não comparado** |
 
-Um caso "passa" quando **todos** os campos do bloco (lateral/vertical/vento/magnético)
-batem dentro da tolerância. `verifica_gabarito.py` reporta PASS/FAIL por bloco, não só por
-caso — um caso pode passar no lateral e falhar no vento, por exemplo, e isso já aponta onde
-olhar.
+Um caso "passa" quando **todos** os campos do bloco (lateral/vertical/vento/magnético — ou só
+`sinal`, nos casos de contrato) batem dentro da tolerância. `verifica_gabarito.py` reporta
+PASS/FAIL por bloco, não só por caso — um caso pode passar no lateral e falhar no vento, por
+exemplo, e isso já aponta onde olhar. Um caso de contrato só tem o bloco `sinal` — os outros 4
+aparecem como "—" (não se aplica, nunca conta contra o PASS/FAIL) no relatório.
 
-### Declinação usa a DATA DO VOO — o gabarito não expira sozinho
+### Os dois modos de vento — por que a maioria dos casos não leva hora
 
-A declinação (WMM) é calculada com a **data do voo** (`hora_partida_utc`), não com a data em
-que o código roda (corrigido em `profile.py` — `magnetic.py` já suportava data explícita
-desde o início; só faltava alguém passar). Isso vale tanto pro bloco `magnetico` quanto pra
-`deriva_deg`/rumo verdadeiro do vento, que dependem da mesma declinação. Como `hora_partida_utc`
-é **fixa por caso** neste gabarito, rodar `verifica_gabarito.py` daqui a um mês ou daqui a um
-ano dá a **mesma declinação** — o snapshot é reprodutível de verdade, não depende de *quando*
-se roda. Se algum dia o TS reproduzir cada caso usando a `entrada.hora_partida_utc` do JSON
-(não a data corrente da máquina rodando o teste), o comportamento deles vai bater com o mesmo
-princípio.
+TAREFA_gabarito_v2_contrato.md (26/08/26): antes, TODO caso levava uma `hora_partida_utc` FIXA
+(a mesma data pra tudo), e isso incluía sempre um bloco `vento` calculado e comparado por
+igualdade exata — inclusive nos casos que não tinham NADA a ver com vento. Isso expirava
+sozinho: o CDN só serve ~5 dias de previsão a partir de "agora", então uma data congelada há
+algumas semanas já não bate mais com o que o CDN devolve hoje (achado ao vivo, 26/08: o
+gabarito antigo estava em 0/25 por causa disso). O modelo mudou pra dois modos, escolhidos por
+caso:
 
-O WMM ainda tem variação secular contínua (~0,025°/ano medidos num ponto de MG) — mas agora
-ela só aparece quando o `hora_partida_utc` de dois casos difere de fato (ex.: um voo em 2026 x
-um em 2029), nunca por causa de quando o teste foi executado.
+1. **Sem hora (a maioria — default do motor desde a TAREFA_pista_obrigatoria_e_vento_
+   default.md):** `entrada.hora_partida_utc = null`. O motor não calcula vento — `esperado.vento`
+   fica `{"segmentos": [], "tempo_min_vento": null, "combustivel_vento": null}` **pra sempre**.
+   Como não depende do CDN, esse bloco NUNCA expira — comparação por igualdade exata (trivial:
+   os dois lados sempre vazios).
+2. **`vento_modo: "relativo"` (só os 4 casos que testam vento de propósito):**
+   `entrada.hora_partida_utc` é o valor resolvido NA GERAÇÃO (`agora` daquele momento +
+   `vento_offset_h` horas — hoje 6h), só informativo. `verifica_gabarito.py` **recalcula** essa
+   hora com o `agora` da própria execução (mesma regra, `+vento_offset_h`) em vez de reler o
+   valor congelado — assim sempre cai dentro da janela de previsão do CDN, não importa quando
+   rodar. Como o vento REAL muda a cada previsão, o valor exato (`gs_kt`, `componente_cauda_kt`)
+   não é mais comparável — a comparação é ESTRUTURAL (`compara_vento_relativo` em
+   `verifica_gabarito.py`): mesma contagem de segmentos (isso não depende do vento, só da
+   geometria — comparado exato), groundspeed positiva/plausível em cada um, e `tempo_min_vento`
+   existe.
+
+   Os 2 casos `vento_par_reciproco_ida`/`_volta` (mesmo par, sentidos opostos, mesma hora — daí
+   o campo `vento_par_reciproco` com o mesmo valor nos dois) recebem ainda uma **checagem
+   cruzada**: como as duas pernas voam o MESMO campo de vento em rumos opostos, uma tem que sair
+   mais rápida e a outra mais lenta que sem vento — nunca as duas iguais. Achado ao vivo (26/08):
+   a checagem NÃO afirma qual perna especificamente leva cauda — isso é o forecast do momento,
+   muda de execução pra execução (a mesma rota que era cauda na ida no snapshot antigo virou
+   proa na hora relativa de outra execução, e está certo, é o vento mudando, não bug); a
+   invariante que não muda é só "efeitos opostos".
+
+### Declinação usa a data de execução — o WMM não é sensível a isso
+
+O bloco `magnetico` (e a `deriva_deg` do vento) usa a declinação WMM calculada na data em que
+`gerar_gabarito.py`/`verifica_gabarito.py` rodam — não em `hora_partida_utc` (que agora nem
+existe na maioria dos casos). Isso é seguro: a variação secular do WMM é de ~0,025°/ano medidos
+num ponto de MG, contra uma tolerância de 0,01° — dá margem de vários MESES entre gerar e
+verificar antes de qualquer risco de estourar a tolerância por causa só da data. Regenerar o
+gabarito com a cadência normal (§5) é bem mais frequente que isso.
 
 ## 4. O que cada caso cobre
 
@@ -146,17 +204,24 @@ Ver a lista completa com a cobertura marcada na mensagem de entrega desta tarefa
 `TAREFA_gabarito_TS_e_faxina.md` §1.3:
 
 - **Lateral:** direto puro longo, corredor coerente (malha da ponta), portão obrigatório,
-  portão por cabeceira de pista (com/sem pista informada, mesmo aeródromo), exceção de
-  portão único ("X ou Y"), malha de passagem (vira direto), k-shortest (alternativas).
+  portão por cabeceira de pista (com pista informada — casando ou não com a regra —, mesmo
+  aeródromo), exceção de portão único ("X ou Y"), malha de passagem (vira direto), k-shortest
+  (alternativas).
 - **Vertical:** subida até teto de corredor, descida em degraus com `start` entre
   corredores, trecho final íngreme com aviso (SBPA→SBFL / SR22), combustível por fase (3
   unidades nativas diferentes: l/h, us gal/h, lb/h), aeronave sem dados de combustível.
-- **Vento:** par recíproco (mesma hora de partida, sentidos opostos) para garantir cauda
-  numa direção e proa na outra pelo mesmo campo de vento; deriva conferida nos trechos de
-  través de qualquer um dos casos com vento.
+- **Vento:** par recíproco (`vento_par_reciproco_ida`/`_volta`, mesma hora relativa, sentidos
+  opostos) para garantir efeito OPOSTO nas duas pernas pelo mesmo campo de vento (checagem
+  cruzada — ver acima); deriva conferida nos trechos de través de qualquer um dos casos com
+  vento; par mínimo sem-hora/com-hora (`contrato_sem_hora_sem_vento`/`_com_hora_com_vento`,
+  mesmo par/aeronave) isolando o efeito do default "sem hora = sem vento".
 - **Magnético:** corredores em cartas/regiões distantes (Norte, Nordeste, Centro-Oeste,
   Sudeste, Sul) — declinações bem diferentes entre si, então qualquer troca de edição do WMM
   entre as duas implementações apareceria em pelo menos um desses casos.
+- **Contrato de input** (`tipo_caso: "contrato_input"`, `esperado` é um sinal — ver
+  `CONTRATO_ERROS.md`): pista obrigatória faltando (1 lado / 2 lados), pista informada mas
+  que não casa nenhuma regra do aeródromo (`contrato_pista_nao_casa` — rota normal, não é
+  sinal), sem hora → sem vento, com hora → com vento.
 
 ### Nota de transparência: caso `vertical_aeronave_sem_combustivel`
 
@@ -187,18 +252,29 @@ diferentes e as duas continuam necessárias.
 
 ## 6. Passo a passo para o time do TS
 
-1. Ler este README e `gabarito_rotas.json`.
-2. Para cada `caso.entrada`, rodar o algoritmo TS com os mesmos parâmetros (mesmo
-   `origem`/`destino`/`aeronave`/`pista_origem`/`pista_destino`/`hora_partida_utc`).
-3. Comparar a saída do TS contra `caso.esperado`, campo a campo, com as tolerâncias da
-   tabela do §3 (não bit-a-bit).
-4. Um caso "passa" quando os 4 blocos (lateral/vertical/vento/magnético) batem dentro da
-   tolerância. Reportar PASS/FAIL por bloco, não só por caso — ajuda a isolar onde está a
-   divergência (ex.: lateral bate mas o vento não → é a integração com o CDN de vento, não a
-   rota).
-5. Se um bloco falhar só na parte magnética/deriva por uma fração de grau pequena, confira
-   primeiro se o TS está calculando a declinação com a **`hora_partida_utc` do caso** (não com
-   a data corrente da máquina rodando o teste) — ver §3. Feito isso corretamente, o resultado
-   não deve variar com *quando* o teste roda.
+1. Ler este README, `CONTRATO_ERROS.md` e `gabarito_rotas.json`.
+2. Para cada caso, checar `tipo_caso` primeiro:
+   - `"rota"` (a maioria): rodar o algoritmo TS com os parâmetros de `caso.entrada` (mesmo
+     `origem`/`destino`/`aeronave`/`pista_origem`/`pista_destino`/`hora_partida_utc` — a
+     maioria tem `hora_partida_utc: null`, o que significa NÃO calcular vento, não "agora").
+     Comparar a saída contra `caso.esperado.{lateral,vertical,vento,magnetico}`, campo a
+     campo, com as tolerâncias do §3.
+   - `"contrato_input"`: `caso.esperado` é um SINAL (`status`/`faltando`/`aerodromos`), não
+     uma rota — rodar o algoritmo TS com os mesmos parâmetros e conferir que ele recusa a
+     rota com o MESMO sinal estruturado (ver `CONTRATO_ERROS.md`). `sinal.mensagem` é texto
+     livre, não comparar por igualdade.
+3. Nos casos com `entrada.vento_modo == "relativo"` (só 4 no gabarito hoje), NÃO reler
+   `entrada.hora_partida_utc` literalmente — recalcular `agora + entrada.vento_offset_h`
+   horas na hora de rodar o teste (mesma regra que `verifica_gabarito.py` usa), e comparar o
+   bloco `vento` por ESTRUTURA (contagem de segmentos, groundspeed positiva), não por valor
+   exato — ver §3, "os dois modos de vento".
+4. Um caso de rota "passa" quando os 4 blocos batem dentro da tolerância; um caso de contrato
+   "passa" quando o sinal bate. Reportar PASS/FAIL por bloco, não só por caso — ajuda a isolar
+   onde está a divergência (ex.: lateral bate mas o vento não → é a integração com o CDN de
+   vento, não a rota).
+5. Se um bloco falhar só na parte magnética/deriva por uma fração de grau pequena, é
+   provavelmente só a data de execução ter mudado (§3 — a declinação não usa
+   `hora_partida_utc`, usa a data corrente; a tolerância de 0,01° cobre isso por meses) —
+   não é regressão.
 6. `verifica_gabarito.py` (Python) é a referência de como fazer essa comparação — o runner
    do TS deve seguir a mesma lógica campo a campo, só trocando "rodar Python" por "rodar TS".

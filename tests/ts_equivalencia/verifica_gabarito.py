@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -135,6 +136,49 @@ def compara_vento(esperado: dict, obtido: dict, diffs: Diffs) -> bool:
     return ok
 
 
+def compara_vento_relativo(esperado: dict, obtido: dict, diffs: Diffs) -> bool:
+    """TAREFA_gabarito_v2_contrato.md, Parte B: casos `vento_modo: 'relativo'`
+    usam uma hora recalculada a cada execução (não a congelada), porque o
+    vento REAL muda a cada previsão — comparar `gs_kt`/`componente_cauda_kt`
+    por igualdade exata contra o congelado falharia sempre, sem ser
+    regressão. Comparação ESTRUTURAL: mesma contagem de segmentos (isso NÃO
+    depende do vento, só da geometria — pode ser exato) e groundspeed
+    positiva/plausível em cada um. NÃO afirma qual sentido leva cauda/proa —
+    achado ao vivo (26/08): isso muda com o forecast, não é propriedade fixa
+    da rota (ver `vento_par_reciproco` em main() pra invariante que de fato
+    não muda)."""
+    ok = True
+    se, so = esperado["segmentos"], obtido["segmentos"]
+    if len(se) != len(so):
+        diffs.add("vento.segmentos (quantidade)", len(se), len(so))
+        return False
+    for i, s in enumerate(so):
+        if s["gs_kt"] <= 0:
+            diffs.add(f"vento.segmentos[{i}].gs_kt (deveria ser > 0)", ">0", s["gs_kt"])
+            ok = False
+    if obtido["tempo_min_vento"] is None:
+        diffs.add("vento.tempo_min_vento (deveria existir — vento_modo=relativo)", "not None", None)
+        ok = False
+    return ok
+
+
+def compara_sinal(esperado: dict, obtido: dict, diffs: Diffs) -> bool:
+    """Casos `tipo_caso: 'contrato_input'` cujo motor recusa a rota — o
+    `esperado`/`obtido` aqui é `PistaObrigatoriaError.to_dict()`
+    (TAREFA_gabarito_v2_contrato.md), não o dict lateral/vertical/vento/
+    magnetico. Compara só os campos ESTRUTURADOS (`status`, `faltando`,
+    `aerodromos`) — `mensagem` é texto livre, como `vertical.avisos`, não é
+    comparado (ver README_equivalencia.md §3)."""
+    ok = True
+    if esperado.get("status") != obtido.get("status"):
+        diffs.add("sinal.status", esperado.get("status"), obtido.get("status")); ok = False
+    if sorted(esperado.get("faltando") or []) != sorted(obtido.get("faltando") or []):
+        diffs.add("sinal.faltando", esperado.get("faltando"), obtido.get("faltando")); ok = False
+    if (esperado.get("aerodromos") or {}) != (obtido.get("aerodromos") or {}):
+        diffs.add("sinal.aerodromos", esperado.get("aerodromos"), obtido.get("aerodromos")); ok = False
+    return ok
+
+
 def compara_magnetico(esperado: list, obtido: list, diffs: Diffs) -> bool:
     ok = True
     if len(esperado) != len(obtido):
@@ -177,56 +221,142 @@ def main() -> None:
     terreno = Terrain()
     wind = Wind()
     if not wind.disponivel():
-        print(f"[AVISO] Vento indisponível ({wind.erro}) — o bloco `vento` vai comparar contra (0,0) "
-              f"e provavelmente vai FALHAR (não é regressão, é o CDN fora do ar).")
+        print(f"[AVISO] Vento indisponível ({wind.erro}) — os casos com `vento_modo: relativo` "
+              f"vão comparar contra (0,0) e provavelmente vão FALHAR (não é regressão, é o CDN fora do ar).")
+
+    # TAREFA_gabarito_v2_contrato.md, Parte B: resolvida UMA VEZ pra toda a
+    # rodada (não por caso) — mesma razão do AGORA_RELATIVA em gerar_gabarito.
+    # py: garante que pares recíprocos vejam o MESMO campo de vento.
+    agora = time.time()
+
+    # TAREFA_gabarito_v2_contrato.md, Parte B: grupo -> [(id, delta_min), ...]
+    # pra checagem cruzada DEPOIS do loop (ver abaixo) — a invariante que não
+    # muda com o forecast é "as duas pernas de um par recíproco têm efeito
+    # OPOSTO" (uma mais rápida, a outra mais lenta que sem vento), não qual
+    # delas especificamente leva cauda.
+    pares_reciprocos: dict[str, list] = {}
 
     resultados = []
     for caso in casos:
-        hora_partida = parse_hora_utc(caso["entrada"]["hora_partida_utc"])
+        entrada = caso["entrada"]
+        vento_modo = entrada.get("vento_modo")
+        if entrada.get("hora_partida_utc") is None:
+            hora_partida = None
+        elif vento_modo == "relativo":
+            # NÃO relê o valor congelado — recalcula com o `agora` de HOJE,
+            # pra cair sempre dentro da janela de previsão do CDN (é isso que
+            # faz o caso nunca expirar; ver compara_vento_relativo).
+            hora_partida = agora + entrada["vento_offset_h"] * 3600.0
+        else:
+            hora_partida = parse_hora_utc(entrada["hora_partida_utc"])
         caso_input = {
-            "origem": caso["entrada"]["origem"], "destino": caso["entrada"]["destino"],
-            "aeronave": caso["entrada"]["aeronave"],
-            "pista_origem": caso["entrada"].get("pista_origem"),
-            "pista_destino": caso["entrada"].get("pista_destino"),
-            "sem_combustivel": "aeronave_observacao" in caso["entrada"],
+            "origem": entrada["origem"], "destino": entrada["destino"],
+            "aeronave": entrada["aeronave"],
+            "pista_origem": entrada.get("pista_origem"),
+            "pista_destino": entrada.get("pista_destino"),
+            "sem_combustivel": "aeronave_observacao" in entrada,
         }
-        blocos = {}
+        is_sinal_esperado = "status" in caso["esperado"]
+
         try:
             obtido = computar_caso(loader, catalog, terreno, wind, hora_partida, caso_input)
+            erro = None
+        except Exception as e:
+            obtido = None
+            erro = str(e)
+
+        is_sinal_obtido = obtido is not None and "status" in obtido
+
+        if erro is not None:
+            msg = f"EXCEÇÃO: {erro}"
+            blocos = ({"sinal": (False, Diffs([msg]))} if is_sinal_esperado else
+                     {b: (False, Diffs([msg])) for b in ("lateral", "vertical", "vento", "magnetico")})
+        elif is_sinal_esperado != is_sinal_obtido:
+            # formato incompatível: o motor devolveu rota onde se esperava um
+            # sinal estruturado, ou vice-versa — sempre uma falha real, nunca
+            # um KeyError tentando ler blocos que não existem no outro lado.
+            msg = (f"esperava {'SINAL' if is_sinal_esperado else 'ROTA'}, obteve "
+                  f"{'SINAL' if is_sinal_obtido else 'ROTA'}"
+                  + (f" ({obtido.get('mensagem')})" if is_sinal_obtido else ""))
+            blocos = ({"sinal": (False, Diffs([msg]))} if is_sinal_esperado else
+                     {b: (False, Diffs([msg])) for b in ("lateral", "vertical", "vento", "magnetico")})
+        elif is_sinal_esperado:
+            diffs = Diffs()
+            ok = compara_sinal(caso["esperado"], obtido, diffs)
+            blocos = {"sinal": (ok, diffs)}
+        else:
+            blocos = {}
             for bloco in ("lateral", "vertical", "vento", "magnetico"):
                 diffs = Diffs()
+                if bloco == "vento" and vento_modo == "relativo":
+                    ok = compara_vento_relativo(caso["esperado"]["vento"], obtido["vento"], diffs)
+                    blocos[bloco] = (ok, diffs)
+                    par = entrada.get("vento_par_reciproco")
+                    tempo_com_vento = obtido["vento"]["tempo_min_vento"]
+                    if par and ok and tempo_com_vento is not None:
+                        tempo_sem_vento = obtido["vertical"]["tempo_min"]["total"]
+                        pares_reciprocos.setdefault(par, []).append(
+                            (caso["id"], tempo_com_vento - tempo_sem_vento, blocos, diffs))
+                    continue
                 cmp_fn = {"lateral": compara_lateral, "vertical": compara_vertical,
                          "vento": compara_vento, "magnetico": compara_magnetico}[bloco]
                 ok = cmp_fn(caso["esperado"][bloco], obtido[bloco], diffs)
                 blocos[bloco] = (ok, diffs)
-        except Exception as e:
-            blocos = {b: (False, Diffs([f"EXCEÇÃO: {e}"])) for b in ("lateral", "vertical", "vento", "magnetico")}
         resultados.append((caso["id"], blocos))
 
     conn.close()
 
+    # --------------------------------------------- checagem cruzada (Parte B)
+    # As duas pernas de um par recíproco voam o MESMO campo de vento (mesma
+    # AGORA_RELATIVA) em rumos opostos — uma tem que sair mais rápida e a
+    # outra mais lenta que sem vento, nunca as duas iguais (a física do
+    # triângulo do vento garante isso; não importa qual delas é qual, isso
+    # muda com o forecast). Limiar de 0,5 min evita falso-positivo no caso
+    # raro de vento quase perpendicular às duas pernas (través puro).
+    for par, membros in pares_reciprocos.items():
+        if len(membros) != 2:
+            continue
+        (id_a, delta_a, blocos_a, diffs_a), (id_b, delta_b, blocos_b, diffs_b) = membros
+        if (delta_a > 0) == (delta_b > 0) and abs(delta_a) > 0.5 and abs(delta_b) > 0.5:
+            sentido = "MAIS LENTAS" if delta_a > 0 else "MAIS RÁPIDAS"
+            msg = (f"par recíproco {par!r} ({id_a} / {id_b}): as duas pernas ficaram "
+                  f"{sentido} que sem vento (δ={delta_a:+.1f} e {delta_b:+.1f} min) — "
+                  f"esperava sentidos OPOSTOS (mesmo campo de vento, rumos opostos).")
+            diffs_a.add("vento.par_reciproco", "sentidos opostos", msg)
+            diffs_b.add("vento.par_reciproco", "sentidos opostos", msg)
+            blocos_a["vento"] = (False, diffs_a)
+            blocos_b["vento"] = (False, diffs_b)
+
     # ------------------------------------------------------------- relatório
+    # "—" marca bloco N/A pro tipo do caso: um caso-sinal só tem "sinal"; um
+    # caso-rota só tem os outros 4 (nunca "sinal") — só conta pro total quem
+    # de fato existe em `blocos`, N/A nunca pesa contra o PASS/FAIL.
     total_blocos = 0
     ok_blocos = 0
-    print(f"{'caso':<48} {'lateral':<9} {'vertical':<9} {'vento':<9} {'magnetico':<9}")
-    print("-" * 88)
+    print(f"{'caso':<48} {'lateral':<9} {'vertical':<9} {'vento':<9} {'magnetico':<9} {'sinal':<9}")
+    print("-" * 97)
     for cid, blocos in resultados:
         linha = [cid[:47]]
-        for b in ("lateral", "vertical", "vento", "magnetico"):
+        for b in ("lateral", "vertical", "vento", "magnetico", "sinal"):
+            if b not in blocos:
+                linha.append("—")
+                continue
             ok, _ = blocos[b]
             total_blocos += 1
             ok_blocos += 1 if ok else 0
             linha.append("PASS" if ok else "FAIL")
-        print(f"{linha[0]:<48} {linha[1]:<9} {linha[2]:<9} {linha[3]:<9} {linha[4]:<9}")
+        print(f"{linha[0]:<48} {linha[1]:<9} {linha[2]:<9} {linha[3]:<9} {linha[4]:<9} {linha[5]:<9}")
         if args.verbose:
-            for b in ("lateral", "vertical", "vento", "magnetico"):
+            for b in ("lateral", "vertical", "vento", "magnetico", "sinal"):
+                if b not in blocos:
+                    continue
                 ok, diffs = blocos[b]
                 if not ok:
                     for d in diffs:
                         print(f"    [{b}] {d}")
 
     casos_ok = sum(1 for _, blocos in resultados if all(ok for ok, _ in blocos.values()))
-    print("-" * 88)
+    print("-" * 97)
     print(f"Casos: {casos_ok}/{len(resultados)} 100% PASS   "
           f"Blocos: {ok_blocos}/{total_blocos} PASS "
           f"({100 * ok_blocos / total_blocos:.1f}%)")

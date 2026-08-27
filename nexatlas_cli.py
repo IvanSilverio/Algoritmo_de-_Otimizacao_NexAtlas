@@ -30,7 +30,7 @@ except ImportError:
 
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.v1 import plan_v1_route
-from nexatlas_router.portoes import aerodromo_exige_pista
+from nexatlas_router.portoes import aerodromo_exige_pista, PistaObrigatoriaError
 try:
     from nexatlas_router.plot_route import plot_v1_combined
     _HAS_LATERAL_PLOT = True
@@ -414,6 +414,8 @@ def main() -> None:
             graph, meta = loader.build_subgraph(
                 origin, dest, chart_radius_nm=60.0, link_radius_nm=30.0,
                 pista_origem=pista_origem, pista_destino=pista_destino)
+        except PistaObrigatoriaError as e:
+            print(f"\n  {RED}✗ {e.mensagem}{RST}\n"); continue
         except LookupError as e:
             print(f"\n  {RED}✗ Aeródromo não encontrado:{RST} {e}\n"); continue
         except Exception as e:
@@ -437,14 +439,14 @@ def main() -> None:
             hora_partida = None
             try:
                 hora_raw = input(f"  {BLD}Hora de partida (UTC) "
-                                 f"[ex.: 15/08/2026 14:30 · 14:30 (hoje) · Enter = agora]:{RST} ").strip()
+                                 f"[ex.: 15/08/2026 14:30 · 14:30 (hoje) · Enter = sem vento]:{RST} ").strip()
             except (EOFError, KeyboardInterrupt):
                 hora_raw = ""
             if hora_raw:
                 try:
                     hora_partida = parse_hora_utc(hora_raw)
                 except Exception as e:
-                    print(f"  {RED}✗ Hora inválida ({e}); usando agora.{RST}")
+                    print(f"  {RED}✗ Hora inválida ({e}); seguindo sem vento.{RST}")
             try:
                 perfil = plan_from_v1(graph, result, aircraft, Terrain(), Wind(),
                                       hora_partida_utc=hora_partida)

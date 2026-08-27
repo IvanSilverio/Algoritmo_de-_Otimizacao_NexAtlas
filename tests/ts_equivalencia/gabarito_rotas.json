@@ -1,10 +1,11 @@
 {
   "meta": {
-    "gerado_em": "2026-08-24T14:08:01.435580+00:00",
-    "commit": "0b9327e",
+    "gerado_em": "2026-08-26T21:04:34.446979+00:00",
+    "commit": "37330a4",
     "wmm_edition": "WMM-2025",
-    "hora_partida_utc_usada": "24/08/2026 15:00",
-    "nota": "Snapshot CONGELADO gerado a partir do banco jetstream (schema published) e do CDN de terreno/vento na data acima. Regenerar (python3 gerar_gabarito.py) quando o banco mudar de forma relevante para algum destes pares origem/destino. Tolerâncias de comparação em README_equivalencia.md. O bloco `magnetico` (e a deriva do vento) usa a declinação WMM calculada na DATA DO VOO de cada caso (`entrada.hora_partida_utc`), não na data de execução do runner — reproduzível independente de quando se roda; ver README_equivalencia.md."
+    "vento_offset_h": 6,
+    "agora_relativa_usada": "2026-08-27T03:02:19.158207+00:00",
+    "nota": "Snapshot CONGELADO gerado a partir do banco jetstream (schema published) e do CDN de terreno/vento na data acima. Regenerar (python3 gerar_gabarito.py) quando o banco mudar de forma relevante para algum destes pares origem/destino. Tolerâncias de comparação em README_equivalencia.md. TAREFA_gabarito_v2_contrato.md (26/08/26): a maioria dos casos roda SEM `hora_partida_utc` (default do motor desde a TAREFA_pista_obrigatoria_e_vento_default.md) — o bloco `vento` fica vazio pra sempre, nunca expira. Só os casos com `entrada.vento_modo == 'relativo'` pedem vento de propósito: usam `agora_relativa_usada` (agora da GERAÇÃO + `vento_offset_h`), e `verifica_gabarito.py` RECALCULA essa hora com o `agora` dele (mesma regra) em vez de reler o valor congelado — por isso o vento desses casos é comparado por estrutura/sinal, não por igualdade exata. O bloco `magnetico` usa a declinação WMM na data de EXECUÇÃO de quem gerou/verificou (não em `hora_partida_utc`) — a variação secular do WMM (~0,025°/ano) fica bem dentro da tolerância de 0,01° por vários meses; ver README_equivalencia.md."
   },
   "casos": [
     {
@@ -14,13 +15,14 @@
         "magnetico:regioes_distantes",
         "vertical:combustivel_por_fase_turboprop"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SIG6",
         "destino": "SBRF",
         "aeronave": "hgS_N8CC",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -140,87 +142,22 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 41.62,
-              "fase": "subida",
-              "gs_kt": 134.72,
-              "componente_cauda_kt": -16.54,
-              "deriva_deg": 5.655
-            },
-            {
-              "x0_nm": 41.62,
-              "x1_nm": 1645.26,
-              "fase": "cruzeiro",
-              "gs_kt": 158.72,
-              "componente_cauda_kt": -20.0,
-              "deriva_deg": 3.194
-            },
-            {
-              "x0_nm": 1645.26,
-              "x1_nm": 1696.15,
-              "fase": "descida",
-              "gs_kt": 204.22,
-              "componente_cauda_kt": 4.24,
-              "deriva_deg": 0.793
-            },
-            {
-              "x0_nm": 1696.15,
-              "x1_nm": 1701.31,
-              "fase": "cruzeiro",
-              "gs_kt": 169.12,
-              "componente_cauda_kt": -9.12,
-              "deriva_deg": -5.308
-            },
-            {
-              "x0_nm": 1701.31,
-              "x1_nm": 1702.42,
-              "fase": "descida",
-              "gs_kt": 186.0,
-              "componente_cauda_kt": -13.56,
-              "deriva_deg": -3.774
-            },
-            {
-              "x0_nm": 1702.42,
-              "x1_nm": 1710.82,
-              "fase": "cruzeiro",
-              "gs_kt": 164.95,
-              "componente_cauda_kt": -13.56,
-              "deriva_deg": -4.218
-            },
-            {
-              "x0_nm": 1710.82,
-              "x1_nm": 1711.54,
-              "fase": "cruzeiro",
-              "gs_kt": 175.45,
-              "componente_cauda_kt": -2.69,
-              "deriva_deg": -5.602
-            },
-            {
-              "x0_nm": 1711.54,
-              "x1_nm": 1715.04,
-              "fase": "descida",
-              "gs_kt": 198.47,
-              "componente_cauda_kt": -1.27,
-              "deriva_deg": -2.911
-            }
-          ],
-          "tempo_min_vento": 646.25,
-          "combustivel_vento": 6318.94
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.1078,
+            "declinacao_deg": -21.1071,
             "rumo_magnetico_deg": 109.0,
-            "rumo_verdadeiro_deg": 87.8922
+            "rumo_verdadeiro_deg": 87.8929
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.0895,
+            "declinacao_deg": -21.0888,
             "rumo_magnetico_deg": 126.0,
-            "rumo_verdadeiro_deg": 104.9105
+            "rumo_verdadeiro_deg": 104.9112
           }
         ]
       }
@@ -231,13 +168,14 @@
         "lateral:direto_puro_longo",
         "vertical:cruzeiro_alto_sem_corredor"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBHT",
         "destino": "SBPJ",
         "aeronave": "hgS_N8CC",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -305,34 +243,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 34.85,
-              "fase": "subida",
-              "gs_kt": 143.92,
-              "componente_cauda_kt": -7.42,
-              "deriva_deg": 5.369
-            },
-            {
-              "x0_nm": 34.85,
-              "x1_nm": 437.13,
-              "fase": "cruzeiro",
-              "gs_kt": 179.2,
-              "componente_cauda_kt": 1.02,
-              "deriva_deg": 5.485
-            },
-            {
-              "x0_nm": 437.13,
-              "x1_nm": 482.14,
-              "fase": "descida",
-              "gs_kt": 190.18,
-              "componente_cauda_kt": -9.51,
-              "deriva_deg": 3.178
-            }
-          ],
-          "tempo_min_vento": 163.43,
-          "combustivel_vento": 1594.21
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -343,13 +256,14 @@
         "lateral:corredor_coerente_malha_da_ponta",
         "vertical:subida_teto_corredor"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBMO",
         "destino": "SBRF",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -484,101 +398,28 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 12.81,
-              "fase": "subida",
-              "gs_kt": 75.47,
-              "componente_cauda_kt": 1.78,
-              "deriva_deg": -10.718
-            },
-            {
-              "x0_nm": 12.81,
-              "x1_nm": 63.31,
-              "fase": "cruzeiro",
-              "gs_kt": 100.22,
-              "componente_cauda_kt": 5.53,
-              "deriva_deg": -4.574
-            },
-            {
-              "x0_nm": 63.31,
-              "x1_nm": 76.31,
-              "fase": "descida",
-              "gs_kt": 105.33,
-              "componente_cauda_kt": 5.98,
-              "deriva_deg": -6.537
-            },
-            {
-              "x0_nm": 76.31,
-              "x1_nm": 79.88,
-              "fase": "cruzeiro",
-              "gs_kt": 104.14,
-              "componente_cauda_kt": 10.08,
-              "deriva_deg": -8.082
-            },
-            {
-              "x0_nm": 79.88,
-              "x1_nm": 90.99,
-              "fase": "cruzeiro",
-              "gs_kt": 111.61,
-              "componente_cauda_kt": 16.62,
-              "deriva_deg": -0.538
-            },
-            {
-              "x0_nm": 90.99,
-              "x1_nm": 92.33,
-              "fase": "descida",
-              "gs_kt": 106.41,
-              "componente_cauda_kt": 7.52,
-              "deriva_deg": -8.537
-            },
-            {
-              "x0_nm": 92.33,
-              "x1_nm": 100.45,
-              "fase": "cruzeiro",
-              "gs_kt": 101.36,
-              "componente_cauda_kt": 7.52,
-              "deriva_deg": -8.99
-            },
-            {
-              "x0_nm": 100.45,
-              "x1_nm": 100.76,
-              "fase": "cruzeiro",
-              "gs_kt": 88.45,
-              "componente_cauda_kt": -4.74,
-              "deriva_deg": -11.181
-            },
-            {
-              "x0_nm": 100.76,
-              "x1_nm": 104.67,
-              "fase": "descida",
-              "gs_kt": 95.52,
-              "componente_cauda_kt": -3.64,
-              "deriva_deg": -7.412
-            }
-          ],
-          "tempo_min_vento": 64.08,
-          "combustivel_vento": 30.93
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.201,
+            "declinacao_deg": -21.2004,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.799
+            "rumo_verdadeiro_deg": 15.7996
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.168,
+            "declinacao_deg": -21.1673,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.832
+            "rumo_verdadeiro_deg": 331.8327
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.114,
+            "declinacao_deg": -21.1134,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.886
+            "rumo_verdadeiro_deg": 31.8866
           }
         ]
       }
@@ -586,338 +427,26 @@
     {
       "id": "lateral_portao_obrigatorio_sem_pista",
       "cobertura": [
-        "lateral:portao_obrigatorio_sem_pista_informada"
+        "contrato:pista_obrigatoria_faltando"
       ],
+      "tipo_caso": "contrato_input",
       "entrada": {
         "origem": "SBBH",
         "destino": "SBFZ",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
-        "lateral": {
-          "rota": [
-            {
-              "id": "ADHP:SBBH",
-              "name": "SBBH"
-            },
-            {
-              "id": "01KSJD4CH8ZS9X5SHVQH5Y22B8",
-              "name": "CIRRUS"
-            },
-            {
-              "id": "01KSJD4CHDASZJJKGVYAYWR8C7",
-              "name": "ONÇA"
-            },
-            {
-              "id": "01KSJD4CHAZ2Q5FFYNXBF2AJAQ",
-              "name": "LAPINHA"
-            },
-            {
-              "id": "01KSJD4CH8KFWE1QMK9K44W0YK",
-              "name": "CONCEIÇÃO"
-            },
-            {
-              "id": "01KSJD4CJPRKH1RWF16PWRG384",
-              "name": "ESTÁDIO DOMINGÃO"
-            },
-            {
-              "id": "01KSJD4CJPWXH84WHESTMN4T73",
-              "name": "FÁBRICA FORTALEZA"
-            },
-            {
-              "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
-              "name": "BEACH PARK"
-            },
-            {
-              "id": "ADHP:SBFZ",
-              "name": "SBFZ"
-            }
-          ],
-          "distancia_total_nm": 1046.38,
-          "distancia_direta_nm": 1016.01,
-          "corredores_usados": [
-            {
-              "name": "TANGO",
-              "is_mandatory": true
-            },
-            {
-              "name": "CHARLIE",
-              "is_mandatory": true
-            },
-            {
-              "name": "HORIZONTE",
-              "is_mandatory": false
-            },
-            {
-              "name": "BEACH PARK",
-              "is_mandatory": false
-            }
-          ]
+        "status": "faltou_input",
+        "faltando": [
+          "pista_origem"
+        ],
+        "aerodromos": {
+          "pista_origem": "SBBH"
         },
-        "vertical": {
-          "vertices": [
-            {
-              "x_nm": 0.0,
-              "alt_ft": 2585.3,
-              "tipo": "origem",
-              "nome": "SBBH",
-              "real": true
-            },
-            {
-              "x_nm": 7.29,
-              "alt_ft": 5500.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 25.58,
-              "alt_ft": 5500.0,
-              "tipo": "corredor",
-              "nome": "CIRRUS",
-              "real": true
-            },
-            {
-              "x_nm": 43.02,
-              "alt_ft": 5500.0,
-              "tipo": "corredor",
-              "nome": "ONÇA",
-              "real": true
-            },
-            {
-              "x_nm": 46.77,
-              "alt_ft": 7000.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 55.4,
-              "alt_ft": 7000.0,
-              "tipo": "corredor",
-              "nome": "LAPINHA",
-              "real": true
-            },
-            {
-              "x_nm": 75.4,
-              "alt_ft": 7000.0,
-              "tipo": "ponto",
-              "nome": "CONCEIÇÃO",
-              "real": true
-            },
-            {
-              "x_nm": 81.65,
-              "alt_ft": 9500.0,
-              "tipo": "toc",
-              "nome": "TOC",
-              "real": false
-            },
-            {
-              "x_nm": 998.16,
-              "alt_ft": 9500.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 1018.16,
-              "alt_ft": 3500.0,
-              "tipo": "corredor",
-              "nome": "ESTÁDIO DOMINGÃO",
-              "real": true
-            },
-            {
-              "x_nm": 1029.1,
-              "alt_ft": 3500.0,
-              "tipo": "corredor",
-              "nome": "FÁBRICA FORTALEZA",
-              "real": true
-            },
-            {
-              "x_nm": 1036.78,
-              "alt_ft": 1197.4,
-              "tipo": "ponto",
-              "nome": "BEACH PARK",
-              "real": true
-            },
-            {
-              "x_nm": 1042.62,
-              "alt_ft": 1197.4,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 1046.38,
-              "alt_ft": 68.9,
-              "tipo": "destino",
-              "nome": "SBFZ",
-              "real": true
-            }
-          ],
-          "toc_nm": 81.65,
-          "tod_nm": 998.16,
-          "tempo_min": {
-            "subida": 13.83,
-            "cruzeiro": 630.1,
-            "descida": 18.86,
-            "total": 662.79
-          },
-          "combustivel": {
-            "subida": 8.07,
-            "cruzeiro": 304.55,
-            "descida": 7.23,
-            "total": 319.85,
-            "unidade": "l"
-          },
-          "avisos": [],
-          "descida_ingreme_nm": []
-        },
-        "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 7.29,
-              "fase": "subida",
-              "gs_kt": 70.21,
-              "componente_cauda_kt": -4.32,
-              "deriva_deg": -6.406
-            },
-            {
-              "x0_nm": 7.29,
-              "x1_nm": 25.58,
-              "fase": "cruzeiro",
-              "gs_kt": 92.89,
-              "componente_cauda_kt": -2.02,
-              "deriva_deg": 2.571
-            },
-            {
-              "x0_nm": 25.58,
-              "x1_nm": 43.02,
-              "fase": "cruzeiro",
-              "gs_kt": 92.48,
-              "componente_cauda_kt": -2.47,
-              "deriva_deg": 1.85
-            },
-            {
-              "x0_nm": 43.02,
-              "x1_nm": 46.77,
-              "fase": "subida",
-              "gs_kt": 78.19,
-              "componente_cauda_kt": 3.24,
-              "deriva_deg": 2.026
-            },
-            {
-              "x0_nm": 46.77,
-              "x1_nm": 55.4,
-              "fase": "cruzeiro",
-              "gs_kt": 98.2,
-              "componente_cauda_kt": 3.24,
-              "deriva_deg": 1.599
-            },
-            {
-              "x0_nm": 55.4,
-              "x1_nm": 75.4,
-              "fase": "cruzeiro",
-              "gs_kt": 95.1,
-              "componente_cauda_kt": 0.17,
-              "deriva_deg": 2.282
-            },
-            {
-              "x0_nm": 75.4,
-              "x1_nm": 81.65,
-              "fase": "subida",
-              "gs_kt": 83.34,
-              "componente_cauda_kt": 10.27,
-              "deriva_deg": 13.022
-            },
-            {
-              "x0_nm": 81.65,
-              "x1_nm": 998.16,
-              "fase": "cruzeiro",
-              "gs_kt": 101.86,
-              "componente_cauda_kt": 7.01,
-              "deriva_deg": -3.218
-            },
-            {
-              "x0_nm": 998.16,
-              "x1_nm": 1018.16,
-              "fase": "descida",
-              "gs_kt": 112.07,
-              "componente_cauda_kt": 12.44,
-              "deriva_deg": -4.958
-            },
-            {
-              "x0_nm": 1018.16,
-              "x1_nm": 1029.1,
-              "fase": "cruzeiro",
-              "gs_kt": 102.58,
-              "componente_cauda_kt": 11.63,
-              "deriva_deg": -16.794
-            },
-            {
-              "x0_nm": 1029.1,
-              "x1_nm": 1036.78,
-              "fase": "descida",
-              "gs_kt": 80.81,
-              "componente_cauda_kt": -15.98,
-              "deriva_deg": -14.555
-            },
-            {
-              "x0_nm": 1036.78,
-              "x1_nm": 1042.62,
-              "fase": "cruzeiro",
-              "gs_kt": 124.71,
-              "componente_cauda_kt": 29.72,
-              "deriva_deg": -1.091
-            },
-            {
-              "x0_nm": 1042.62,
-              "x1_nm": 1046.38,
-              "fase": "descida",
-              "gs_kt": 118.52,
-              "componente_cauda_kt": 18.53,
-              "deriva_deg": -0.622
-            }
-          ],
-          "tempo_min_vento": 622.0,
-          "combustivel_vento": 300.17
-        },
-        "magnetico": [
-          {
-            "corredor": "TANGO",
-            "declinacao_deg": -23.0945,
-            "rumo_magnetico_deg": 9.0,
-            "rumo_verdadeiro_deg": 345.9055
-          },
-          {
-            "corredor": "CHARLIE",
-            "declinacao_deg": -23.1126,
-            "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8874
-          },
-          {
-            "corredor": "CHARLIE",
-            "declinacao_deg": -23.1713,
-            "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8287
-          },
-          {
-            "corredor": "HORIZONTE",
-            "declinacao_deg": -20.3291,
-            "rumo_magnetico_deg": 21.0,
-            "rumo_verdadeiro_deg": 0.6709
-          },
-          {
-            "corredor": "BEACH PARK",
-            "declinacao_deg": -20.2753,
-            "rumo_magnetico_deg": 73.0,
-            "rumo_verdadeiro_deg": 52.7247
-          }
-        ]
+        "mensagem": "SBBH tem regra de cabeceira; informe a pista de decolagem para calcular a rota."
       }
     },
     {
@@ -925,13 +454,14 @@
       "cobertura": [
         "lateral:portao_por_cabeceira_pista_informada"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBH",
         "destino": "SBFZ",
         "aeronave": "1n7s5U5J",
         "pista_origem": "13",
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -1202,247 +732,338 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 5.92,
-              "fase": "subida",
-              "gs_kt": 84.43,
-              "componente_cauda_kt": 9.43,
-              "deriva_deg": -0.476
-            },
-            {
-              "x0_nm": 5.92,
-              "x1_nm": 6.04,
-              "fase": "subida",
-              "gs_kt": 70.76,
-              "componente_cauda_kt": -4.0,
-              "deriva_deg": -4.55
-            },
-            {
-              "x0_nm": 6.04,
-              "x1_nm": 12.97,
-              "fase": "cruzeiro",
-              "gs_kt": 90.81,
-              "componente_cauda_kt": -4.0,
-              "deriva_deg": -3.591
-            },
-            {
-              "x0_nm": 12.97,
-              "x1_nm": 14.22,
-              "fase": "subida",
-              "gs_kt": 70.86,
-              "componente_cauda_kt": -3.9,
-              "deriva_deg": -4.601
-            },
-            {
-              "x0_nm": 14.22,
-              "x1_nm": 22.83,
-              "fase": "cruzeiro",
-              "gs_kt": 91.47,
-              "componente_cauda_kt": -3.23,
-              "deriva_deg": -4.568
-            },
-            {
-              "x0_nm": 22.83,
-              "x1_nm": 24.08,
-              "fase": "subida",
-              "gs_kt": 76.44,
-              "componente_cauda_kt": 1.87,
-              "deriva_deg": 6.131
-            },
-            {
-              "x0_nm": 24.08,
-              "x1_nm": 38.95,
-              "fase": "cruzeiro",
-              "gs_kt": 96.53,
-              "componente_cauda_kt": 1.87,
-              "deriva_deg": 4.837
-            },
-            {
-              "x0_nm": 38.95,
-              "x1_nm": 49.69,
-              "fase": "cruzeiro",
-              "gs_kt": 88.01,
-              "componente_cauda_kt": -6.98,
-              "deriva_deg": 0.511
-            },
-            {
-              "x0_nm": 49.69,
-              "x1_nm": 64.7,
-              "fase": "cruzeiro",
-              "gs_kt": 91.03,
-              "componente_cauda_kt": -3.91,
-              "deriva_deg": 2.06
-            },
-            {
-              "x0_nm": 64.7,
-              "x1_nm": 74.58,
-              "fase": "cruzeiro",
-              "gs_kt": 97.06,
-              "componente_cauda_kt": 2.2,
-              "deriva_deg": 3.15
-            },
-            {
-              "x0_nm": 74.58,
-              "x1_nm": 90.42,
-              "fase": "cruzeiro",
-              "gs_kt": 98.26,
-              "componente_cauda_kt": 3.32,
-              "deriva_deg": 2.011
-            },
-            {
-              "x0_nm": 90.42,
-              "x1_nm": 92.92,
-              "fase": "subida",
-              "gs_kt": 78.19,
-              "componente_cauda_kt": 3.24,
-              "deriva_deg": 2.026
-            },
-            {
-              "x0_nm": 92.92,
-              "x1_nm": 102.8,
-              "fase": "cruzeiro",
-              "gs_kt": 98.2,
-              "componente_cauda_kt": 3.24,
-              "deriva_deg": 1.599
-            },
-            {
-              "x0_nm": 102.8,
-              "x1_nm": 122.8,
-              "fase": "cruzeiro",
-              "gs_kt": 95.1,
-              "componente_cauda_kt": 0.17,
-              "deriva_deg": 2.282
-            },
-            {
-              "x0_nm": 122.8,
-              "x1_nm": 129.05,
-              "fase": "subida",
-              "gs_kt": 83.34,
-              "componente_cauda_kt": 10.27,
-              "deriva_deg": 13.022
-            },
-            {
-              "x0_nm": 129.05,
-              "x1_nm": 1045.56,
-              "fase": "cruzeiro",
-              "gs_kt": 101.86,
-              "componente_cauda_kt": 7.01,
-              "deriva_deg": -3.218
-            },
-            {
-              "x0_nm": 1045.56,
-              "x1_nm": 1065.56,
-              "fase": "descida",
-              "gs_kt": 112.07,
-              "componente_cauda_kt": 12.44,
-              "deriva_deg": -4.958
-            },
-            {
-              "x0_nm": 1065.56,
-              "x1_nm": 1076.5,
-              "fase": "cruzeiro",
-              "gs_kt": 102.58,
-              "componente_cauda_kt": 11.63,
-              "deriva_deg": -16.794
-            },
-            {
-              "x0_nm": 1076.5,
-              "x1_nm": 1084.18,
-              "fase": "descida",
-              "gs_kt": 80.81,
-              "componente_cauda_kt": -15.98,
-              "deriva_deg": -14.555
-            },
-            {
-              "x0_nm": 1084.18,
-              "x1_nm": 1090.02,
-              "fase": "cruzeiro",
-              "gs_kt": 124.71,
-              "componente_cauda_kt": 29.72,
-              "deriva_deg": -1.091
-            },
-            {
-              "x0_nm": 1090.02,
-              "x1_nm": 1093.78,
-              "fase": "descida",
-              "gs_kt": 118.52,
-              "componente_cauda_kt": 18.53,
-              "deriva_deg": -0.622
-            }
-          ],
-          "tempo_min_vento": 651.26,
-          "combustivel_vento": 314.22
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0357,
+            "declinacao_deg": -23.0358,
             "rumo_magnetico_deg": 279.0,
-            "rumo_verdadeiro_deg": 255.9643
+            "rumo_verdadeiro_deg": 255.9642
           },
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0006,
+            "declinacao_deg": -23.0008,
             "rumo_magnetico_deg": 278.0,
-            "rumo_verdadeiro_deg": 254.9994
+            "rumo_verdadeiro_deg": 254.9992
           },
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -22.9774,
+            "declinacao_deg": -22.9776,
             "rumo_magnetico_deg": 88.0,
-            "rumo_verdadeiro_deg": 65.0226
+            "rumo_verdadeiro_deg": 65.0224
           },
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -22.973,
+            "declinacao_deg": -22.9732,
             "rumo_magnetico_deg": 9.0,
-            "rumo_verdadeiro_deg": 346.027
+            "rumo_verdadeiro_deg": 346.0268
           },
           {
             "corredor": "PAPA",
-            "declinacao_deg": -22.9817,
+            "declinacao_deg": -22.9819,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 11.0183
+            "rumo_verdadeiro_deg": 11.0181
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.0103,
+            "declinacao_deg": -23.0104,
             "rumo_magnetico_deg": 85.0,
-            "rumo_verdadeiro_deg": 61.9897
+            "rumo_verdadeiro_deg": 61.9896
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.0593,
+            "declinacao_deg": -23.0594,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 77.9407
+            "rumo_verdadeiro_deg": 77.9406
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1126,
+            "declinacao_deg": -23.1127,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8874
+            "rumo_verdadeiro_deg": 79.8873
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1713,
+            "declinacao_deg": -23.1714,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8287
+            "rumo_verdadeiro_deg": 79.8286
           },
           {
             "corredor": "HORIZONTE",
-            "declinacao_deg": -20.3291,
+            "declinacao_deg": -20.3286,
             "rumo_magnetico_deg": 21.0,
-            "rumo_verdadeiro_deg": 0.6709
+            "rumo_verdadeiro_deg": 0.6714
           },
           {
             "corredor": "BEACH PARK",
-            "declinacao_deg": -20.2753,
+            "declinacao_deg": -20.2748,
             "rumo_magnetico_deg": 73.0,
-            "rumo_verdadeiro_deg": 52.7247
+            "rumo_verdadeiro_deg": 52.7252
           }
         ]
+      }
+    },
+    {
+      "id": "contrato_pista_nao_casa",
+      "cobertura": [
+        "contrato:pista_informada_nao_casa_regra"
+      ],
+      "tipo_caso": "contrato_input",
+      "entrada": {
+        "origem": "SBBH",
+        "destino": "SBFZ",
+        "aeronave": "1n7s5U5J",
+        "pista_origem": "31",
+        "pista_destino": null,
+        "hora_partida_utc": null
+      },
+      "esperado": {
+        "lateral": {
+          "rota": [
+            {
+              "id": "ADHP:SBBH",
+              "name": "SBBH"
+            },
+            {
+              "id": "01KSJD4CH8ZS9X5SHVQH5Y22B8",
+              "name": "CIRRUS"
+            },
+            {
+              "id": "01KSJD4CHDASZJJKGVYAYWR8C7",
+              "name": "ONÇA"
+            },
+            {
+              "id": "01KSJD4CHAZ2Q5FFYNXBF2AJAQ",
+              "name": "LAPINHA"
+            },
+            {
+              "id": "01KSJD4CH8KFWE1QMK9K44W0YK",
+              "name": "CONCEIÇÃO"
+            },
+            {
+              "id": "01KSJD4CJPRKH1RWF16PWRG384",
+              "name": "ESTÁDIO DOMINGÃO"
+            },
+            {
+              "id": "01KSJD4CJPWXH84WHESTMN4T73",
+              "name": "FÁBRICA FORTALEZA"
+            },
+            {
+              "id": "01KSJD4CJN9BZFPNEXGRYPRE7A",
+              "name": "BEACH PARK"
+            },
+            {
+              "id": "ADHP:SBFZ",
+              "name": "SBFZ"
+            }
+          ],
+          "distancia_total_nm": 1046.38,
+          "distancia_direta_nm": 1016.01,
+          "corredores_usados": [
+            {
+              "name": "TANGO",
+              "is_mandatory": true
+            },
+            {
+              "name": "CHARLIE",
+              "is_mandatory": true
+            },
+            {
+              "name": "HORIZONTE",
+              "is_mandatory": false
+            },
+            {
+              "name": "BEACH PARK",
+              "is_mandatory": false
+            }
+          ]
+        },
+        "vertical": {
+          "vertices": [
+            {
+              "x_nm": 0.0,
+              "alt_ft": 2585.3,
+              "tipo": "origem",
+              "nome": "SBBH",
+              "real": true
+            },
+            {
+              "x_nm": 7.29,
+              "alt_ft": 5500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 25.58,
+              "alt_ft": 5500.0,
+              "tipo": "corredor",
+              "nome": "CIRRUS",
+              "real": true
+            },
+            {
+              "x_nm": 43.02,
+              "alt_ft": 5500.0,
+              "tipo": "corredor",
+              "nome": "ONÇA",
+              "real": true
+            },
+            {
+              "x_nm": 46.77,
+              "alt_ft": 7000.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 55.4,
+              "alt_ft": 7000.0,
+              "tipo": "corredor",
+              "nome": "LAPINHA",
+              "real": true
+            },
+            {
+              "x_nm": 75.4,
+              "alt_ft": 7000.0,
+              "tipo": "ponto",
+              "nome": "CONCEIÇÃO",
+              "real": true
+            },
+            {
+              "x_nm": 81.65,
+              "alt_ft": 9500.0,
+              "tipo": "toc",
+              "nome": "TOC",
+              "real": false
+            },
+            {
+              "x_nm": 998.16,
+              "alt_ft": 9500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 1018.16,
+              "alt_ft": 3500.0,
+              "tipo": "corredor",
+              "nome": "ESTÁDIO DOMINGÃO",
+              "real": true
+            },
+            {
+              "x_nm": 1029.1,
+              "alt_ft": 3500.0,
+              "tipo": "corredor",
+              "nome": "FÁBRICA FORTALEZA",
+              "real": true
+            },
+            {
+              "x_nm": 1036.78,
+              "alt_ft": 1197.4,
+              "tipo": "ponto",
+              "nome": "BEACH PARK",
+              "real": true
+            },
+            {
+              "x_nm": 1042.62,
+              "alt_ft": 1197.4,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 1046.38,
+              "alt_ft": 68.9,
+              "tipo": "destino",
+              "nome": "SBFZ",
+              "real": true
+            }
+          ],
+          "toc_nm": 81.65,
+          "tod_nm": 998.16,
+          "tempo_min": {
+            "subida": 13.83,
+            "cruzeiro": 630.1,
+            "descida": 18.86,
+            "total": 662.79
+          },
+          "combustivel": {
+            "subida": 8.07,
+            "cruzeiro": 304.55,
+            "descida": 7.23,
+            "total": 319.85,
+            "unidade": "l"
+          },
+          "avisos": [],
+          "descida_ingreme_nm": []
+        },
+        "vento": {
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
+        },
+        "magnetico": [
+          {
+            "corredor": "TANGO",
+            "declinacao_deg": -23.0946,
+            "rumo_magnetico_deg": 9.0,
+            "rumo_verdadeiro_deg": 345.9054
+          },
+          {
+            "corredor": "CHARLIE",
+            "declinacao_deg": -23.1127,
+            "rumo_magnetico_deg": 103.0,
+            "rumo_verdadeiro_deg": 79.8873
+          },
+          {
+            "corredor": "CHARLIE",
+            "declinacao_deg": -23.1714,
+            "rumo_magnetico_deg": 103.0,
+            "rumo_verdadeiro_deg": 79.8286
+          },
+          {
+            "corredor": "HORIZONTE",
+            "declinacao_deg": -20.3286,
+            "rumo_magnetico_deg": 21.0,
+            "rumo_verdadeiro_deg": 0.6714
+          },
+          {
+            "corredor": "BEACH PARK",
+            "declinacao_deg": -20.2748,
+            "rumo_magnetico_deg": 73.0,
+            "rumo_verdadeiro_deg": 52.7252
+          }
+        ]
+      }
+    },
+    {
+      "id": "contrato_pista_falta_dois_lados",
+      "cobertura": [
+        "contrato:pista_obrigatoria_faltando_dois_extremos"
+      ],
+      "tipo_caso": "contrato_input",
+      "entrada": {
+        "origem": "SBRJ",
+        "destino": "SBMT",
+        "aeronave": "1n7s5U5J",
+        "pista_origem": null,
+        "pista_destino": null,
+        "hora_partida_utc": null
+      },
+      "esperado": {
+        "status": "faltou_input",
+        "faltando": [
+          "pista_origem",
+          "pista_destino"
+        ],
+        "aerodromos": {
+          "pista_origem": "SBRJ",
+          "pista_destino": "SBMT"
+        },
+        "mensagem": "SBRJ tem regra de cabeceira; informe a pista de decolagem; SBMT tem regra de cabeceira; informe a pista de pouso para calcular a rota."
       }
     },
     {
@@ -1450,13 +1071,14 @@
       "cobertura": [
         "lateral:excecao_portao_unico_x_ou_y"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBJR",
         "destino": "SBKP",
         "aeronave": "1n7s5U5J",
         "pista_origem": "03",
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -1761,295 +1383,94 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 2.99,
-              "fase": "subida",
-              "gs_kt": 82.65,
-              "componente_cauda_kt": 7.81,
-              "deriva_deg": -3.709
-            },
-            {
-              "x0_nm": 2.99,
-              "x1_nm": 3.73,
-              "fase": "subida",
-              "gs_kt": 71.99,
-              "componente_cauda_kt": -2.13,
-              "deriva_deg": 8.78
-            },
-            {
-              "x0_nm": 3.73,
-              "x1_nm": 13.27,
-              "fase": "cruzeiro",
-              "gs_kt": 92.95,
-              "componente_cauda_kt": -1.25,
-              "deriva_deg": 7.452
-            },
-            {
-              "x0_nm": 13.27,
-              "x1_nm": 20.77,
-              "fase": "subida",
-              "gs_kt": 81.34,
-              "componente_cauda_kt": 6.39,
-              "deriva_deg": 1.977
-            },
-            {
-              "x0_nm": 20.77,
-              "x1_nm": 25.59,
-              "fase": "cruzeiro",
-              "gs_kt": 101.38,
-              "componente_cauda_kt": 6.4,
-              "deriva_deg": 1.049
-            },
-            {
-              "x0_nm": 25.59,
-              "x1_nm": 36.01,
-              "fase": "cruzeiro",
-              "gs_kt": 99.24,
-              "componente_cauda_kt": 4.26,
-              "deriva_deg": 1.255
-            },
-            {
-              "x0_nm": 36.01,
-              "x1_nm": 50.14,
-              "fase": "cruzeiro",
-              "gs_kt": 99.23,
-              "componente_cauda_kt": 4.24,
-              "deriva_deg": 0.999
-            },
-            {
-              "x0_nm": 50.14,
-              "x1_nm": 55.14,
-              "fase": "subida",
-              "gs_kt": 73.19,
-              "componente_cauda_kt": -0.15,
-              "deriva_deg": -12.077
-            },
-            {
-              "x0_nm": 55.14,
-              "x1_nm": 68.71,
-              "fase": "cruzeiro",
-              "gs_kt": 94.91,
-              "componente_cauda_kt": 1.0,
-              "deriva_deg": -8.695
-            },
-            {
-              "x0_nm": 68.71,
-              "x1_nm": 73.71,
-              "fase": "subida",
-              "gs_kt": 77.56,
-              "componente_cauda_kt": 3.72,
-              "deriva_deg": -10.106
-            },
-            {
-              "x0_nm": 73.71,
-              "x1_nm": 80.5,
-              "fase": "cruzeiro",
-              "gs_kt": 72.2,
-              "componente_cauda_kt": -22.04,
-              "deriva_deg": -7.245
-            },
-            {
-              "x0_nm": 80.5,
-              "x1_nm": 105.91,
-              "fase": "cruzeiro",
-              "gs_kt": 73.96,
-              "componente_cauda_kt": -20.27,
-              "deriva_deg": -7.311
-            },
-            {
-              "x0_nm": 105.91,
-              "x1_nm": 116.58,
-              "fase": "descida",
-              "gs_kt": 93.06,
-              "componente_cauda_kt": -6.65,
-              "deriva_deg": -4.402
-            },
-            {
-              "x0_nm": 116.58,
-              "x1_nm": 136.86,
-              "fase": "cruzeiro",
-              "gs_kt": 88.48,
-              "componente_cauda_kt": -6.16,
-              "deriva_deg": -5.02
-            },
-            {
-              "x0_nm": 136.86,
-              "x1_nm": 138.19,
-              "fase": "descida",
-              "gs_kt": 92.57,
-              "componente_cauda_kt": -7.24,
-              "deriva_deg": -3.518
-            },
-            {
-              "x0_nm": 138.19,
-              "x1_nm": 148.93,
-              "fase": "cruzeiro",
-              "gs_kt": 85.47,
-              "componente_cauda_kt": -9.43,
-              "deriva_deg": -2.632
-            },
-            {
-              "x0_nm": 148.93,
-              "x1_nm": 151.93,
-              "fase": "descida",
-              "gs_kt": 106.78,
-              "componente_cauda_kt": 7.06,
-              "deriva_deg": 4.292
-            },
-            {
-              "x0_nm": 151.93,
-              "x1_nm": 159.17,
-              "fase": "cruzeiro",
-              "gs_kt": 100.13,
-              "componente_cauda_kt": 5.57,
-              "deriva_deg": 5.521
-            },
-            {
-              "x0_nm": 159.17,
-              "x1_nm": 173.5,
-              "fase": "cruzeiro",
-              "gs_kt": 98.18,
-              "componente_cauda_kt": 3.68,
-              "deriva_deg": 5.849
-            },
-            {
-              "x0_nm": 173.5,
-              "x1_nm": 176.0,
-              "fase": "subida",
-              "gs_kt": 80.44,
-              "componente_cauda_kt": 5.93,
-              "deriva_deg": 6.502
-            },
-            {
-              "x0_nm": 176.0,
-              "x1_nm": 196.41,
-              "fase": "cruzeiro",
-              "gs_kt": 93.83,
-              "componente_cauda_kt": -0.58,
-              "deriva_deg": -6.381
-            },
-            {
-              "x0_nm": 196.41,
-              "x1_nm": 214.63,
-              "fase": "cruzeiro",
-              "gs_kt": 90.82,
-              "componente_cauda_kt": -4.18,
-              "deriva_deg": -0.314
-            },
-            {
-              "x0_nm": 214.63,
-              "x1_nm": 228.66,
-              "fase": "cruzeiro",
-              "gs_kt": 93.11,
-              "componente_cauda_kt": -1.88,
-              "deriva_deg": -0.703
-            },
-            {
-              "x0_nm": 228.66,
-              "x1_nm": 239.24,
-              "fase": "cruzeiro",
-              "gs_kt": 94.99,
-              "componente_cauda_kt": 0.0,
-              "deriva_deg": 1.064
-            },
-            {
-              "x0_nm": 239.24,
-              "x1_nm": 248.74,
-              "fase": "descida",
-              "gs_kt": 97.12,
-              "componente_cauda_kt": -2.72,
-              "deriva_deg": 3.179
-            }
-          ],
-          "tempo_min_vento": 167.34,
-          "combustivel_vento": 81.16
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "PORTÃO CURICICA",
-            "declinacao_deg": -22.9327,
+            "declinacao_deg": -22.9328,
             "rumo_magnetico_deg": 231.0,
-            "rumo_verdadeiro_deg": 208.0673
+            "rumo_verdadeiro_deg": 208.0672
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8803,
+            "declinacao_deg": -22.8804,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1197
+            "rumo_verdadeiro_deg": 253.1196
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8214,
+            "declinacao_deg": -22.8215,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1786
+            "rumo_verdadeiro_deg": 253.1785
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.757,
+            "declinacao_deg": -22.7571,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.243
+            "rumo_verdadeiro_deg": 258.2429
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6695,
+            "declinacao_deg": -22.6697,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.3305
+            "rumo_verdadeiro_deg": 258.3303
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.5848,
+            "declinacao_deg": -22.585,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.4152
+            "rumo_verdadeiro_deg": 248.415
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.4755,
+            "declinacao_deg": -22.4757,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.5245
+            "rumo_verdadeiro_deg": 248.5243
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.3459,
+            "declinacao_deg": -22.3461,
             "rumo_magnetico_deg": 325.0,
-            "rumo_verdadeiro_deg": 302.6541
+            "rumo_verdadeiro_deg": 302.6539
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.2793,
+            "declinacao_deg": -22.2796,
             "rumo_magnetico_deg": 338.0,
-            "rumo_verdadeiro_deg": 315.7207
+            "rumo_verdadeiro_deg": 315.7204
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2408,
+            "declinacao_deg": -22.2411,
             "rumo_magnetico_deg": 296.0,
-            "rumo_verdadeiro_deg": 273.7592
+            "rumo_verdadeiro_deg": 273.7589
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1701,
+            "declinacao_deg": -22.1703,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.8299
+            "rumo_verdadeiro_deg": 258.8297
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0582,
+            "declinacao_deg": -22.0585,
             "rumo_magnetico_deg": 295.0,
-            "rumo_verdadeiro_deg": 272.9418
+            "rumo_verdadeiro_deg": 272.9415
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9711,
+            "declinacao_deg": -21.9714,
             "rumo_magnetico_deg": 337.0,
-            "rumo_verdadeiro_deg": 315.0289
+            "rumo_verdadeiro_deg": 315.0286
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.935,
+            "declinacao_deg": -21.9353,
             "rumo_magnetico_deg": 337.0,
-            "rumo_verdadeiro_deg": 315.065
+            "rumo_verdadeiro_deg": 315.0647
           }
         ]
       }
@@ -2059,13 +1480,14 @@
       "cobertura": [
         "lateral:malha_de_passagem_vira_direto"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SWME",
         "destino": "SBAQ",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -2133,34 +1555,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 11.9,
-              "fase": "subida",
-              "gs_kt": 78.96,
-              "componente_cauda_kt": 3.97,
-              "deriva_deg": -1.029
-            },
-            {
-              "x0_nm": 11.9,
-              "x1_nm": 340.33,
-              "fase": "cruzeiro",
-              "gs_kt": 103.68,
-              "componente_cauda_kt": 9.64,
-              "deriva_deg": -8.169
-            },
-            {
-              "x0_nm": 340.33,
-              "x1_nm": 357.68,
-              "fase": "descida",
-              "gs_kt": 101.45,
-              "componente_cauda_kt": 1.46,
-              "deriva_deg": -0.832
-            }
-          ],
-          "tempo_min_vento": 209.37,
-          "combustivel_vento": 101.07
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -2173,13 +1570,14 @@
         "vertical:combustivel_por_fase",
         "magnetico:mg_sp"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBH",
         "destino": "SBMT",
         "aeronave": "1n7s5U5J",
-        "pista_origem": null,
-        "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "pista_origem": "13",
+        "pista_destino": "12",
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -2189,24 +1587,20 @@
               "name": "SBBH"
             },
             {
-              "id": "01KSJD4CHAPTQDQXV7AJXHRM97",
-              "name": "MANNESMANN (REA)"
+              "id": "01KSJD4CH7ZSA9QG366GSEDM78",
+              "name": "CEASA"
             },
             {
-              "id": "01KSJD4CH8MDK54BYWMBP1E7WV",
-              "name": "IBIRITÉ"
+              "id": "01KSJD4CH8EB10G0HT5Q2YKGB8",
+              "name": "FLORES (REA)"
             },
             {
-              "id": "01KSJD4CH8PQB8DRAVA8F21WMN",
-              "name": "IGARAPÉ"
+              "id": "01KSJD4CHA04RE9M5Q83KWZ94R",
+              "name": "JUATUBA"
             },
             {
-              "id": "01KSJD4CHCNF276FERZRM1189Z",
-              "name": "MANSO"
-            },
-            {
-              "id": "01KSJD4CH9WH2N8P9PT6AJ0MRX",
-              "name": "ITAGUARA"
+              "id": "01KSJD4CH982DR2N48449WD4GT",
+              "name": "ITAÚNA"
             },
             {
               "id": "01KSJD4CMCC9S02NHFFXDXTC1M",
@@ -2249,23 +1643,15 @@
               "name": "SBMT"
             }
           ],
-          "distancia_total_nm": 286.77,
+          "distancia_total_nm": 288.1,
           "distancia_direta_nm": 265.85,
           "corredores_usados": [
             {
-              "name": "ROMEU",
+              "name": "KILO",
               "is_mandatory": true
             },
             {
-              "name": "SIERRA",
-              "is_mandatory": true
-            },
-            {
-              "name": "NOVEMBER",
-              "is_mandatory": true
-            },
-            {
-              "name": "JULIET",
+              "name": "INDIA",
               "is_mandatory": true
             },
             {
@@ -2292,187 +1678,180 @@
               "real": true
             },
             {
-              "x_nm": 7.29,
+              "x_nm": 5.92,
+              "alt_ft": 4952.2,
+              "tipo": "corredor",
+              "nome": "CEASA",
+              "real": true
+            },
+            {
+              "x_nm": 6.04,
+              "alt_ft": 5000.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 12.97,
+              "alt_ft": 5000.0,
+              "tipo": "corredor",
+              "nome": "FLORES (REA)",
+              "real": true
+            },
+            {
+              "x_nm": 14.22,
               "alt_ft": 5500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 8.24,
+              "x_nm": 22.83,
               "alt_ft": 5500.0,
               "tipo": "corredor",
-              "nome": "MANNESMANN (REA)",
+              "nome": "JUATUBA",
               "real": true
             },
             {
-              "x_nm": 14.18,
-              "alt_ft": 5500.0,
-              "tipo": "corredor",
-              "nome": "IBIRITÉ",
-              "real": true
-            },
-            {
-              "x_nm": 15.43,
+              "x_nm": 24.08,
               "alt_ft": 6000.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 26.33,
+              "x_nm": 38.09,
               "alt_ft": 6000.0,
-              "tipo": "corredor",
-              "nome": "IGARAPÉ",
-              "real": true
-            },
-            {
-              "x_nm": 35.12,
-              "alt_ft": 6000.0,
-              "tipo": "corredor",
-              "nome": "MANSO",
-              "real": true
-            },
-            {
-              "x_nm": 36.37,
-              "alt_ft": 6500.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 50.52,
-              "alt_ft": 6500.0,
               "tipo": "ponto",
-              "nome": "ITAGUARA",
+              "nome": "ITAÚNA",
               "real": true
             },
             {
-              "x_nm": 53.02,
+              "x_nm": 41.84,
               "alt_ft": 7500.0,
               "tipo": "toc",
               "nome": "TOC",
               "real": false
             },
             {
-              "x_nm": 212.99,
+              "x_nm": 214.33,
               "alt_ft": 7500.0,
               "tipo": "corredor",
               "nome": "CAMBUÍ (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 221.69,
+              "x_nm": 223.03,
               "alt_ft": 7500.0,
               "tipo": "corredor",
               "nome": "CAMANDUCAIA",
               "real": true
             },
             {
-              "x_nm": 232.56,
+              "x_nm": 233.9,
               "alt_ft": 7500.0,
               "tipo": "corredor",
               "nome": "JOANÓPOLIS",
               "real": true
             },
             {
-              "x_nm": 239.23,
+              "x_nm": 240.56,
               "alt_ft": 5500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 251.81,
+              "x_nm": 253.15,
               "alt_ft": 5500.0,
               "tipo": "corredor",
               "nome": "ATIBAIA",
               "real": true
             },
             {
-              "x_nm": 255.14,
+              "x_nm": 256.48,
               "alt_ft": 4500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 265.32,
+              "x_nm": 266.66,
               "alt_ft": 4500.0,
               "tipo": "corredor",
               "nome": "MORATO",
               "real": true
             },
             {
-              "x_nm": 271.16,
+              "x_nm": 272.5,
               "alt_ft": 4500.0,
               "tipo": "corredor",
               "nome": "PEDÁGIO LEROY",
               "real": true
             },
             {
-              "x_nm": 271.82,
+              "x_nm": 273.16,
               "alt_ft": 4300.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 278.5,
+              "x_nm": 279.84,
               "alt_ft": 4300.0,
               "tipo": "corredor",
               "nome": "PERUS",
               "real": true
             },
             {
-              "x_nm": 279.17,
+              "x_nm": 280.51,
               "alt_ft": 4100.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 281.58,
+              "x_nm": 282.92,
               "alt_ft": 4100.0,
               "tipo": "corredor",
               "nome": "PEDREIRA (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 281.91,
+              "x_nm": 283.25,
               "alt_ft": 4000.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 283.59,
+              "x_nm": 284.92,
               "alt_ft": 4000.0,
               "tipo": "ponto",
               "nome": "PENTEADO (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 286.77,
+              "x_nm": 288.1,
               "alt_ft": 2372.1,
               "tipo": "destino",
               "nome": "SBMT",
               "real": true
             }
           ],
-          "toc_nm": 53.02,
-          "tod_nm": 232.56,
+          "toc_nm": 41.84,
+          "tod_nm": 233.9,
           "tempo_min": {
             "subida": 9.83,
-            "cruzeiro": 163.98,
+            "cruzeiro": 164.82,
             "descida": 10.26,
-            "total": 184.06
+            "total": 184.91
           },
           "combustivel": {
             "subida": 5.73,
-            "cruzeiro": 79.26,
+            "cruzeiro": 79.66,
             "descida": 3.93,
-            "total": 88.92,
+            "total": 89.33,
             "unidade": "l"
           },
           "avisos": [
@@ -2481,281 +1860,82 @@
           ],
           "descida_ingreme_nm": [
             [
-              283.59,
-              286.77
+              284.92,
+              288.1
             ]
           ]
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 7.29,
-              "fase": "subida",
-              "gs_kt": 81.96,
-              "componente_cauda_kt": 7.21,
-              "deriva_deg": 4.674
-            },
-            {
-              "x0_nm": 7.29,
-              "x1_nm": 8.24,
-              "fase": "cruzeiro",
-              "gs_kt": 97.07,
-              "componente_cauda_kt": 2.32,
-              "deriva_deg": -4.097
-            },
-            {
-              "x0_nm": 8.24,
-              "x1_nm": 14.18,
-              "fase": "cruzeiro",
-              "gs_kt": 94.17,
-              "componente_cauda_kt": -0.66,
-              "deriva_deg": -3.362
-            },
-            {
-              "x0_nm": 14.18,
-              "x1_nm": 15.43,
-              "fase": "subida",
-              "gs_kt": 72.56,
-              "componente_cauda_kt": -2.27,
-              "deriva_deg": -3.924
-            },
-            {
-              "x0_nm": 15.43,
-              "x1_nm": 26.33,
-              "fase": "cruzeiro",
-              "gs_kt": 92.08,
-              "componente_cauda_kt": -2.62,
-              "deriva_deg": -4.579
-            },
-            {
-              "x0_nm": 26.33,
-              "x1_nm": 35.12,
-              "fase": "cruzeiro",
-              "gs_kt": 102.33,
-              "componente_cauda_kt": 7.38,
-              "deriva_deg": -1.895
-            },
-            {
-              "x0_nm": 35.12,
-              "x1_nm": 36.37,
-              "fase": "subida",
-              "gs_kt": 76.05,
-              "componente_cauda_kt": 1.52,
-              "deriva_deg": -6.401
-            },
-            {
-              "x0_nm": 36.37,
-              "x1_nm": 50.52,
-              "fase": "cruzeiro",
-              "gs_kt": 96.15,
-              "componente_cauda_kt": 1.52,
-              "deriva_deg": -5.049
-            },
-            {
-              "x0_nm": 50.52,
-              "x1_nm": 53.02,
-              "fase": "subida",
-              "gs_kt": 80.01,
-              "componente_cauda_kt": 5.3,
-              "deriva_deg": -5.04
-            },
-            {
-              "x0_nm": 53.02,
-              "x1_nm": 212.99,
-              "fase": "cruzeiro",
-              "gs_kt": 100.48,
-              "componente_cauda_kt": 5.7,
-              "deriva_deg": -3.866
-            },
-            {
-              "x0_nm": 212.99,
-              "x1_nm": 221.69,
-              "fase": "cruzeiro",
-              "gs_kt": 94.82,
-              "componente_cauda_kt": 0.02,
-              "deriva_deg": -3.719
-            },
-            {
-              "x0_nm": 221.69,
-              "x1_nm": 232.56,
-              "fase": "cruzeiro",
-              "gs_kt": 101.33,
-              "componente_cauda_kt": 6.36,
-              "deriva_deg": -1.643
-            },
-            {
-              "x0_nm": 232.56,
-              "x1_nm": 239.23,
-              "fase": "descida",
-              "gs_kt": 104.66,
-              "componente_cauda_kt": 4.79,
-              "deriva_deg": -2.867
-            },
-            {
-              "x0_nm": 239.23,
-              "x1_nm": 251.81,
-              "fase": "cruzeiro",
-              "gs_kt": 97.82,
-              "componente_cauda_kt": 3.2,
-              "deriva_deg": -5.169
-            },
-            {
-              "x0_nm": 251.81,
-              "x1_nm": 255.14,
-              "fase": "descida",
-              "gs_kt": 104.46,
-              "componente_cauda_kt": 4.76,
-              "deriva_deg": -4.474
-            },
-            {
-              "x0_nm": 255.14,
-              "x1_nm": 265.32,
-              "fase": "cruzeiro",
-              "gs_kt": 95.62,
-              "componente_cauda_kt": 1.39,
-              "deriva_deg": 7.276
-            },
-            {
-              "x0_nm": 265.32,
-              "x1_nm": 271.16,
-              "fase": "cruzeiro",
-              "gs_kt": 95.64,
-              "componente_cauda_kt": 1.4,
-              "deriva_deg": 7.275
-            },
-            {
-              "x0_nm": 271.16,
-              "x1_nm": 271.82,
-              "fase": "descida",
-              "gs_kt": 84.02,
-              "componente_cauda_kt": -15.97,
-              "deriva_deg": 0.944
-            },
-            {
-              "x0_nm": 271.82,
-              "x1_nm": 278.5,
-              "fase": "cruzeiro",
-              "gs_kt": 80.7,
-              "componente_cauda_kt": -14.28,
-              "deriva_deg": 1.233
-            },
-            {
-              "x0_nm": 278.5,
-              "x1_nm": 279.17,
-              "fase": "descida",
-              "gs_kt": 85.76,
-              "componente_cauda_kt": -14.21,
-              "deriva_deg": -1.416
-            },
-            {
-              "x0_nm": 279.17,
-              "x1_nm": 281.58,
-              "fase": "cruzeiro",
-              "gs_kt": 80.76,
-              "componente_cauda_kt": -14.21,
-              "deriva_deg": -1.49
-            },
-            {
-              "x0_nm": 281.58,
-              "x1_nm": 281.91,
-              "fase": "descida",
-              "gs_kt": 85.64,
-              "componente_cauda_kt": -14.34,
-              "deriva_deg": 0.883
-            },
-            {
-              "x0_nm": 281.91,
-              "x1_nm": 283.59,
-              "fase": "cruzeiro",
-              "gs_kt": 80.64,
-              "componente_cauda_kt": -14.34,
-              "deriva_deg": 0.93
-            },
-            {
-              "x0_nm": 283.59,
-              "x1_nm": 286.77,
-              "fase": "descida",
-              "gs_kt": 86.94,
-              "componente_cauda_kt": -12.84,
-              "deriva_deg": -3.771
-            }
-          ],
-          "tempo_min_vento": 177.03,
-          "combustivel_vento": 85.57
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
-            "corredor": "ROMEU",
-            "declinacao_deg": -23.0437,
-            "rumo_magnetico_deg": 262.0,
-            "rumo_verdadeiro_deg": 238.9563
-          },
-          {
-            "corredor": "SIERRA",
-            "declinacao_deg": -23.0067,
+            "corredor": "KILO",
+            "declinacao_deg": -23.0358,
             "rumo_magnetico_deg": 279.0,
-            "rumo_verdadeiro_deg": 255.9933
+            "rumo_verdadeiro_deg": 255.9642
           },
           {
-            "corredor": "NOVEMBER",
-            "declinacao_deg": -22.9802,
-            "rumo_magnetico_deg": 193.0,
-            "rumo_verdadeiro_deg": 170.0198
+            "corredor": "KILO",
+            "declinacao_deg": -23.0008,
+            "rumo_magnetico_deg": 278.0,
+            "rumo_verdadeiro_deg": 254.9992
           },
           {
-            "corredor": "JULIET",
-            "declinacao_deg": -22.9498,
-            "rumo_magnetico_deg": 252.0,
-            "rumo_verdadeiro_deg": 229.0502
+            "corredor": "INDIA",
+            "declinacao_deg": -22.9485,
+            "rumo_magnetico_deg": 265.0,
+            "rumo_verdadeiro_deg": 242.0515
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.2018,
+            "declinacao_deg": -22.2021,
             "rumo_magnetico_deg": 236.0,
-            "rumo_verdadeiro_deg": 213.7982
+            "rumo_verdadeiro_deg": 213.7979
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.1481,
+            "declinacao_deg": -22.1484,
             "rumo_magnetico_deg": 236.0,
-            "rumo_verdadeiro_deg": 213.8519
+            "rumo_verdadeiro_deg": 213.8516
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.0547,
+            "declinacao_deg": -22.055,
             "rumo_magnetico_deg": 259.0,
-            "rumo_verdadeiro_deg": 236.9453
+            "rumo_verdadeiro_deg": 236.945
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.9465,
+            "declinacao_deg": -21.9468,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.0535
+            "rumo_verdadeiro_deg": 226.0532
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.8826,
+            "declinacao_deg": -21.8829,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.1174
+            "rumo_verdadeiro_deg": 226.1171
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.8663,
+            "declinacao_deg": -21.8666,
             "rumo_magnetico_deg": 169.0,
-            "rumo_verdadeiro_deg": 147.1337
+            "rumo_verdadeiro_deg": 147.1334
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8733,
+            "declinacao_deg": -21.8736,
             "rumo_magnetico_deg": 151.0,
-            "rumo_verdadeiro_deg": 129.1267
+            "rumo_verdadeiro_deg": 129.1264
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.878,
+            "declinacao_deg": -21.8784,
             "rumo_magnetico_deg": 167.0,
-            "rumo_verdadeiro_deg": 145.122
+            "rumo_verdadeiro_deg": 145.1216
           }
         ]
       }
@@ -2766,13 +1946,14 @@
         "lateral:colisao_portao_coerencia",
         "magnetico:rj_sp"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBRJ",
         "destino": "SBMT",
         "aeronave": "1n7s5U5J",
-        "pista_origem": null,
-        "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "pista_origem": "02",
+        "pista_destino": "12",
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -2782,8 +1963,24 @@
               "name": "SBRJ"
             },
             {
-              "id": "01KSJD4CKHWJBYSQF68QSR1AAW",
-              "name": "PORTÃO MARAPENDI"
+              "id": "01KSJD4CKG3WDKBQATS95ASZZG",
+              "name": "ITAIPU (PORTÃO)"
+            },
+            {
+              "id": "01KSJD4CKFK0DK1TJ6VDA612DV",
+              "name": "FANTE"
+            },
+            {
+              "id": "01KSJD4CKGDSRGSDV5V3ME90KM",
+              "name": "ILHA"
+            },
+            {
+              "id": "01KSJD4CKMQXXMBA9F8WZ0W33N",
+              "name": "RONDA"
+            },
+            {
+              "id": "01KSJD4CKN0824Q3SQ8FQH7GJS",
+              "name": "TIJUCAS"
             },
             {
               "id": "01KSJD4CKMP6M91R14WSNX2ABS",
@@ -2810,19 +2007,87 @@
               "name": "PONTA (PORTÃO)"
             },
             {
+              "id": "01KSJD4CMK3MR076GDTCEV6R5S",
+              "name": "LARANJEIRAS"
+            },
+            {
+              "id": "01KSJD4CMGTTPB0NSR1C6KM0ZC",
+              "name": "ILHA ANCHIETA"
+            },
+            {
+              "id": "01KSJD4CMQ0XPW45GD446CYHKR",
+              "name": "REDENÇÃO (PORTÃO)"
+            },
+            {
+              "id": "01KSJD4CMCWTWW05F8XVYE5FSW",
+              "name": "CAÇAPAVA (PORTÃO)"
+            },
+            {
+              "id": "01KSJD4CMWV2VTR72NFG1J6JKZ",
+              "name": "TRAVÉS NORTE SÃO JOSÉ"
+            },
+            {
+              "id": "01KSJD4CMWVYWRMBT8T2MKDGRS",
+              "name": "TRAVÉS NORTE IGARATÁ"
+            },
+            {
+              "id": "01KSJD4CMA92C0D9DG1229K891",
+              "name": "ATIBAIA"
+            },
+            {
+              "id": "01KSJD4CMMVTMQBBYRZPMTYK31",
+              "name": "MORATO"
+            },
+            {
+              "id": "01KSJD4CMN4QCPD07904GRPBE3",
+              "name": "PEDÁGIO LEROY"
+            },
+            {
+              "id": "01KSJD4CMPKN27CYV0F40XV9WH",
+              "name": "PERUS"
+            },
+            {
+              "id": "01KSJD4CMPCK0MDNQFQDKWTP05",
+              "name": "PEDREIRA (PORTÃO)"
+            },
+            {
+              "id": "01KSJD4CMPH5RHGCXS7VYEHVZD",
+              "name": "PENTEADO (PORTÃO)"
+            },
+            {
               "id": "ADHP:SBMT",
               "name": "SBMT"
             }
           ],
-          "distancia_total_nm": 198.82,
+          "distancia_total_nm": 256.01,
           "distancia_direta_nm": 195.09,
           "corredores_usados": [
             {
-              "name": "PORTÃO MARAPENDI",
+              "name": "PORTÃO ITAIPU",
               "is_mandatory": true
             },
             {
               "name": "FOXTROT",
+              "is_mandatory": true
+            },
+            {
+              "name": "UNIFORM",
+              "is_mandatory": true
+            },
+            {
+              "name": "MIKE",
+              "is_mandatory": true
+            },
+            {
+              "name": "LIMA",
+              "is_mandatory": true
+            },
+            {
+              "name": "DELTA",
+              "is_mandatory": true
+            },
+            {
+              "name": "PORTÃO PENTEADO",
               "is_mandatory": true
             }
           ]
@@ -2837,263 +2102,273 @@
               "real": true
             },
             {
-              "x_nm": 3.73,
-              "alt_ft": 1500.0,
+              "x_nm": 113.1,
+              "alt_ft": 45246.1,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 14.25,
-              "alt_ft": 1500.0,
+              "x_nm": 130.56,
+              "alt_ft": 40009.2,
               "tipo": "corredor",
-              "nome": "PORTÃO MARAPENDI",
+              "nome": "ILHA ANCHIETA",
               "real": true
             },
             {
-              "x_nm": 16.74,
-              "alt_ft": 1500.0,
+              "x_nm": 161.5,
+              "alt_ft": 30726.2,
               "tipo": "corredor",
-              "nome": "SENNA",
+              "nome": "REDENÇÃO (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 20.49,
-              "alt_ft": 3000.0,
+              "x_nm": 173.57,
+              "alt_ft": 27103.7,
+              "tipo": "corredor",
+              "nome": "CAÇAPAVA (PORTÃO)",
+              "real": true
+            },
+            {
+              "x_nm": 183.81,
+              "alt_ft": 24032.5,
+              "tipo": "corredor",
+              "nome": "TRAVÉS NORTE SÃO JOSÉ",
+              "real": true
+            },
+            {
+              "x_nm": 198.15,
+              "alt_ft": 19731.9,
+              "tipo": "corredor",
+              "nome": "TRAVÉS NORTE IGARATÁ",
+              "real": true
+            },
+            {
+              "x_nm": 221.05,
+              "alt_ft": 12859.5,
+              "tipo": "corredor",
+              "nome": "ATIBAIA",
+              "real": true
+            },
+            {
+              "x_nm": 234.56,
+              "alt_ft": 8806.6,
+              "tipo": "corredor",
+              "nome": "MORATO",
+              "real": true
+            },
+            {
+              "x_nm": 240.4,
+              "alt_ft": 7054.9,
+              "tipo": "corredor",
+              "nome": "PEDÁGIO LEROY",
+              "real": true
+            },
+            {
+              "x_nm": 247.75,
+              "alt_ft": 4851.2,
+              "tipo": "corredor",
+              "nome": "PERUS",
+              "real": true
+            },
+            {
+              "x_nm": 250.25,
+              "alt_ft": 4100.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 22.23,
-              "alt_ft": 3000.0,
+              "x_nm": 250.82,
+              "alt_ft": 4100.0,
               "tipo": "corredor",
-              "nome": "PONTAL",
+              "nome": "PEDREIRA (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 25.98,
-              "alt_ft": 4500.0,
+              "x_nm": 251.16,
+              "alt_ft": 4000.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
-              "x_nm": 34.55,
-              "alt_ft": 4500.0,
-              "tipo": "corredor",
-              "nome": "GRAMA",
-              "real": true
-            },
-            {
-              "x_nm": 44.97,
-              "alt_ft": 4500.0,
-              "tipo": "corredor",
-              "nome": "MARA",
-              "real": true
-            },
-            {
-              "x_nm": 59.1,
-              "alt_ft": 4500.0,
-              "tipo": "corredor",
-              "nome": "GRANDE",
-              "real": true
-            },
-            {
-              "x_nm": 64.1,
-              "alt_ft": 6500.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 77.67,
-              "alt_ft": 6500.0,
+              "x_nm": 252.83,
+              "alt_ft": 4000.0,
               "tipo": "ponto",
-              "nome": "PONTA (PORTÃO)",
+              "nome": "PENTEADO (PORTÃO)",
               "real": true
             },
             {
-              "x_nm": 185.06,
-              "alt_ft": 6500.0,
-              "tipo": "virtual",
-              "nome": null,
-              "real": false
-            },
-            {
-              "x_nm": 198.82,
+              "x_nm": 256.01,
               "alt_ft": 2372.1,
               "tipo": "destino",
               "nome": "SBMT",
               "real": true
             }
           ],
-          "toc_nm": 64.1,
-          "tod_nm": 185.06,
+          "toc_nm": 113.1,
+          "tod_nm": 113.1,
           "tempo_min": {
-            "subida": 12.99,
-            "cruzeiro": 106.62,
-            "descida": 8.26,
-            "total": 127.87
+            "subida": 90.48,
+            "cruzeiro": 1.42,
+            "descida": 85.75,
+            "total": 177.65
           },
           "combustivel": {
-            "subida": 7.58,
-            "cruzeiro": 51.54,
-            "descida": 3.16,
-            "total": 62.28,
+            "subida": 52.78,
+            "cruzeiro": 0.69,
+            "descida": 32.87,
+            "total": 86.34,
             "unidade": "l"
           },
           "avisos": [
-            "perfil pode furar terreno entre 4 e 14 NM (2861+1000 > 1500 ft)"
+            "trecho final PENTEADO (PORTÃO) -> SBMT: razão de descida necessária ~853 fpm excede a máxima do banco (500 fpm); trecho íngreme (piloto reduz velocidade / espiral)."
           ],
-          "descida_ingreme_nm": []
+          "descida_ingreme_nm": [
+            [
+              252.83,
+              256.01
+            ]
+          ]
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.73,
-              "fase": "subida",
-              "gs_kt": 76.25,
-              "componente_cauda_kt": 1.63,
-              "deriva_deg": 5.801
-            },
-            {
-              "x0_nm": 3.73,
-              "x1_nm": 14.25,
-              "fase": "cruzeiro",
-              "gs_kt": 97.88,
-              "componente_cauda_kt": 3.52,
-              "deriva_deg": 6.688
-            },
-            {
-              "x0_nm": 14.25,
-              "x1_nm": 16.74,
-              "fase": "cruzeiro",
-              "gs_kt": 87.53,
-              "componente_cauda_kt": -7.02,
-              "deriva_deg": 5.586
-            },
-            {
-              "x0_nm": 16.74,
-              "x1_nm": 20.49,
-              "fase": "subida",
-              "gs_kt": 84.25,
-              "componente_cauda_kt": 9.65,
-              "deriva_deg": 5.937
-            },
-            {
-              "x0_nm": 20.49,
-              "x1_nm": 22.23,
-              "fase": "cruzeiro",
-              "gs_kt": 101.78,
-              "componente_cauda_kt": 6.78,
-              "deriva_deg": 0.729
-            },
-            {
-              "x0_nm": 22.23,
-              "x1_nm": 25.98,
-              "fase": "subida",
-              "gs_kt": 81.34,
-              "componente_cauda_kt": 6.39,
-              "deriva_deg": 1.977
-            },
-            {
-              "x0_nm": 25.98,
-              "x1_nm": 34.55,
-              "fase": "cruzeiro",
-              "gs_kt": 101.38,
-              "componente_cauda_kt": 6.4,
-              "deriva_deg": 1.049
-            },
-            {
-              "x0_nm": 34.55,
-              "x1_nm": 44.97,
-              "fase": "cruzeiro",
-              "gs_kt": 99.24,
-              "componente_cauda_kt": 4.26,
-              "deriva_deg": 1.255
-            },
-            {
-              "x0_nm": 44.97,
-              "x1_nm": 59.1,
-              "fase": "cruzeiro",
-              "gs_kt": 99.23,
-              "componente_cauda_kt": 4.24,
-              "deriva_deg": 0.999
-            },
-            {
-              "x0_nm": 59.1,
-              "x1_nm": 64.1,
-              "fase": "subida",
-              "gs_kt": 73.19,
-              "componente_cauda_kt": -0.15,
-              "deriva_deg": -12.077
-            },
-            {
-              "x0_nm": 64.1,
-              "x1_nm": 77.67,
-              "fase": "cruzeiro",
-              "gs_kt": 94.91,
-              "componente_cauda_kt": 1.0,
-              "deriva_deg": -8.695
-            },
-            {
-              "x0_nm": 77.67,
-              "x1_nm": 185.06,
-              "fase": "cruzeiro",
-              "gs_kt": 94.86,
-              "componente_cauda_kt": 0.43,
-              "deriva_deg": -6.247
-            },
-            {
-              "x0_nm": 185.06,
-              "x1_nm": 198.82,
-              "fase": "descida",
-              "gs_kt": 106.6,
-              "componente_cauda_kt": 7.17,
-              "deriva_deg": 6.107
-            }
-          ],
-          "tempo_min_vento": 125.81,
-          "combustivel_vento": 61.28
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
-            "corredor": "PORTÃO MARAPENDI",
-            "declinacao_deg": -22.9404,
-            "rumo_magnetico_deg": 204.0,
-            "rumo_verdadeiro_deg": 181.0596
+            "corredor": "PORTÃO ITAIPU",
+            "declinacao_deg": -23.031,
+            "rumo_magnetico_deg": 149.0,
+            "rumo_verdadeiro_deg": 125.969
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9247,
+            "declinacao_deg": -23.0167,
+            "rumo_magnetico_deg": 283.0,
+            "rumo_verdadeiro_deg": 259.9833
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.9915,
+            "rumo_magnetico_deg": 283.0,
+            "rumo_verdadeiro_deg": 260.0085
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.9755,
             "rumo_magnetico_deg": 288.0,
-            "rumo_verdadeiro_deg": 265.0753
+            "rumo_verdadeiro_deg": 265.0245
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8803,
+            "declinacao_deg": -22.9519,
+            "rumo_magnetico_deg": 288.0,
+            "rumo_verdadeiro_deg": 265.0481
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.9248,
+            "rumo_magnetico_deg": 288.0,
+            "rumo_verdadeiro_deg": 265.0752
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.8804,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1197
+            "rumo_verdadeiro_deg": 253.1196
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8214,
+            "declinacao_deg": -22.8215,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1786
+            "rumo_verdadeiro_deg": 253.1785
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.757,
+            "declinacao_deg": -22.7571,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.243
+            "rumo_verdadeiro_deg": 258.2429
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6695,
+            "declinacao_deg": -22.6697,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.3305
+            "rumo_verdadeiro_deg": 258.3303
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.585,
+            "rumo_magnetico_deg": 271.0,
+            "rumo_verdadeiro_deg": 248.415
+          },
+          {
+            "corredor": "FOXTROT",
+            "declinacao_deg": -22.4757,
+            "rumo_magnetico_deg": 271.0,
+            "rumo_verdadeiro_deg": 248.5243
+          },
+          {
+            "corredor": "UNIFORM",
+            "declinacao_deg": -22.3461,
+            "rumo_magnetico_deg": 325.0,
+            "rumo_verdadeiro_deg": 302.6539
+          },
+          {
+            "corredor": "UNIFORM",
+            "declinacao_deg": -22.2796,
+            "rumo_magnetico_deg": 338.0,
+            "rumo_verdadeiro_deg": 315.7204
+          },
+          {
+            "corredor": "MIKE",
+            "declinacao_deg": -22.2411,
+            "rumo_magnetico_deg": 296.0,
+            "rumo_verdadeiro_deg": 273.7589
+          },
+          {
+            "corredor": "MIKE",
+            "declinacao_deg": -22.1703,
+            "rumo_magnetico_deg": 281.0,
+            "rumo_verdadeiro_deg": 258.8297
+          },
+          {
+            "corredor": "MIKE",
+            "declinacao_deg": -22.0585,
+            "rumo_magnetico_deg": 295.0,
+            "rumo_verdadeiro_deg": 272.9415
+          },
+          {
+            "corredor": "LIMA",
+            "declinacao_deg": -21.9468,
+            "rumo_magnetico_deg": 248.0,
+            "rumo_verdadeiro_deg": 226.0532
+          },
+          {
+            "corredor": "LIMA",
+            "declinacao_deg": -21.8829,
+            "rumo_magnetico_deg": 248.0,
+            "rumo_verdadeiro_deg": 226.1171
+          },
+          {
+            "corredor": "DELTA",
+            "declinacao_deg": -21.8666,
+            "rumo_magnetico_deg": 169.0,
+            "rumo_verdadeiro_deg": 147.1334
+          },
+          {
+            "corredor": "PORTÃO PENTEADO",
+            "declinacao_deg": -21.8736,
+            "rumo_magnetico_deg": 151.0,
+            "rumo_verdadeiro_deg": 129.1264
+          },
+          {
+            "corredor": "PORTÃO PENTEADO",
+            "declinacao_deg": -21.8784,
+            "rumo_magnetico_deg": 167.0,
+            "rumo_verdadeiro_deg": 145.1216
           }
         ]
       }
@@ -3103,13 +2378,14 @@
       "cobertura": [
         "lateral:duplicidade_ultimo_ponto_dedup_destino"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBVT",
         "destino": "SIVU",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3177,34 +2453,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.73,
-              "fase": "subida",
-              "gs_kt": 77.94,
-              "componente_cauda_kt": 3.1,
-              "deriva_deg": 3.728
-            },
-            {
-              "x0_nm": 3.73,
-              "x1_nm": 5.25,
-              "fase": "cruzeiro",
-              "gs_kt": 100.58,
-              "componente_cauda_kt": 5.69,
-              "deriva_deg": 2.801
-            },
-            {
-              "x0_nm": 5.25,
-              "x1_nm": 10.22,
-              "fase": "descida",
-              "gs_kt": 104.77,
-              "componente_cauda_kt": 4.94,
-              "deriva_deg": 3.35
-            }
-          ],
-          "tempo_min_vento": 6.62,
-          "combustivel_vento": 3.2
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -3214,13 +2465,14 @@
       "cobertura": [
         "lateral:colisao_portao_coerencia"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBPS",
         "destino": "SBTV",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3290,34 +2542,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 2.11,
-              "fase": "subida",
-              "gs_kt": 76.97,
-              "componente_cauda_kt": 2.34,
-              "deriva_deg": 5.723
-            },
-            {
-              "x0_nm": 2.11,
-              "x1_nm": 3.64,
-              "fase": "cruzeiro",
-              "gs_kt": 98.38,
-              "componente_cauda_kt": 3.85,
-              "deriva_deg": 5.714
-            },
-            {
-              "x0_nm": 3.64,
-              "x1_nm": 6.44,
-              "fase": "descida",
-              "gs_kt": 102.06,
-              "componente_cauda_kt": 2.34,
-              "deriva_deg": 4.289
-            }
-          ],
-          "tempo_min_vento": 4.23,
-          "combustivel_vento": 2.04
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -3328,13 +2555,14 @@
         "lateral:colisao_portao_coerencia",
         "magnetico:nordeste_litoral"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBTV",
         "destino": "SBRF",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3498,131 +2726,34 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.24,
-              "fase": "subida",
-              "gs_kt": 71.73,
-              "componente_cauda_kt": -2.84,
-              "deriva_deg": 6.166
-            },
-            {
-              "x0_nm": 3.24,
-              "x1_nm": 3.36,
-              "fase": "subida",
-              "gs_kt": 72.45,
-              "componente_cauda_kt": -1.95,
-              "deriva_deg": -7.234
-            },
-            {
-              "x0_nm": 3.36,
-              "x1_nm": 9.34,
-              "fase": "cruzeiro",
-              "gs_kt": 91.53,
-              "componente_cauda_kt": -2.96,
-              "deriva_deg": -5.904
-            },
-            {
-              "x0_nm": 9.34,
-              "x1_nm": 29.34,
-              "fase": "subida",
-              "gs_kt": 72.4,
-              "componente_cauda_kt": -2.45,
-              "deriva_deg": -3.617
-            },
-            {
-              "x0_nm": 29.34,
-              "x1_nm": 518.22,
-              "fase": "cruzeiro",
-              "gs_kt": 94.51,
-              "componente_cauda_kt": -0.28,
-              "deriva_deg": -3.877
-            },
-            {
-              "x0_nm": 518.22,
-              "x1_nm": 544.55,
-              "fase": "descida",
-              "gs_kt": 106.37,
-              "componente_cauda_kt": 7.09,
-              "deriva_deg": -6.876
-            },
-            {
-              "x0_nm": 544.55,
-              "x1_nm": 548.12,
-              "fase": "cruzeiro",
-              "gs_kt": 108.31,
-              "componente_cauda_kt": 13.97,
-              "deriva_deg": -6.761
-            },
-            {
-              "x0_nm": 548.12,
-              "x1_nm": 559.24,
-              "fase": "cruzeiro",
-              "gs_kt": 114.18,
-              "componente_cauda_kt": 19.23,
-              "deriva_deg": 1.888
-            },
-            {
-              "x0_nm": 559.24,
-              "x1_nm": 560.57,
-              "fase": "descida",
-              "gs_kt": 111.16,
-              "componente_cauda_kt": 12.31,
-              "deriva_deg": -8.684
-            },
-            {
-              "x0_nm": 560.57,
-              "x1_nm": 568.69,
-              "fase": "cruzeiro",
-              "gs_kt": 106.1,
-              "componente_cauda_kt": 12.31,
-              "deriva_deg": -9.145
-            },
-            {
-              "x0_nm": 568.69,
-              "x1_nm": 569.0,
-              "fase": "cruzeiro",
-              "gs_kt": 92.07,
-              "componente_cauda_kt": -0.72,
-              "deriva_deg": -12.398
-            },
-            {
-              "x0_nm": 569.0,
-              "x1_nm": 572.91,
-              "fase": "descida",
-              "gs_kt": 99.32,
-              "componente_cauda_kt": 0.03,
-              "deriva_deg": -6.825
-            }
-          ],
-          "tempo_min_vento": 364.23,
-          "combustivel_vento": 176.19
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "ECHO",
-            "declinacao_deg": -23.5893,
+            "declinacao_deg": -23.5891,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 10.4107
+            "rumo_verdadeiro_deg": 10.4109
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.201,
+            "declinacao_deg": -21.2004,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.799
+            "rumo_verdadeiro_deg": 15.7996
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.168,
+            "declinacao_deg": -21.1673,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.832
+            "rumo_verdadeiro_deg": 331.8327
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.114,
+            "declinacao_deg": -21.1134,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.886
+            "rumo_verdadeiro_deg": 31.8866
           }
         ]
       }
@@ -3632,13 +2763,14 @@
       "cobertura": [
         "lateral:proximidade_direta_vs_malha"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBNT",
         "destino": "SBSG",
         "aeronave": "1n7s5U5J",
-        "pista_origem": null,
+        "pista_origem": "16L",
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3706,34 +2838,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 4.61,
-              "fase": "subida",
-              "gs_kt": 100.63,
-              "componente_cauda_kt": 25.63,
-              "deriva_deg": -0.004
-            },
-            {
-              "x0_nm": 4.61,
-              "x1_nm": 5.12,
-              "fase": "cruzeiro",
-              "gs_kt": 120.63,
-              "componente_cauda_kt": 25.63,
-              "deriva_deg": -0.003
-            },
-            {
-              "x0_nm": 5.12,
-              "x1_nm": 10.91,
-              "fase": "descida",
-              "gs_kt": 125.63,
-              "componente_cauda_kt": 25.63,
-              "deriva_deg": -0.003
-            }
-          ],
-          "tempo_min_vento": 5.77,
-          "combustivel_vento": 2.79
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -3744,13 +2851,14 @@
         "lateral:proximidade_direta_vs_malha",
         "magnetico:centro_oeste"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBCY",
         "destino": "SIAQ",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3818,34 +2926,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.52,
-              "fase": "subida",
-              "gs_kt": 77.77,
-              "componente_cauda_kt": 2.89,
-              "deriva_deg": -3.31
-            },
-            {
-              "x0_nm": 3.52,
-              "x1_nm": 4.5,
-              "fase": "cruzeiro",
-              "gs_kt": 98.99,
-              "componente_cauda_kt": 4.09,
-              "deriva_deg": -2.623
-            },
-            {
-              "x0_nm": 4.5,
-              "x1_nm": 8.69,
-              "fase": "descida",
-              "gs_kt": 103.99,
-              "componente_cauda_kt": 4.09,
-              "deriva_deg": -2.492
-            }
-          ],
-          "tempo_min_vento": 5.73,
-          "combustivel_vento": 2.8
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -3856,13 +2939,14 @@
         "lateral:proximidade_direta_vs_malha",
         "magnetico:norte"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SISM",
         "destino": "SBMQ",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -3923,26 +3007,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 2.0,
-              "fase": "subida",
-              "gs_kt": 70.44,
-              "componente_cauda_kt": -4.55,
-              "deriva_deg": 0.361
-            },
-            {
-              "x0_nm": 2.0,
-              "x1_nm": 4.68,
-              "fase": "descida",
-              "gs_kt": 95.45,
-              "componente_cauda_kt": -4.55,
-              "deriva_deg": 0.271
-            }
-          ],
-          "tempo_min_vento": 3.39,
-          "combustivel_vento": 1.64
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -3952,13 +3019,14 @@
       "cobertura": [
         "magnetico:norte_amazonia"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBE",
         "destino": "SWEQ",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -4028,34 +3096,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 2.4,
-              "fase": "subida",
-              "gs_kt": 68.96,
-              "componente_cauda_kt": -6.03,
-              "deriva_deg": 0.871
-            },
-            {
-              "x0_nm": 2.4,
-              "x1_nm": 4.44,
-              "fase": "cruzeiro",
-              "gs_kt": 87.82,
-              "componente_cauda_kt": -7.11,
-              "deriva_deg": -2.306
-            },
-            {
-              "x0_nm": 4.44,
-              "x1_nm": 7.64,
-              "fase": "descida",
-              "gs_kt": 93.96,
-              "componente_cauda_kt": -6.03,
-              "deriva_deg": 0.653
-            }
-          ],
-          "tempo_min_vento": 5.53,
-          "combustivel_vento": 2.68
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -4065,13 +3108,14 @@
       "cobertura": [
         "lateral:dentro_da_mesma_regiao"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBI",
         "destino": "SBCT",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -4141,34 +3185,9 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 2.42,
-              "fase": "subida",
-              "gs_kt": 75.4,
-              "componente_cauda_kt": 0.55,
-              "deriva_deg": 3.567
-            },
-            {
-              "x0_nm": 2.42,
-              "x1_nm": 4.9,
-              "fase": "cruzeiro",
-              "gs_kt": 95.43,
-              "componente_cauda_kt": 0.55,
-              "deriva_deg": 2.815
-            },
-            {
-              "x0_nm": 4.9,
-              "x1_nm": 8.31,
-              "fase": "descida",
-              "gs_kt": 100.5,
-              "componente_cauda_kt": 0.6,
-              "deriva_deg": 2.652
-            }
-          ],
-          "tempo_min_vento": 5.52,
-          "combustivel_vento": 2.66
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": []
       }
@@ -4178,13 +3197,14 @@
       "cobertura": [
         "lateral:entre_regioes_diferentes"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBCT",
         "destino": "SBVT",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -4381,161 +3401,40 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.81,
-              "fase": "subida",
-              "gs_kt": 70.83,
-              "componente_cauda_kt": -4.14,
-              "deriva_deg": -1.645
-            },
-            {
-              "x0_nm": 3.81,
-              "x1_nm": 7.84,
-              "fase": "cruzeiro",
-              "gs_kt": 90.84,
-              "componente_cauda_kt": -4.14,
-              "deriva_deg": -1.299
-            },
-            {
-              "x0_nm": 7.84,
-              "x1_nm": 11.85,
-              "fase": "cruzeiro",
-              "gs_kt": 90.82,
-              "componente_cauda_kt": -4.16,
-              "deriva_deg": 1.276
-            },
-            {
-              "x0_nm": 11.85,
-              "x1_nm": 14.35,
-              "fase": "subida",
-              "gs_kt": 82.81,
-              "componente_cauda_kt": 7.87,
-              "deriva_deg": 2.229
-            },
-            {
-              "x0_nm": 14.35,
-              "x1_nm": 17.53,
-              "fase": "cruzeiro",
-              "gs_kt": 102.6,
-              "componente_cauda_kt": 7.67,
-              "deriva_deg": 2.118
-            },
-            {
-              "x0_nm": 17.53,
-              "x1_nm": 20.03,
-              "fase": "subida",
-              "gs_kt": 83.41,
-              "componente_cauda_kt": 8.41,
-              "deriva_deg": -0.486
-            },
-            {
-              "x0_nm": 20.03,
-              "x1_nm": 36.24,
-              "fase": "cruzeiro",
-              "gs_kt": 104.2,
-              "componente_cauda_kt": 9.21,
-              "deriva_deg": -0.833
-            },
-            {
-              "x0_nm": 36.24,
-              "x1_nm": 43.74,
-              "fase": "subida",
-              "gs_kt": 83.06,
-              "componente_cauda_kt": 8.35,
-              "deriva_deg": 5.039
-            },
-            {
-              "x0_nm": 43.74,
-              "x1_nm": 558.29,
-              "fase": "cruzeiro",
-              "gs_kt": 112.62,
-              "componente_cauda_kt": 19.59,
-              "deriva_deg": 11.666
-            },
-            {
-              "x0_nm": 558.29,
-              "x1_nm": 583.29,
-              "fase": "descida",
-              "gs_kt": 103.17,
-              "componente_cauda_kt": 3.59,
-              "deriva_deg": 5.214
-            },
-            {
-              "x0_nm": 583.29,
-              "x1_nm": 592.0,
-              "fase": "cruzeiro",
-              "gs_kt": 92.18,
-              "componente_cauda_kt": -2.36,
-              "deriva_deg": -5.662
-            },
-            {
-              "x0_nm": 592.0,
-              "x1_nm": 592.67,
-              "fase": "descida",
-              "gs_kt": 92.87,
-              "componente_cauda_kt": -7.02,
-              "deriva_deg": -2.746
-            },
-            {
-              "x0_nm": 592.67,
-              "x1_nm": 599.02,
-              "fase": "cruzeiro",
-              "gs_kt": 90.79,
-              "componente_cauda_kt": -4.16,
-              "deriva_deg": -1.914
-            },
-            {
-              "x0_nm": 599.02,
-              "x1_nm": 599.33,
-              "fase": "cruzeiro",
-              "gs_kt": 87.72,
-              "componente_cauda_kt": -7.17,
-              "deriva_deg": 2.744
-            },
-            {
-              "x0_nm": 599.33,
-              "x1_nm": 605.3,
-              "fase": "descida",
-              "gs_kt": 92.73,
-              "componente_cauda_kt": -7.17,
-              "deriva_deg": 2.607
-            }
-          ],
-          "tempo_min_vento": 331.8,
-          "combustivel_vento": 159.71
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "REPRESA",
-            "declinacao_deg": -20.4943,
+            "declinacao_deg": -20.4947,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 87.5057
+            "rumo_verdadeiro_deg": 87.5053
           },
           {
             "corredor": "REPRESA",
-            "declinacao_deg": -20.5342,
+            "declinacao_deg": -20.5346,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 87.4658
+            "rumo_verdadeiro_deg": 87.4654
           },
           {
             "corredor": "MARUMBÍ",
-            "declinacao_deg": -20.6044,
+            "declinacao_deg": -20.6048,
             "rumo_magnetico_deg": 137.0,
-            "rumo_verdadeiro_deg": 116.3956
+            "rumo_verdadeiro_deg": 116.3952
           },
           {
             "corredor": "VIANA",
-            "declinacao_deg": -23.7081,
+            "declinacao_deg": -23.708,
             "rumo_magnetico_deg": 1.0,
-            "rumo_verdadeiro_deg": 337.2919
+            "rumo_verdadeiro_deg": 337.292
           },
           {
             "corredor": "CARIACICA",
-            "declinacao_deg": -23.7064,
+            "declinacao_deg": -23.7063,
             "rumo_magnetico_deg": 38.0,
-            "rumo_verdadeiro_deg": 14.2936
+            "rumo_verdadeiro_deg": 14.2937
           }
         ]
       }
@@ -4546,13 +3445,14 @@
         "vertical:descida_start_entre_corredores",
         "magnetico:sp_rj"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBGR",
         "destino": "SBGL",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -4988,447 +3888,142 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 3.86,
-              "fase": "subida",
-              "gs_kt": 81.76,
-              "componente_cauda_kt": 6.91,
-              "deriva_deg": 3.629
-            },
-            {
-              "x0_nm": 3.86,
-              "x1_nm": 12.44,
-              "fase": "cruzeiro",
-              "gs_kt": 102.02,
-              "componente_cauda_kt": 7.15,
-              "deriva_deg": 2.964
-            },
-            {
-              "x0_nm": 12.44,
-              "x1_nm": 14.45,
-              "fase": "cruzeiro",
-              "gs_kt": 101.9,
-              "componente_cauda_kt": 7.04,
-              "deriva_deg": -3.058
-            },
-            {
-              "x0_nm": 14.45,
-              "x1_nm": 14.7,
-              "fase": "subida",
-              "gs_kt": 83.11,
-              "componente_cauda_kt": 8.16,
-              "deriva_deg": -2.241
-            },
-            {
-              "x0_nm": 14.7,
-              "x1_nm": 17.52,
-              "fase": "cruzeiro",
-              "gs_kt": 103.12,
-              "componente_cauda_kt": 8.16,
-              "deriva_deg": -1.769
-            },
-            {
-              "x0_nm": 17.52,
-              "x1_nm": 17.77,
-              "fase": "subida",
-              "gs_kt": 77.26,
-              "componente_cauda_kt": 2.72,
-              "deriva_deg": -6.306
-            },
-            {
-              "x0_nm": 17.77,
-              "x1_nm": 27.72,
-              "fase": "cruzeiro",
-              "gs_kt": 97.36,
-              "componente_cauda_kt": 2.72,
-              "deriva_deg": -4.975
-            },
-            {
-              "x0_nm": 27.72,
-              "x1_nm": 28.47,
-              "fase": "subida",
-              "gs_kt": 70.48,
-              "componente_cauda_kt": -4.01,
-              "deriva_deg": -6.701
-            },
-            {
-              "x0_nm": 28.47,
-              "x1_nm": 41.23,
-              "fase": "cruzeiro",
-              "gs_kt": 90.59,
-              "componente_cauda_kt": -4.01,
-              "deriva_deg": -5.286
-            },
-            {
-              "x0_nm": 41.23,
-              "x1_nm": 42.48,
-              "fase": "subida",
-              "gs_kt": 63.85,
-              "componente_cauda_kt": -10.88,
-              "deriva_deg": -4.857
-            },
-            {
-              "x0_nm": 42.48,
-              "x1_nm": 64.14,
-              "fase": "cruzeiro",
-              "gs_kt": 96.54,
-              "componente_cauda_kt": 2.44,
-              "deriva_deg": 7.873
-            },
-            {
-              "x0_nm": 64.14,
-              "x1_nm": 67.47,
-              "fase": "descida",
-              "gs_kt": 93.89,
-              "componente_cauda_kt": -5.95,
-              "deriva_deg": -3.274
-            },
-            {
-              "x0_nm": 67.47,
-              "x1_nm": 78.48,
-              "fase": "cruzeiro",
-              "gs_kt": 88.72,
-              "componente_cauda_kt": -6.17,
-              "deriva_deg": -2.696
-            },
-            {
-              "x0_nm": 78.48,
-              "x1_nm": 88.71,
-              "fase": "cruzeiro",
-              "gs_kt": 87.85,
-              "componente_cauda_kt": -7.11,
-              "deriva_deg": -1.645
-            },
-            {
-              "x0_nm": 88.71,
-              "x1_nm": 92.46,
-              "fase": "subida",
-              "gs_kt": 69.84,
-              "componente_cauda_kt": -5.12,
-              "deriva_deg": -1.959
-            },
-            {
-              "x0_nm": 92.46,
-              "x1_nm": 95.44,
-              "fase": "cruzeiro",
-              "gs_kt": 92.43,
-              "componente_cauda_kt": -2.2,
-              "deriva_deg": 5.043
-            },
-            {
-              "x0_nm": 95.44,
-              "x1_nm": 100.46,
-              "fase": "cruzeiro",
-              "gs_kt": 90.4,
-              "componente_cauda_kt": -4.36,
-              "deriva_deg": 4.076
-            },
-            {
-              "x0_nm": 100.46,
-              "x1_nm": 111.57,
-              "fase": "cruzeiro",
-              "gs_kt": 90.4,
-              "componente_cauda_kt": -4.36,
-              "deriva_deg": 4.074
-            },
-            {
-              "x0_nm": 111.57,
-              "x1_nm": 115.02,
-              "fase": "cruzeiro",
-              "gs_kt": 91.11,
-              "componente_cauda_kt": -3.6,
-              "deriva_deg": 4.5
-            },
-            {
-              "x0_nm": 115.02,
-              "x1_nm": 117.52,
-              "fase": "subida",
-              "gs_kt": 79.84,
-              "componente_cauda_kt": 5.12,
-              "deriva_deg": 4.974
-            },
-            {
-              "x0_nm": 117.52,
-              "x1_nm": 121.26,
-              "fase": "cruzeiro",
-              "gs_kt": 99.9,
-              "componente_cauda_kt": 5.12,
-              "deriva_deg": 3.925
-            },
-            {
-              "x0_nm": 121.26,
-              "x1_nm": 136.78,
-              "fase": "cruzeiro",
-              "gs_kt": 97.74,
-              "componente_cauda_kt": 2.89,
-              "deriva_deg": 3.206
-            },
-            {
-              "x0_nm": 136.78,
-              "x1_nm": 159.76,
-              "fase": "cruzeiro",
-              "gs_kt": 98.16,
-              "componente_cauda_kt": 3.68,
-              "deriva_deg": 5.965
-            },
-            {
-              "x0_nm": 159.76,
-              "x1_nm": 188.71,
-              "fase": "cruzeiro",
-              "gs_kt": 93.48,
-              "componente_cauda_kt": -1.15,
-              "deriva_deg": 5.039
-            },
-            {
-              "x0_nm": 188.71,
-              "x1_nm": 192.04,
-              "fase": "descida",
-              "gs_kt": 90.61,
-              "componente_cauda_kt": -9.19,
-              "deriva_deg": 3.639
-            },
-            {
-              "x0_nm": 192.04,
-              "x1_nm": 199.86,
-              "fase": "cruzeiro",
-              "gs_kt": 88.06,
-              "componente_cauda_kt": -6.79,
-              "deriva_deg": 3.169
-            },
-            {
-              "x0_nm": 199.86,
-              "x1_nm": 201.52,
-              "fase": "descida",
-              "gs_kt": 93.31,
-              "componente_cauda_kt": -6.24,
-              "deriva_deg": 5.429
-            },
-            {
-              "x0_nm": 201.52,
-              "x1_nm": 213.36,
-              "fase": "cruzeiro",
-              "gs_kt": 91.19,
-              "componente_cauda_kt": -3.15,
-              "deriva_deg": 6.75
-            },
-            {
-              "x0_nm": 213.36,
-              "x1_nm": 215.02,
-              "fase": "descida",
-              "gs_kt": 90.38,
-              "componente_cauda_kt": -9.44,
-              "deriva_deg": -3.446
-            },
-            {
-              "x0_nm": 215.02,
-              "x1_nm": 219.03,
-              "fase": "cruzeiro",
-              "gs_kt": 85.37,
-              "componente_cauda_kt": -9.44,
-              "deriva_deg": -3.627
-            },
-            {
-              "x0_nm": 219.03,
-              "x1_nm": 222.78,
-              "fase": "descida",
-              "gs_kt": 90.75,
-              "componente_cauda_kt": -9.21,
-              "deriva_deg": -1.586
-            },
-            {
-              "x0_nm": 222.78,
-              "x1_nm": 225.69,
-              "fase": "descida",
-              "gs_kt": 93.05,
-              "componente_cauda_kt": -6.71,
-              "deriva_deg": -3.951
-            },
-            {
-              "x0_nm": 225.69,
-              "x1_nm": 230.49,
-              "fase": "cruzeiro",
-              "gs_kt": 88.04,
-              "componente_cauda_kt": -6.71,
-              "deriva_deg": -4.159
-            },
-            {
-              "x0_nm": 230.49,
-              "x1_nm": 233.83,
-              "fase": "descida",
-              "gs_kt": 92.96,
-              "componente_cauda_kt": -6.82,
-              "deriva_deg": -3.758
-            },
-            {
-              "x0_nm": 233.83,
-              "x1_nm": 238.3,
-              "fase": "cruzeiro",
-              "gs_kt": 87.95,
-              "componente_cauda_kt": -6.82,
-              "deriva_deg": -3.956
-            },
-            {
-              "x0_nm": 238.3,
-              "x1_nm": 243.48,
-              "fase": "cruzeiro",
-              "gs_kt": 85.54,
-              "componente_cauda_kt": -9.46,
-              "deriva_deg": 0.012
-            },
-            {
-              "x0_nm": 243.48,
-              "x1_nm": 246.15,
-              "fase": "cruzeiro",
-              "gs_kt": 86.01,
-              "componente_cauda_kt": -8.97,
-              "deriva_deg": -1.186
-            },
-            {
-              "x0_nm": 246.15,
-              "x1_nm": 251.07,
-              "fase": "descida",
-              "gs_kt": 95.18,
-              "componente_cauda_kt": -4.79,
-              "deriva_deg": -1.239
-            }
-          ],
-          "tempo_min_vento": 163.65,
-          "combustivel_vento": 78.5
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.878,
+            "declinacao_deg": -21.8784,
             "rumo_magnetico_deg": 347.0,
-            "rumo_verdadeiro_deg": 325.122
+            "rumo_verdadeiro_deg": 325.1216
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8733,
+            "declinacao_deg": -21.8736,
             "rumo_magnetico_deg": 331.0,
-            "rumo_verdadeiro_deg": 309.1267
+            "rumo_verdadeiro_deg": 309.1264
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.8858,
+            "declinacao_deg": -21.8862,
             "rumo_magnetico_deg": 23.0,
-            "rumo_verdadeiro_deg": 1.1142
+            "rumo_verdadeiro_deg": 1.1138
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.9465,
+            "declinacao_deg": -21.9468,
             "rumo_magnetico_deg": 68.0,
-            "rumo_verdadeiro_deg": 46.0535
+            "rumo_verdadeiro_deg": 46.0532
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0582,
+            "declinacao_deg": -22.0585,
             "rumo_magnetico_deg": 115.0,
-            "rumo_verdadeiro_deg": 92.9418
+            "rumo_verdadeiro_deg": 92.9415
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1701,
+            "declinacao_deg": -22.1703,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.8299
+            "rumo_verdadeiro_deg": 78.8297
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2408,
+            "declinacao_deg": -22.2411,
             "rumo_magnetico_deg": 116.0,
-            "rumo_verdadeiro_deg": 93.7592
+            "rumo_verdadeiro_deg": 93.7589
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2877,
+            "declinacao_deg": -22.288,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.7123
+            "rumo_verdadeiro_deg": 59.712
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.3243,
+            "declinacao_deg": -22.3246,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.6757
+            "rumo_verdadeiro_deg": 59.6754
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.3739,
+            "declinacao_deg": -22.3742,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.6261
+            "rumo_verdadeiro_deg": 59.6258
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.4179,
+            "declinacao_deg": -22.4182,
             "rumo_magnetico_deg": 75.0,
-            "rumo_verdadeiro_deg": 52.5821
+            "rumo_verdadeiro_deg": 52.5818
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.4397,
+            "declinacao_deg": -22.4399,
             "rumo_magnetico_deg": 139.0,
-            "rumo_verdadeiro_deg": 116.5603
+            "rumo_verdadeiro_deg": 116.5601
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.4791,
+            "declinacao_deg": -22.4793,
             "rumo_magnetico_deg": 139.0,
-            "rumo_verdadeiro_deg": 116.5209
+            "rumo_verdadeiro_deg": 116.5207
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.5584,
+            "declinacao_deg": -22.5586,
             "rumo_magnetico_deg": 126.0,
-            "rumo_verdadeiro_deg": 103.4416
+            "rumo_verdadeiro_deg": 103.4414
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.6897,
+            "declinacao_deg": -22.6899,
             "rumo_magnetico_deg": 95.0,
-            "rumo_verdadeiro_deg": 72.3103
+            "rumo_verdadeiro_deg": 72.3101
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -22.7872,
+            "declinacao_deg": -22.7874,
             "rumo_magnetico_deg": 38.0,
-            "rumo_verdadeiro_deg": 15.2128
+            "rumo_verdadeiro_deg": 15.2126
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -22.8355,
+            "declinacao_deg": -22.8357,
             "rumo_magnetico_deg": 55.0,
-            "rumo_verdadeiro_deg": 32.1645
+            "rumo_verdadeiro_deg": 32.1643
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.8743,
+            "declinacao_deg": -22.8744,
             "rumo_magnetico_deg": 136.0,
-            "rumo_verdadeiro_deg": 113.1257
+            "rumo_verdadeiro_deg": 113.1256
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.8905,
+            "declinacao_deg": -22.8906,
             "rumo_magnetico_deg": 136.0,
-            "rumo_verdadeiro_deg": 113.1095
+            "rumo_verdadeiro_deg": 113.1094
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.9154,
+            "declinacao_deg": -22.9155,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 84.0846
+            "rumo_verdadeiro_deg": 84.0845
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.9521,
+            "declinacao_deg": -22.9523,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 84.0479
+            "rumo_verdadeiro_deg": 84.0477
           },
           {
             "corredor": "PORTÃO ROXO",
-            "declinacao_deg": -22.9763,
+            "declinacao_deg": -22.9765,
             "rumo_magnetico_deg": 151.0,
-            "rumo_verdadeiro_deg": 128.0237
+            "rumo_verdadeiro_deg": 128.0235
           }
         ]
       }
@@ -5439,13 +4034,14 @@
         "vertical:descida_start_entre_corredores",
         "vertical:combustivel_us_gal"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBKP",
         "destino": "SBJR",
         "aeronave": "01KN08Z9R5B392RGMW7A6D8988",
         "pista_origem": null,
-        "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "pista_destino": "03",
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -5689,221 +4285,100 @@
           ]
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 77.51,
-              "fase": "subida",
-              "gs_kt": 135.62,
-              "componente_cauda_kt": 16.39,
-              "deriva_deg": -6.482
-            },
-            {
-              "x0_nm": 77.51,
-              "x1_nm": 89.57,
-              "fase": "descida",
-              "gs_kt": 208.99,
-              "componente_cauda_kt": 49.15,
-              "deriva_deg": 2.597
-            },
-            {
-              "x0_nm": 89.57,
-              "x1_nm": 99.81,
-              "fase": "descida",
-              "gs_kt": 209.37,
-              "componente_cauda_kt": 49.47,
-              "deriva_deg": -2.071
-            },
-            {
-              "x0_nm": 99.81,
-              "x1_nm": 111.88,
-              "fase": "descida",
-              "gs_kt": 189.3,
-              "componente_cauda_kt": 33.9,
-              "deriva_deg": -13.778
-            },
-            {
-              "x0_nm": 111.88,
-              "x1_nm": 142.83,
-              "fase": "descida",
-              "gs_kt": 194.02,
-              "componente_cauda_kt": 35.56,
-              "deriva_deg": -7.955
-            },
-            {
-              "x0_nm": 142.83,
-              "x1_nm": 168.24,
-              "fase": "descida",
-              "gs_kt": 183.95,
-              "componente_cauda_kt": 24.13,
-              "deriva_deg": 2.75
-            },
-            {
-              "x0_nm": 168.24,
-              "x1_nm": 180.03,
-              "fase": "descida",
-              "gs_kt": 181.59,
-              "componente_cauda_kt": 22.04,
-              "deriva_deg": 4.294
-            },
-            {
-              "x0_nm": 180.03,
-              "x1_nm": 198.6,
-              "fase": "descida",
-              "gs_kt": 186.52,
-              "componente_cauda_kt": 26.84,
-              "deriva_deg": 3.637
-            },
-            {
-              "x0_nm": 198.6,
-              "x1_nm": 212.73,
-              "fase": "descida",
-              "gs_kt": 159.79,
-              "componente_cauda_kt": 0.61,
-              "deriva_deg": 5.793
-            },
-            {
-              "x0_nm": 212.73,
-              "x1_nm": 216.85,
-              "fase": "descida",
-              "gs_kt": 158.37,
-              "componente_cauda_kt": -0.82,
-              "deriva_deg": 5.79
-            },
-            {
-              "x0_nm": 216.85,
-              "x1_nm": 223.15,
-              "fase": "cruzeiro",
-              "gs_kt": 149.25,
-              "componente_cauda_kt": -5.72,
-              "deriva_deg": -1.075
-            },
-            {
-              "x0_nm": 223.15,
-              "x1_nm": 235.47,
-              "fase": "cruzeiro",
-              "gs_kt": 150.6,
-              "componente_cauda_kt": -4.33,
-              "deriva_deg": -1.725
-            },
-            {
-              "x0_nm": 235.47,
-              "x1_nm": 240.96,
-              "fase": "descida",
-              "gs_kt": 154.75,
-              "componente_cauda_kt": -5.21,
-              "deriva_deg": -1.314
-            },
-            {
-              "x0_nm": 240.96,
-              "x1_nm": 243.45,
-              "fase": "descida",
-              "gs_kt": 162.44,
-              "componente_cauda_kt": 2.49,
-              "deriva_deg": -1.458
-            },
-            {
-              "x0_nm": 243.45,
-              "x1_nm": 246.79,
-              "fase": "descida",
-              "gs_kt": 165.6,
-              "componente_cauda_kt": 5.82,
-              "deriva_deg": -2.97
-            }
-          ],
-          "tempo_min_vento": 90.81,
-          "combustivel_vento": 25.44
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.935,
+            "declinacao_deg": -21.9353,
             "rumo_magnetico_deg": 157.0,
-            "rumo_verdadeiro_deg": 135.065
+            "rumo_verdadeiro_deg": 135.0647
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9711,
+            "declinacao_deg": -21.9714,
             "rumo_magnetico_deg": 157.0,
-            "rumo_verdadeiro_deg": 135.0289
+            "rumo_verdadeiro_deg": 135.0286
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0582,
+            "declinacao_deg": -22.0585,
             "rumo_magnetico_deg": 115.0,
-            "rumo_verdadeiro_deg": 92.9418
+            "rumo_verdadeiro_deg": 92.9415
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1701,
+            "declinacao_deg": -22.1703,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.8299
+            "rumo_verdadeiro_deg": 78.8297
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2408,
+            "declinacao_deg": -22.2411,
             "rumo_magnetico_deg": 116.0,
-            "rumo_verdadeiro_deg": 93.7592
+            "rumo_verdadeiro_deg": 93.7589
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.2793,
+            "declinacao_deg": -22.2796,
             "rumo_magnetico_deg": 158.0,
-            "rumo_verdadeiro_deg": 135.7207
+            "rumo_verdadeiro_deg": 135.7204
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.3459,
+            "declinacao_deg": -22.3461,
             "rumo_magnetico_deg": 145.0,
-            "rumo_verdadeiro_deg": 122.6541
+            "rumo_verdadeiro_deg": 122.6539
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.4755,
+            "declinacao_deg": -22.4757,
             "rumo_magnetico_deg": 91.0,
-            "rumo_verdadeiro_deg": 68.5245
+            "rumo_verdadeiro_deg": 68.5243
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.5848,
+            "declinacao_deg": -22.585,
             "rumo_magnetico_deg": 91.0,
-            "rumo_verdadeiro_deg": 68.4152
+            "rumo_verdadeiro_deg": 68.415
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6695,
+            "declinacao_deg": -22.6697,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.3305
+            "rumo_verdadeiro_deg": 78.3303
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.757,
+            "declinacao_deg": -22.7571,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.243
+            "rumo_verdadeiro_deg": 78.2429
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8214,
+            "declinacao_deg": -22.8215,
             "rumo_magnetico_deg": 96.0,
-            "rumo_verdadeiro_deg": 73.1786
+            "rumo_verdadeiro_deg": 73.1785
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8803,
+            "declinacao_deg": -22.8804,
             "rumo_magnetico_deg": 96.0,
-            "rumo_verdadeiro_deg": 73.1197
+            "rumo_verdadeiro_deg": 73.1196
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9247,
+            "declinacao_deg": -22.9248,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 85.0753
+            "rumo_verdadeiro_deg": 85.0752
           },
           {
             "corredor": "PORTÃO MARAPENDI",
-            "declinacao_deg": -22.9404,
+            "declinacao_deg": -22.9405,
             "rumo_magnetico_deg": 24.0,
-            "rumo_verdadeiro_deg": 1.0596
+            "rumo_verdadeiro_deg": 1.0595
           }
         ]
       }
@@ -5913,13 +4388,14 @@
       "cobertura": [
         "vertical:trecho_final_ingreme_com_aviso"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBPA",
         "destino": "SBFL",
         "aeronave": "01KN08Z9R5B392RGMW7A6D8988",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": null
       },
       "esperado": {
         "lateral": {
@@ -6109,151 +4585,46 @@
           ]
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 6.64,
-              "fase": "subida",
-              "gs_kt": 118.11,
-              "componente_cauda_kt": -1.77,
-              "deriva_deg": -2.535
-            },
-            {
-              "x0_nm": 6.64,
-              "x1_nm": 13.75,
-              "fase": "cruzeiro",
-              "gs_kt": 154.53,
-              "componente_cauda_kt": -0.38,
-              "deriva_deg": -1.943
-            },
-            {
-              "x0_nm": 13.75,
-              "x1_nm": 21.19,
-              "fase": "cruzeiro",
-              "gs_kt": 153.7,
-              "componente_cauda_kt": -1.21,
-              "deriva_deg": -1.97
-            },
-            {
-              "x0_nm": 21.19,
-              "x1_nm": 24.52,
-              "fase": "subida",
-              "gs_kt": 118.73,
-              "componente_cauda_kt": -1.19,
-              "deriva_deg": -2.015
-            },
-            {
-              "x0_nm": 24.52,
-              "x1_nm": 38.91,
-              "fase": "cruzeiro",
-              "gs_kt": 154.73,
-              "componente_cauda_kt": -0.24,
-              "deriva_deg": -1.084
-            },
-            {
-              "x0_nm": 38.91,
-              "x1_nm": 60.57,
-              "fase": "subida",
-              "gs_kt": 133.57,
-              "componente_cauda_kt": 13.85,
-              "deriva_deg": 3.917
-            },
-            {
-              "x0_nm": 60.57,
-              "x1_nm": 142.64,
-              "fase": "cruzeiro",
-              "gs_kt": 184.56,
-              "componente_cauda_kt": 29.67,
-              "deriva_deg": 2.141
-            },
-            {
-              "x0_nm": 142.64,
-              "x1_nm": 175.97,
-              "fase": "descida",
-              "gs_kt": 173.94,
-              "componente_cauda_kt": 14.32,
-              "deriva_deg": 3.926
-            },
-            {
-              "x0_nm": 175.97,
-              "x1_nm": 193.13,
-              "fase": "cruzeiro",
-              "gs_kt": 157.47,
-              "componente_cauda_kt": 2.49,
-              "deriva_deg": 1.016
-            },
-            {
-              "x0_nm": 193.13,
-              "x1_nm": 198.73,
-              "fase": "cruzeiro",
-              "gs_kt": 154.93,
-              "componente_cauda_kt": 0.08,
-              "deriva_deg": 2.506
-            },
-            {
-              "x0_nm": 198.73,
-              "x1_nm": 202.66,
-              "fase": "descida",
-              "gs_kt": 166.61,
-              "componente_cauda_kt": 6.62,
-              "deriva_deg": 0.52
-            },
-            {
-              "x0_nm": 202.66,
-              "x1_nm": 205.88,
-              "fase": "descida",
-              "gs_kt": 162.47,
-              "componente_cauda_kt": 2.69,
-              "deriva_deg": 2.956
-            },
-            {
-              "x0_nm": 205.88,
-              "x1_nm": 215.5,
-              "fase": "descida",
-              "gs_kt": 160.34,
-              "componente_cauda_kt": 0.36,
-              "deriva_deg": 0.83
-            }
-          ],
-          "tempo_min_vento": 79.12,
-          "combustivel_vento": 21.74
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "GM",
-            "declinacao_deg": -17.9968,
+            "declinacao_deg": -17.9973,
             "rumo_magnetico_deg": 81.0,
-            "rumo_verdadeiro_deg": 63.0032
+            "rumo_verdadeiro_deg": 63.0027
           },
           {
             "corredor": "FREEWAY",
-            "declinacao_deg": -18.1362,
+            "declinacao_deg": -18.1366,
             "rumo_magnetico_deg": 109.0,
-            "rumo_verdadeiro_deg": 90.8638
+            "rumo_verdadeiro_deg": 90.8634
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.8526,
+            "declinacao_deg": -19.853,
             "rumo_magnetico_deg": 29.0,
-            "rumo_verdadeiro_deg": 9.1474
+            "rumo_verdadeiro_deg": 9.147
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.9352,
+            "declinacao_deg": -19.9356,
             "rumo_magnetico_deg": 30.0,
-            "rumo_verdadeiro_deg": 10.0648
+            "rumo_verdadeiro_deg": 10.0644
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.9727,
+            "declinacao_deg": -19.9731,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 87.0273
+            "rumo_verdadeiro_deg": 87.0269
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -20.0061,
+            "declinacao_deg": -20.0065,
             "rumo_magnetico_deg": 60.0,
-            "rumo_verdadeiro_deg": 39.9939
+            "rumo_verdadeiro_deg": 39.9935
           }
         ]
       }
@@ -6263,13 +4634,14 @@
       "cobertura": [
         "vertical:aeronave_sem_dados_combustivel"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBLO",
         "destino": "SBTG",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00",
+        "hora_partida_utc": null,
         "aeronave_observacao": "aeronave real do catálogo com os 3 campos de combustível zerados artificialmente (nenhuma aeronave do banco hoje tem performance completa e combustível incompleto ao mesmo tempo) — cobre o caminho combustivel=None do profile.py"
       },
       "esperado": {
@@ -6405,117 +4777,48 @@
           "descida_ingreme_nm": []
         },
         "vento": {
-          "segmentos": [
-            {
-              "x0_nm": 0.0,
-              "x1_nm": 5.35,
-              "fase": "subida",
-              "gs_kt": 79.59,
-              "componente_cauda_kt": 5.11,
-              "deriva_deg": -6.712
-            },
-            {
-              "x0_nm": 5.35,
-              "x1_nm": 13.15,
-              "fase": "cruzeiro",
-              "gs_kt": 98.89,
-              "componente_cauda_kt": 4.37,
-              "deriva_deg": -5.797
-            },
-            {
-              "x0_nm": 13.15,
-              "x1_nm": 25.49,
-              "fase": "cruzeiro",
-              "gs_kt": 104.69,
-              "componente_cauda_kt": 9.89,
-              "deriva_deg": -3.638
-            },
-            {
-              "x0_nm": 25.49,
-              "x1_nm": 29.24,
-              "fase": "subida",
-              "gs_kt": 69.22,
-              "componente_cauda_kt": -5.08,
-              "deriva_deg": -7.811
-            },
-            {
-              "x0_nm": 29.24,
-              "x1_nm": 36.23,
-              "fase": "cruzeiro",
-              "gs_kt": 95.64,
-              "componente_cauda_kt": 1.24,
-              "deriva_deg": 6.46
-            },
-            {
-              "x0_nm": 36.23,
-              "x1_nm": 48.41,
-              "fase": "cruzeiro",
-              "gs_kt": 93.02,
-              "componente_cauda_kt": -1.22,
-              "deriva_deg": 7.252
-            },
-            {
-              "x0_nm": 48.41,
-              "x1_nm": 53.41,
-              "fase": "subida",
-              "gs_kt": 71.17,
-              "componente_cauda_kt": -2.91,
-              "deriva_deg": 8.972
-            },
-            {
-              "x0_nm": 53.41,
-              "x1_nm": 142.87,
-              "fase": "cruzeiro",
-              "gs_kt": 90.88,
-              "componente_cauda_kt": -2.77,
-              "deriva_deg": 9.684
-            },
-            {
-              "x0_nm": 142.87,
-              "x1_nm": 164.35,
-              "fase": "descida",
-              "gs_kt": 102.41,
-              "componente_cauda_kt": 2.43,
-              "deriva_deg": -1.317
-            }
-          ],
-          "tempo_min_vento": 107.19,
+          "segmentos": [],
+          "tempo_min_vento": null,
           "combustivel_vento": null
         },
         "magnetico": [
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -20.0174,
+            "declinacao_deg": -20.018,
             "rumo_magnetico_deg": 316.0,
-            "rumo_verdadeiro_deg": 295.9826
+            "rumo_verdadeiro_deg": 295.982
           },
           {
             "corredor": "OSCAR",
-            "declinacao_deg": -20.0124,
+            "declinacao_deg": -20.013,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 13.9876
+            "rumo_verdadeiro_deg": 13.987
           },
           {
             "corredor": "OSCAR",
-            "declinacao_deg": -20.069,
+            "declinacao_deg": -20.0696,
             "rumo_magnetico_deg": 20.0,
-            "rumo_verdadeiro_deg": 359.931
+            "rumo_verdadeiro_deg": 359.9304
           }
         ]
       }
     },
     {
-      "id": "vento_cauda_predominante_ida",
+      "id": "vento_par_reciproco_ida",
       "cobertura": [
         "vento:par_reciproco_ida"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBGO",
         "destino": "SBBE",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "vento_modo": "relativo",
+        "vento_offset_h": 6,
+        "vento_par_reciproco": "sbgo_sbbe"
       },
       "esperado": {
         "lateral": {
@@ -6707,156 +5010,160 @@
               "x0_nm": 0.0,
               "x1_nm": 5.19,
               "fase": "subida",
-              "gs_kt": 71.87,
-              "componente_cauda_kt": -3.05,
-              "deriva_deg": -2.681
+              "gs_kt": 70.85,
+              "componente_cauda_kt": -3.25,
+              "deriva_deg": -8.864
             },
             {
               "x0_nm": 5.19,
               "x1_nm": 11.32,
               "fase": "cruzeiro",
-              "gs_kt": 93.65,
-              "componente_cauda_kt": -1.28,
-              "deriva_deg": -2.107
+              "gs_kt": 90.45,
+              "componente_cauda_kt": -4.02,
+              "deriva_deg": -6.057
             },
             {
               "x0_nm": 11.32,
               "x1_nm": 26.23,
               "fase": "cruzeiro",
-              "gs_kt": 100.86,
-              "componente_cauda_kt": 5.86,
-              "deriva_deg": 0.104
+              "gs_kt": 108.35,
+              "componente_cauda_kt": 13.35,
+              "deriva_deg": 0.242
             },
             {
               "x0_nm": 26.23,
               "x1_nm": 28.98,
               "fase": "subida",
-              "gs_kt": 72.72,
-              "componente_cauda_kt": -2.21,
-              "deriva_deg": -2.402
+              "gs_kt": 66.47,
+              "componente_cauda_kt": -8.24,
+              "deriva_deg": 5.076
             },
             {
               "x0_nm": 28.98,
               "x1_nm": 42.75,
               "fase": "cruzeiro",
-              "gs_kt": 92.74,
-              "componente_cauda_kt": -2.21,
-              "deriva_deg": -1.896
+              "gs_kt": 86.53,
+              "componente_cauda_kt": -8.24,
+              "deriva_deg": 4.005
             },
             {
               "x0_nm": 42.75,
               "x1_nm": 67.96,
               "fase": "cruzeiro",
-              "gs_kt": 92.28,
-              "componente_cauda_kt": -2.69,
-              "deriva_deg": 1.333
+              "gs_kt": 95.57,
+              "componente_cauda_kt": 1.25,
+              "deriva_deg": 6.826
             },
             {
               "x0_nm": 67.96,
               "x1_nm": 77.71,
               "fase": "subida",
-              "gs_kt": 69.49,
-              "componente_cauda_kt": -5.47,
-              "deriva_deg": -1.915
+              "gs_kt": 66.55,
+              "componente_cauda_kt": -8.27,
+              "deriva_deg": 3.951
             },
             {
               "x0_nm": 77.71,
               "x1_nm": 893.0,
               "fase": "cruzeiro",
-              "gs_kt": 98.61,
-              "componente_cauda_kt": 5.2,
-              "deriva_deg": -10.505
+              "gs_kt": 86.9,
+              "componente_cauda_kt": -6.93,
+              "deriva_deg": -9.02
             },
             {
               "x0_nm": 893.0,
               "x1_nm": 919.33,
               "fase": "descida",
-              "gs_kt": 108.88,
-              "componente_cauda_kt": 9.76,
-              "deriva_deg": -7.595
+              "gs_kt": 95.75,
+              "componente_cauda_kt": -2.11,
+              "deriva_deg": -11.852
             },
             {
               "x0_nm": 919.33,
               "x1_nm": 942.35,
               "fase": "cruzeiro",
-              "gs_kt": 81.31,
-              "componente_cauda_kt": -13.68,
-              "deriva_deg": -0.621
+              "gs_kt": 79.68,
+              "componente_cauda_kt": -15.27,
+              "deriva_deg": -1.726
             },
             {
               "x0_nm": 942.35,
               "x1_nm": 947.78,
               "fase": "cruzeiro",
-              "gs_kt": 106.76,
-              "componente_cauda_kt": 11.9,
-              "deriva_deg": -3.129
+              "gs_kt": 109.51,
+              "componente_cauda_kt": 14.68,
+              "deriva_deg": -3.439
             },
             {
               "x0_nm": 947.78,
               "x1_nm": 950.09,
               "fase": "cruzeiro",
-              "gs_kt": 98.45,
-              "componente_cauda_kt": 4.35,
-              "deriva_deg": -7.872
+              "gs_kt": 100.46,
+              "componente_cauda_kt": 6.51,
+              "deriva_deg": -8.54
             },
             {
               "x0_nm": 950.09,
               "x1_nm": 955.29,
               "fase": "descida",
-              "gs_kt": 103.17,
-              "componente_cauda_kt": 3.21,
-              "deriva_deg": -1.498
+              "gs_kt": 103.01,
+              "componente_cauda_kt": 3.24,
+              "deriva_deg": -3.863
             }
           ],
-          "tempo_min_vento": 588.18,
-          "combustivel_vento": 284.03
+          "tempo_min_vento": 657.53,
+          "combustivel_vento": 317.42
         },
         "magnetico": [
           {
             "corredor": "NEROPÓLIS",
-            "declinacao_deg": -21.7334,
+            "declinacao_deg": -21.7338,
             "rumo_magnetico_deg": 319.0,
-            "rumo_verdadeiro_deg": 297.2666
+            "rumo_verdadeiro_deg": 297.2662
           },
           {
             "corredor": "NOVA VENEZA",
-            "declinacao_deg": -21.6978,
+            "declinacao_deg": -21.6982,
             "rumo_magnetico_deg": 18.0,
-            "rumo_verdadeiro_deg": 356.3022
+            "rumo_verdadeiro_deg": 356.3018
           },
           {
             "corredor": "PETROLINA",
-            "declinacao_deg": -21.7584,
+            "declinacao_deg": -21.7588,
             "rumo_magnetico_deg": 75.0,
-            "rumo_verdadeiro_deg": 53.2416
+            "rumo_verdadeiro_deg": 53.2412
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -20.2659,
+            "declinacao_deg": -20.266,
             "rumo_magnetico_deg": 79.0,
-            "rumo_verdadeiro_deg": 58.7341
+            "rumo_verdadeiro_deg": 58.734
           },
           {
             "corredor": "JULIET",
-            "declinacao_deg": -20.2555,
+            "declinacao_deg": -20.2556,
             "rumo_magnetico_deg": 292.0,
-            "rumo_verdadeiro_deg": 271.7445
+            "rumo_verdadeiro_deg": 271.7444
           }
         ]
       }
     },
     {
-      "id": "vento_proa_predominante_volta",
+      "id": "vento_par_reciproco_volta",
       "cobertura": [
         "vento:par_reciproco_volta"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBE",
         "destino": "SBGO",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "vento_modo": "relativo",
+        "vento_offset_h": 6,
+        "vento_par_reciproco": "sbgo_sbbe"
       },
       "esperado": {
         "lateral": {
@@ -6929,29 +5236,29 @@
               "x0_nm": 0.0,
               "x1_nm": 26.15,
               "fase": "subida",
-              "gs_kt": 60.74,
-              "componente_cauda_kt": -12.39,
-              "deriva_deg": 12.833
+              "gs_kt": 73.29,
+              "componente_cauda_kt": 0.11,
+              "deriva_deg": 12.661
             },
             {
               "x0_nm": 26.15,
               "x1_nm": 889.62,
               "fase": "cruzeiro",
-              "gs_kt": 89.59,
-              "componente_cauda_kt": -4.05,
-              "deriva_deg": 9.727
+              "gs_kt": 103.08,
+              "componente_cauda_kt": 8.93,
+              "deriva_deg": 7.656
             },
             {
               "x0_nm": 889.62,
               "x1_nm": 916.54,
               "fase": "descida",
-              "gs_kt": 89.46,
-              "componente_cauda_kt": -10.54,
-              "deriva_deg": 0.318
+              "gs_kt": 111.72,
+              "componente_cauda_kt": 12.02,
+              "deriva_deg": -4.388
             }
           ],
-          "tempo_min_vento": 622.2,
-          "combustivel_vento": 301.51
+          "tempo_min_vento": 538.47,
+          "combustivel_vento": 260.95
         },
         "magnetico": []
       }
@@ -6962,13 +5269,16 @@
         "vento:rota_longa_diversidade",
         "magnetico:centro_oeste_nordeste"
       ],
+      "tipo_caso": "rota",
       "entrada": {
         "origem": "SBBR",
         "destino": "SBNT",
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
-        "pista_destino": null,
-        "hora_partida_utc": "24/08/2026 15:00"
+        "pista_destino": "16L",
+        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "vento_modo": "relativo",
+        "vento_offset_h": 6
       },
       "esperado": {
         "lateral": {
@@ -7147,132 +5457,553 @@
               "x0_nm": 0.0,
               "x1_nm": 2.58,
               "fase": "subida",
-              "gs_kt": 68.88,
-              "componente_cauda_kt": -6.12,
-              "deriva_deg": -0.56
+              "gs_kt": 75.71,
+              "componente_cauda_kt": 0.78,
+              "deriva_deg": -2.523
             },
             {
               "x0_nm": 2.58,
               "x1_nm": 8.82,
               "fase": "cruzeiro",
-              "gs_kt": 88.47,
-              "componente_cauda_kt": -6.53,
-              "deriva_deg": 0.032
+              "gs_kt": 94.08,
+              "componente_cauda_kt": -0.81,
+              "deriva_deg": -2.817
             },
             {
               "x0_nm": 8.82,
               "x1_nm": 16.21,
               "fase": "cruzeiro",
-              "gs_kt": 90.87,
-              "componente_cauda_kt": -3.86,
-              "deriva_deg": 4.352
+              "gs_kt": 89.04,
+              "componente_cauda_kt": -5.95,
+              "deriva_deg": -1.021
             },
             {
               "x0_nm": 16.21,
               "x1_nm": 19.04,
               "fase": "cruzeiro",
-              "gs_kt": 93.35,
-              "componente_cauda_kt": -1.3,
-              "deriva_deg": 4.874
+              "gs_kt": 88.82,
+              "componente_cauda_kt": -6.18,
+              "deriva_deg": 0.201
             },
             {
               "x0_nm": 19.04,
               "x1_nm": 21.25,
               "fase": "cruzeiro",
-              "gs_kt": 94.76,
-              "componente_cauda_kt": 0.23,
-              "deriva_deg": 5.675
+              "gs_kt": 87.35,
+              "componente_cauda_kt": -7.61,
+              "deriva_deg": 1.702
             },
             {
               "x0_nm": 21.25,
               "x1_nm": 33.75,
               "fase": "subida",
-              "gs_kt": 64.9,
-              "componente_cauda_kt": -9.98,
-              "deriva_deg": 3.301
+              "gs_kt": 65.09,
+              "componente_cauda_kt": -9.9,
+              "deriva_deg": 1.168
             },
             {
               "x0_nm": 33.75,
               "x1_nm": 908.71,
               "fase": "cruzeiro",
-              "gs_kt": 103.61,
-              "componente_cauda_kt": 9.5,
-              "deriva_deg": -7.87
+              "gs_kt": 99.48,
+              "componente_cauda_kt": 4.53,
+              "deriva_deg": -1.725
             },
             {
               "x0_nm": 908.71,
               "x1_nm": 933.71,
               "fase": "descida",
-              "gs_kt": 93.5,
-              "componente_cauda_kt": -4.34,
-              "deriva_deg": -11.937
+              "gs_kt": 92.92,
+              "componente_cauda_kt": -6.93,
+              "deriva_deg": -3.207
             },
             {
               "x0_nm": 933.71,
               "x1_nm": 953.69,
               "fase": "cruzeiro",
-              "gs_kt": 86.25,
-              "componente_cauda_kt": -4.38,
-              "deriva_deg": -17.448
+              "gs_kt": 85.01,
+              "componente_cauda_kt": -9.35,
+              "deriva_deg": -6.691
             },
             {
               "x0_nm": 953.69,
               "x1_nm": 959.77,
               "fase": "cruzeiro",
-              "gs_kt": 107.52,
-              "componente_cauda_kt": 15.49,
-              "deriva_deg": -14.353
+              "gs_kt": 92.94,
+              "componente_cauda_kt": -0.78,
+              "deriva_deg": -9.413
             },
             {
               "x0_nm": 959.77,
               "x1_nm": 962.19,
               "fase": "cruzeiro",
-              "gs_kt": 70.13,
-              "componente_cauda_kt": -23.62,
-              "deriva_deg": -9.321
+              "gs_kt": 79.46,
+              "componente_cauda_kt": -15.53,
+              "deriva_deg": 0.509
             },
             {
               "x0_nm": 962.19,
               "x1_nm": 968.34,
               "fase": "descida",
-              "gs_kt": 75.19,
-              "componente_cauda_kt": -23.62,
-              "deriva_deg": -8.851
+              "gs_kt": 84.46,
+              "componente_cauda_kt": -15.53,
+              "deriva_deg": 0.484
             }
           ],
-          "tempo_min_vento": 573.16,
-          "combustivel_vento": 276.31
+          "tempo_min_vento": 594.03,
+          "combustivel_vento": 286.42
         },
         "magnetico": [
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.1783,
+            "declinacao_deg": -22.1786,
             "rumo_magnetico_deg": 121.0,
-            "rumo_verdadeiro_deg": 98.8217
+            "rumo_verdadeiro_deg": 98.8214
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.2017,
+            "declinacao_deg": -22.2021,
             "rumo_magnetico_deg": 140.0,
-            "rumo_verdadeiro_deg": 117.7983
+            "rumo_verdadeiro_deg": 117.7979
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.2116,
+            "declinacao_deg": -22.2119,
             "rumo_magnetico_deg": 156.0,
-            "rumo_verdadeiro_deg": 133.7884
+            "rumo_verdadeiro_deg": 133.7881
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -20.4221,
+            "declinacao_deg": -20.4214,
             "rumo_magnetico_deg": 84.0,
-            "rumo_verdadeiro_deg": 63.5779
+            "rumo_verdadeiro_deg": 63.5786
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -20.3361,
+            "declinacao_deg": -20.3354,
             "rumo_magnetico_deg": 43.0,
-            "rumo_verdadeiro_deg": 22.6639
+            "rumo_verdadeiro_deg": 22.6646
+          }
+        ]
+      }
+    },
+    {
+      "id": "contrato_sem_hora_sem_vento",
+      "cobertura": [
+        "contrato:sem_hora_sem_vento"
+      ],
+      "tipo_caso": "contrato_input",
+      "entrada": {
+        "origem": "SBMO",
+        "destino": "SBRF",
+        "aeronave": "1n7s5U5J",
+        "pista_origem": null,
+        "pista_destino": null,
+        "hora_partida_utc": null
+      },
+      "esperado": {
+        "lateral": {
+          "rota": [
+            {
+              "id": "ADHP:SBMO",
+              "name": "SBMO"
+            },
+            {
+              "id": "01KSJD4CKC1FJBHJRZ1ASJWT1V",
+              "name": "PORTO DE GALINHAS"
+            },
+            {
+              "id": "01KSJD4CKCP2WA11Z0S7K85X0J",
+              "name": "MURO ALTO"
+            },
+            {
+              "id": "01KSJD4CKB68FK1SER74BM3656",
+              "name": "BARRAGEM"
+            },
+            {
+              "id": "01KSJD4CKC0M5283Y7RR8TT1RC",
+              "name": "LAGOA AZUL"
+            },
+            {
+              "id": "ADHP:SBRF",
+              "name": "SBRF"
+            }
+          ],
+          "distancia_total_nm": 104.67,
+          "distancia_direta_nm": 97.81,
+          "corredores_usados": [
+            {
+              "name": "BRAVO",
+              "is_mandatory": true
+            },
+            {
+              "name": "ECHO",
+              "is_mandatory": true
+            }
+          ]
+        },
+        "vertical": {
+          "vertices": [
+            {
+              "x_nm": 0.0,
+              "alt_ft": 377.3,
+              "tipo": "origem",
+              "nome": "SBMO",
+              "real": true
+            },
+            {
+              "x_nm": 12.81,
+              "alt_ft": 5500.0,
+              "tipo": "toc",
+              "nome": "TOC",
+              "real": false
+            },
+            {
+              "x_nm": 63.31,
+              "alt_ft": 5500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 76.31,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "PORTO DE GALINHAS",
+              "real": true
+            },
+            {
+              "x_nm": 79.88,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "MURO ALTO",
+              "real": true
+            },
+            {
+              "x_nm": 90.99,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "BARRAGEM",
+              "real": true
+            },
+            {
+              "x_nm": 92.33,
+              "alt_ft": 1200.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 100.45,
+              "alt_ft": 1200.0,
+              "tipo": "ponto",
+              "nome": "LAGOA AZUL",
+              "real": true
+            },
+            {
+              "x_nm": 100.76,
+              "alt_ft": 1200.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 104.67,
+              "alt_ft": 26.2,
+              "tipo": "destino",
+              "nome": "SBRF",
+              "real": true
+            }
+          ],
+          "toc_nm": 12.81,
+          "tod_nm": 63.31,
+          "tempo_min": {
+            "subida": 10.25,
+            "cruzeiro": 46.49,
+            "descida": 10.95,
+            "total": 67.69
+          },
+          "combustivel": {
+            "subida": 5.98,
+            "cruzeiro": 22.47,
+            "descida": 4.2,
+            "total": 32.65,
+            "unidade": "l"
+          },
+          "avisos": [],
+          "descida_ingreme_nm": []
+        },
+        "vento": {
+          "segmentos": [],
+          "tempo_min_vento": null,
+          "combustivel_vento": null
+        },
+        "magnetico": [
+          {
+            "corredor": "BRAVO",
+            "declinacao_deg": -21.2004,
+            "rumo_magnetico_deg": 37.0,
+            "rumo_verdadeiro_deg": 15.7996
+          },
+          {
+            "corredor": "BRAVO",
+            "declinacao_deg": -21.1673,
+            "rumo_magnetico_deg": 353.0,
+            "rumo_verdadeiro_deg": 331.8327
+          },
+          {
+            "corredor": "ECHO",
+            "declinacao_deg": -21.1134,
+            "rumo_magnetico_deg": 53.0,
+            "rumo_verdadeiro_deg": 31.8866
+          }
+        ]
+      }
+    },
+    {
+      "id": "contrato_com_hora_com_vento",
+      "cobertura": [
+        "contrato:com_hora_com_vento"
+      ],
+      "tipo_caso": "contrato_input",
+      "entrada": {
+        "origem": "SBMO",
+        "destino": "SBRF",
+        "aeronave": "1n7s5U5J",
+        "pista_origem": null,
+        "pista_destino": null,
+        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "vento_modo": "relativo",
+        "vento_offset_h": 6
+      },
+      "esperado": {
+        "lateral": {
+          "rota": [
+            {
+              "id": "ADHP:SBMO",
+              "name": "SBMO"
+            },
+            {
+              "id": "01KSJD4CKC1FJBHJRZ1ASJWT1V",
+              "name": "PORTO DE GALINHAS"
+            },
+            {
+              "id": "01KSJD4CKCP2WA11Z0S7K85X0J",
+              "name": "MURO ALTO"
+            },
+            {
+              "id": "01KSJD4CKB68FK1SER74BM3656",
+              "name": "BARRAGEM"
+            },
+            {
+              "id": "01KSJD4CKC0M5283Y7RR8TT1RC",
+              "name": "LAGOA AZUL"
+            },
+            {
+              "id": "ADHP:SBRF",
+              "name": "SBRF"
+            }
+          ],
+          "distancia_total_nm": 104.67,
+          "distancia_direta_nm": 97.81,
+          "corredores_usados": [
+            {
+              "name": "BRAVO",
+              "is_mandatory": true
+            },
+            {
+              "name": "ECHO",
+              "is_mandatory": true
+            }
+          ]
+        },
+        "vertical": {
+          "vertices": [
+            {
+              "x_nm": 0.0,
+              "alt_ft": 377.3,
+              "tipo": "origem",
+              "nome": "SBMO",
+              "real": true
+            },
+            {
+              "x_nm": 12.81,
+              "alt_ft": 5500.0,
+              "tipo": "toc",
+              "nome": "TOC",
+              "real": false
+            },
+            {
+              "x_nm": 63.31,
+              "alt_ft": 5500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 76.31,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "PORTO DE GALINHAS",
+              "real": true
+            },
+            {
+              "x_nm": 79.88,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "MURO ALTO",
+              "real": true
+            },
+            {
+              "x_nm": 90.99,
+              "alt_ft": 1600.0,
+              "tipo": "corredor",
+              "nome": "BARRAGEM",
+              "real": true
+            },
+            {
+              "x_nm": 92.33,
+              "alt_ft": 1200.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 100.45,
+              "alt_ft": 1200.0,
+              "tipo": "ponto",
+              "nome": "LAGOA AZUL",
+              "real": true
+            },
+            {
+              "x_nm": 100.76,
+              "alt_ft": 1200.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 104.67,
+              "alt_ft": 26.2,
+              "tipo": "destino",
+              "nome": "SBRF",
+              "real": true
+            }
+          ],
+          "toc_nm": 12.81,
+          "tod_nm": 63.31,
+          "tempo_min": {
+            "subida": 10.25,
+            "cruzeiro": 46.49,
+            "descida": 10.95,
+            "total": 67.69
+          },
+          "combustivel": {
+            "subida": 5.98,
+            "cruzeiro": 22.47,
+            "descida": 4.2,
+            "total": 32.65,
+            "unidade": "l"
+          },
+          "avisos": [],
+          "descida_ingreme_nm": []
+        },
+        "vento": {
+          "segmentos": [
+            {
+              "x0_nm": 0.0,
+              "x1_nm": 12.81,
+              "fase": "subida",
+              "gs_kt": 66.4,
+              "componente_cauda_kt": -8.48,
+              "deriva_deg": -3.134
+            },
+            {
+              "x0_nm": 12.81,
+              "x1_nm": 63.31,
+              "fase": "cruzeiro",
+              "gs_kt": 85.72,
+              "componente_cauda_kt": -9.22,
+              "deriva_deg": -2.052
+            },
+            {
+              "x0_nm": 63.31,
+              "x1_nm": 76.31,
+              "fase": "descida",
+              "gs_kt": 93.28,
+              "componente_cauda_kt": -6.5,
+              "deriva_deg": -3.792
+            },
+            {
+              "x0_nm": 76.31,
+              "x1_nm": 79.88,
+              "fase": "cruzeiro",
+              "gs_kt": 91.31,
+              "componente_cauda_kt": -3.29,
+              "deriva_deg": -5.295
+            },
+            {
+              "x0_nm": 79.88,
+              "x1_nm": 90.99,
+              "fase": "cruzeiro",
+              "gs_kt": 98.92,
+              "componente_cauda_kt": 4.16,
+              "deriva_deg": -4.072
+            },
+            {
+              "x0_nm": 90.99,
+              "x1_nm": 92.33,
+              "fase": "descida",
+              "gs_kt": 95.99,
+              "componente_cauda_kt": -3.77,
+              "deriva_deg": -3.999
+            },
+            {
+              "x0_nm": 92.33,
+              "x1_nm": 100.45,
+              "fase": "cruzeiro",
+              "gs_kt": 90.98,
+              "componente_cauda_kt": -3.77,
+              "deriva_deg": -4.21
+            },
+            {
+              "x0_nm": 100.45,
+              "x1_nm": 100.76,
+              "fase": "cruzeiro",
+              "gs_kt": 86.9,
+              "componente_cauda_kt": -8.03,
+              "deriva_deg": -2.194
+            },
+            {
+              "x0_nm": 100.76,
+              "x1_nm": 104.67,
+              "fase": "descida",
+              "gs_kt": 95.92,
+              "componente_cauda_kt": -4.07,
+              "deriva_deg": -0.636
+            }
+          ],
+          "tempo_min_vento": 73.22,
+          "combustivel_vento": 35.38
+        },
+        "magnetico": [
+          {
+            "corredor": "BRAVO",
+            "declinacao_deg": -21.2004,
+            "rumo_magnetico_deg": 37.0,
+            "rumo_verdadeiro_deg": 15.7996
+          },
+          {
+            "corredor": "BRAVO",
+            "declinacao_deg": -21.1673,
+            "rumo_magnetico_deg": 353.0,
+            "rumo_verdadeiro_deg": 331.8327
+          },
+          {
+            "corredor": "ECHO",
+            "declinacao_deg": -21.1134,
+            "rumo_magnetico_deg": 53.0,
+            "rumo_verdadeiro_deg": 31.8866
           }
         ]
       }

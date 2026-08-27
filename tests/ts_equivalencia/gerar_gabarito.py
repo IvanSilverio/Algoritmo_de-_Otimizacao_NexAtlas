@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,14 +24,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from motor_gabarito import (  # noqa: E402
     ROOT, WMM_EDITION, computar_caso, connect, montar_entrada)
 from nexatlas_router.db import PostgisLoader  # noqa: E402
-from nexatlas_router.vertical import Terrain, Wind, load_from_db, parse_hora_utc  # noqa: E402
+from nexatlas_router.vertical import Terrain, Wind, load_from_db  # noqa: E402
 
-# Fixa para TODOS os casos (1.1: "Fixar uma hora_partida_utc explícita por
-# caso para o vento ser reprodutível") — usar a MESMA hora em pares
-# recíprocos (ida/volta) é o que garante, com o mesmo campo de vento, que uma
-# direção sai com cauda e a outra com proa (não é escolha arbitrária por
-# caso, é uma propriedade do triângulo do vento).
-HORA_PARTIDA_UTC = "24/08/2026 15:00"
+# TAREFA_gabarito_v2_contrato.md (26/08/26), Parte B: data fixa expira (o
+# vento real do CDN só cobre ~5 dias de previsão a partir de "agora" — uma
+# data fixa como "24/08/2026 15:00" congelada há alguns dias já não bate mais
+# com o que o CDN serve hoje). Modelo NOVO, alinhado ao default "sem hora =
+# sem vento" da TAREFA_pista_obrigatoria_e_vento_default.md:
+#   - Por padrão, um caso NÃO leva hora nenhuma (`vento_modo` ausente) — o
+#     motor não calcula vento, e esse bloco fica congelado VAZIO pra sempre
+#     (nunca expira, porque nunca depende do CDN).
+#   - Só os casos que testam vento DE PROPÓSITO marcam `vento_modo:
+#     "relativo"` — usam AGORA_RELATIVA (= "agora" desta geração + algumas
+#     horas, dentro da janela de previsão) em vez de uma data fixa.
+#     `verifica_gabarito.py` RECALCULA essa hora com o "agora" dele (mesma
+#     regra, +VENTO_OFFSET_H), não relê o valor congelado — por isso o valor
+#     do vento em si é comparado por ESTRUTURA/sinal, não por igualdade
+#     exata (ver README_equivalencia.md). Usar a MESMA AGORA_RELATIVA em
+#     TODOS os casos relativos (calculada uma vez só aqui) garante que pares
+#     recíprocos (ida/volta) continuem vendo o MESMO campo de vento.
+VENTO_OFFSET_H = 6
+AGORA_RELATIVA = time.time() + VENTO_OFFSET_H * 3600.0
 
 OUT_PATH = Path(__file__).resolve().parent / "gabarito_rotas.json"
 
@@ -55,12 +69,20 @@ CASOS = [
      "cobertura": ["lateral:corredor_coerente_malha_da_ponta", "vertical:subida_teto_corredor"]},
 
     {"id": "lateral_portao_obrigatorio_sem_pista", "origem": "SBBH", "destino": "SBFZ",
-     "aeronave": AC_C172, "pista_origem": None,
-     "cobertura": ["lateral:portao_obrigatorio_sem_pista_informada"]},
+     "aeronave": AC_C172, "pista_origem": None, "tipo_caso": "contrato_input",
+     "cobertura": ["contrato:pista_obrigatoria_faltando"]},
 
     {"id": "lateral_portao_obrigatorio_com_pista", "origem": "SBBH", "destino": "SBFZ",
      "aeronave": AC_C172, "pista_origem": "13",
      "cobertura": ["lateral:portao_por_cabeceira_pista_informada"]},
+
+    {"id": "contrato_pista_nao_casa", "origem": "SBBH", "destino": "SBFZ",
+     "aeronave": AC_C172, "pista_origem": "31", "tipo_caso": "contrato_input",
+     "cobertura": ["contrato:pista_informada_nao_casa_regra"]},
+
+    {"id": "contrato_pista_falta_dois_lados", "origem": "SBRJ", "destino": "SBMT",
+     "aeronave": AC_C172, "tipo_caso": "contrato_input",
+     "cobertura": ["contrato:pista_obrigatoria_faltando_dois_extremos"]},
 
     {"id": "lateral_portao_excecao_unica_x_ou_y", "origem": "SBJR", "destino": "SBKP",
      "aeronave": AC_C172, "pista_origem": "03",
@@ -71,12 +93,12 @@ CASOS = [
      "cobertura": ["lateral:malha_de_passagem_vira_direto"]},
 
     {"id": "lateral_k_shortest_referencia_sp_mg", "origem": "SBBH", "destino": "SBMT",
-     "aeronave": AC_C172,
+     "aeronave": AC_C172, "pista_origem": "13", "pista_destino": "12",
      "cobertura": ["lateral:k_shortest_alternativas", "vertical:subida_teto_corredor",
                    "vertical:combustivel_por_fase", "magnetico:mg_sp"]},
 
     {"id": "lateral_portao_colisao_sp_rj", "origem": "SBRJ", "destino": "SBMT",
-     "aeronave": AC_C172,
+     "aeronave": AC_C172, "pista_origem": "02", "pista_destino": "12",
      "cobertura": ["lateral:colisao_portao_coerencia", "magnetico:rj_sp"]},
 
     {"id": "lateral_duplicidade_waypoint_destino_sivu", "origem": "SBVT", "destino": "SIVU",
@@ -92,7 +114,7 @@ CASOS = [
      "cobertura": ["lateral:colisao_portao_coerencia", "magnetico:nordeste_litoral"]},
 
     {"id": "lateral_proximidade_ne", "origem": "SBNT", "destino": "SBSG",
-     "aeronave": AC_C172,
+     "aeronave": AC_C172, "pista_origem": "16L",
      "cobertura": ["lateral:proximidade_direta_vs_malha"]},
 
     {"id": "lateral_proximidade_centro_oeste", "origem": "SBCY", "destino": "SIAQ",
@@ -121,7 +143,7 @@ CASOS = [
      "cobertura": ["vertical:descida_start_entre_corredores", "magnetico:sp_rj"]},
 
     {"id": "vertical_descida_start_corredores_densos", "origem": "SBKP", "destino": "SBJR",
-     "aeronave": AC_SR22,
+     "aeronave": AC_SR22, "pista_destino": "03",
      "cobertura": ["vertical:descida_start_entre_corredores", "vertical:combustivel_us_gal"]},
 
     {"id": "vertical_trecho_final_ingreme_sr22", "origem": "SBPA", "destino": "SBFL",
@@ -133,17 +155,47 @@ CASOS = [
      "cobertura": ["vertical:aeronave_sem_dados_combustivel"]},
 
     # -------------------------------------------------------------------- vento
-    {"id": "vento_cauda_predominante_ida", "origem": "SBGO", "destino": "SBBE",
-     "aeronave": AC_C172,
+    # TAREFA_gabarito_v2_contrato.md, Parte B: os 4 casos abaixo são os ÚNICOS
+    # com `vento_modo: "relativo"` — só eles pedem hora/vento de propósito.
+    # Todo o resto do gabarito roda SEM hora (default novo, ver VENTO_OFFSET_H
+    # acima) e por isso nunca mais expira por causa da janela do CDN.
+    # `vento_par_reciproco` (mesmo valor nos dois): usado só por
+    # verifica_gabarito.py no modo relativo — NÃO afirma qual perna é cauda e
+    # qual é proa (isso depende do forecast do momento, muda a cada
+    # previsão; achado ao vivo 26/08: a mesma rota que era cauda na ida no
+    # snapshot antigo virou proa na hora relativa de hoje — é o vento
+    # mudando, não bug). A invariante que NÃO muda: voar o MESMO campo de
+    # vento em rumos opostos produz efeitos OPOSTOS — uma perna mais rápida
+    # e a outra mais lenta que sem vento, nunca as duas iguais. É isso que a
+    # checagem cruzada confere (ver compara_vento_relativo/main).
+    {"id": "vento_par_reciproco_ida", "origem": "SBGO", "destino": "SBBE",
+     "aeronave": AC_C172, "vento_modo": "relativo", "vento_offset_h": VENTO_OFFSET_H,
+     "vento_par_reciproco": "sbgo_sbbe",
      "cobertura": ["vento:par_reciproco_ida"]},
 
-    {"id": "vento_proa_predominante_volta", "origem": "SBBE", "destino": "SBGO",
-     "aeronave": AC_C172,
+    {"id": "vento_par_reciproco_volta", "origem": "SBBE", "destino": "SBGO",
+     "aeronave": AC_C172, "vento_modo": "relativo", "vento_offset_h": VENTO_OFFSET_H,
+     "vento_par_reciproco": "sbgo_sbbe",
      "cobertura": ["vento:par_reciproco_volta"]},
 
     {"id": "vento_regiao_nordeste_litoral", "origem": "SBBR", "destino": "SBNT",
-     "aeronave": AC_C172,
+     "aeronave": AC_C172, "pista_destino": "16L",
+     "vento_modo": "relativo", "vento_offset_h": VENTO_OFFSET_H,
      "cobertura": ["vento:rota_longa_diversidade", "magnetico:centro_oeste_nordeste"]},
+
+    # ------------------------------------------------------------- contrato
+    # TAREFA_gabarito_v2_contrato.md, Parte A, casos 5/6 — MESMO par/aeronave,
+    # só variando hora informada ou não, pra isolar o efeito do default
+    # "sem hora = sem vento" (Missão 2 da TAREFA_pista_obrigatoria_e_vento_
+    # default.md) num par mínimo.
+    {"id": "contrato_sem_hora_sem_vento", "origem": "SBMO", "destino": "SBRF",
+     "aeronave": AC_C172, "tipo_caso": "contrato_input",
+     "cobertura": ["contrato:sem_hora_sem_vento"]},
+
+    {"id": "contrato_com_hora_com_vento", "origem": "SBMO", "destino": "SBRF",
+     "aeronave": AC_C172, "tipo_caso": "contrato_input",
+     "vento_modo": "relativo", "vento_offset_h": VENTO_OFFSET_H,
+     "cobertura": ["contrato:com_hora_com_vento"]},
 ]
 
 
@@ -157,18 +209,24 @@ def main() -> None:
     if not wind.disponivel():
         sys.exit(f"Vento indisponível ({wind.erro}) — aborte e cheque o CDN antes de congelar o gabarito "
                  f"(o gabarito precisa dos números REAIS de vento, não de (0,0)).")
-    hora_partida = parse_hora_utc(HORA_PARTIDA_UTC)
+    agora_relativa_iso = datetime.fromtimestamp(AGORA_RELATIVA, timezone.utc).isoformat()
+    print(f"  Casos com vento usam AGORA_RELATIVA = {agora_relativa_iso} "
+          f"(agora + {VENTO_OFFSET_H}h) — os demais rodam sem hora/sem vento.")
 
     casos_out = []
     erros = []
     for i, caso in enumerate(CASOS, 1):
         print(f"  [{i:02d}/{len(CASOS)}] {caso['id']} ({caso['origem']} -> {caso['destino']})...", end=" ")
         try:
+            relativo = caso.get("vento_modo") == "relativo"
+            hora_partida = AGORA_RELATIVA if relativo else None
+            hora_str = agora_relativa_iso if relativo else None
             esperado = computar_caso(loader, catalog, terreno, wind, hora_partida, caso)
             casos_out.append({
                 "id": caso["id"],
                 "cobertura": caso["cobertura"],
-                "entrada": montar_entrada(caso, HORA_PARTIDA_UTC),
+                "tipo_caso": caso.get("tipo_caso", "rota"),
+                "entrada": montar_entrada(caso, hora_str),
                 "esperado": esperado,
             })
             print("ok")
@@ -192,15 +250,24 @@ def main() -> None:
             "gerado_em": datetime.now(timezone.utc).isoformat(),
             "commit": commit,
             "wmm_edition": WMM_EDITION,
-            "hora_partida_utc_usada": HORA_PARTIDA_UTC,
+            "vento_offset_h": VENTO_OFFSET_H,
+            "agora_relativa_usada": agora_relativa_iso,
             "nota": (
                 "Snapshot CONGELADO gerado a partir do banco jetstream (schema published) e do "
                 "CDN de terreno/vento na data acima. Regenerar (python3 gerar_gabarito.py) quando "
                 "o banco mudar de forma relevante para algum destes pares origem/destino. "
-                "Tolerâncias de comparação em README_equivalencia.md. O bloco `magnetico` (e a "
-                "deriva do vento) usa a declinação WMM calculada na DATA DO VOO de cada caso "
-                "(`entrada.hora_partida_utc`), não na data de execução do runner — reproduzível "
-                "independente de quando se roda; ver README_equivalencia.md."
+                "Tolerâncias de comparação em README_equivalencia.md. "
+                "TAREFA_gabarito_v2_contrato.md (26/08/26): a maioria dos casos roda SEM "
+                "`hora_partida_utc` (default do motor desde a TAREFA_pista_obrigatoria_e_vento_"
+                "default.md) — o bloco `vento` fica vazio pra sempre, nunca expira. Só os casos "
+                "com `entrada.vento_modo == 'relativo'` pedem vento de propósito: usam "
+                "`agora_relativa_usada` (agora da GERAÇÃO + `vento_offset_h`), e "
+                "`verifica_gabarito.py` RECALCULA essa hora com o `agora` dele (mesma regra) em "
+                "vez de reler o valor congelado — por isso o vento desses casos é comparado por "
+                "estrutura/sinal, não por igualdade exata. O bloco `magnetico` usa a declinação "
+                "WMM na data de EXECUÇÃO de quem gerou/verificou (não em `hora_partida_utc`) — "
+                "a variação secular do WMM (~0,025°/ano) fica bem dentro da tolerância de 0,01° "
+                "por vários meses; ver README_equivalencia.md."
             ),
         },
         "casos": casos_out,

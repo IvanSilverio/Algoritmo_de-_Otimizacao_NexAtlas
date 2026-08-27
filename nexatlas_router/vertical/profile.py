@@ -218,16 +218,14 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     # TAREFA_magnetic_data_voo.md: declinação (WMM) pela DATA DO VOO, não pela
     # data de execução — senão o rumo verdadeiro/vento e o gabarito congelado
     # dependeriam de QUANDO se roda, não do voo em si (variação secular do
-    # WMM, ~0,025°/ano). `hora_referencia` também alimenta o vento abaixo —
-    # UMA só amostra de "agora" no fallback, não duas (rota + vento
-    # divergindo por microssegundos entre duas chamadas de time.time()).
-    if hora_partida_utc is not None:
-        hora_referencia = hora_partida_utc
-    else:
-        hora_referencia = time.time()
-        quando = dt.datetime.fromtimestamp(hora_referencia, dt.timezone.utc)
-        avisos.append(f"hora de partida não informada; usando agora ({quando:%Y-%m-%d %H:%M} UTC) "
-                      f"como data do voo para a declinação magnética (WMM) e o vento.")
+    # WMM, ~0,025°/ano).
+    # TAREFA_pista_obrigatoria_e_vento_default.md (26/08/26): sem
+    # `hora_partida_utc`, a declinação ainda precisa de uma data (cai na data
+    # corrente — a variação secular é pequena, não justifica aviso), mas o
+    # VENTO deixa de ter fallback — ver o guard `hora_partida_utc is not None`
+    # mais abaixo. `hora_referencia` alimenta só a declinação/paridade daqui
+    # pra frente; `hora_vento` (abaixo) é que decide se há vento ou não.
+    hora_referencia = hora_partida_utc if hora_partida_utc is not None else time.time()
     data_voo = dt.datetime.fromtimestamp(hora_referencia, dt.timezone.utc).date()
 
     # Elevação de origem/destino: terreno no ponto (radius_px=0). (Futuro: cota do aeródromo.)
@@ -668,15 +666,18 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     # ---- vento: tempo/combustível recalculados por trecho (TAREFA_vento.md,
     #      passo 1). NÃO toca na geometria acima (vértices já estão prontos);
     #      wind=None -> campos ficam None (chamador optou por não calcular). ----
-    # `hora_referencia` (com o fallback já avisado lá em cima) alimenta tanto a
-    # declinação quanto o vento — um só "agora", nunca dois valores de
-    # time.time() ligeiramente diferentes para a mesma rota.
+    # TAREFA_pista_obrigatoria_e_vento_default.md (26/08/26): default virou
+    # SEM vento — só calcula quando `hora_partida_utc` foi INFORMADO
+    # explicitamente (nunca cai no "agora" de `hora_referencia`, que existe só
+    # pra declinação). Motivo: o Vinícius não quer vento subentendido, e um
+    # "agora" implícito faria o gabarito congelado divergir conforme a janela
+    # de previsão do CDN expira.
     hora_vento = None
     subida_vento = cruzeiro_vento = descida_vento = None
     comb_subida_vento = comb_cruzeiro_vento = comb_descida_vento = comb_total_vento = None
     segmentos_vento: list = []
-    if wind is not None:
-        hora_vento = hora_referencia
+    if wind is not None and hora_partida_utc is not None:
+        hora_vento = hora_partida_utc
         subida_vento, cruzeiro_vento, descida_vento, segmentos_vento = _vento_por_segmento(
             vertices, legs, cum, ac, wind, hora_vento, avisos, data_voo)
         if ac.fuel_ac is not None and ac.fuel_cruise is not None and ac.fuel_dc is not None and ac.fuel_unit:

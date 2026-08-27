@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 import psycopg2  # noqa: E402
 
 from nexatlas_router.db import PostgisLoader  # noqa: E402
+from nexatlas_router.portoes import PistaObrigatoriaError  # noqa: E402
 from nexatlas_router.v1 import plan_v1_route  # noqa: E402
 from nexatlas_router.vertical import (  # noqa: E402
     Terrain, Wind, find as find_aircraft, load_from_db as load_aircraft_catalog,
@@ -65,7 +66,14 @@ def resolver_aeronave(catalog, caso: dict):
     return ac
 
 
-def montar_entrada(caso: dict, hora_partida_utc_str: str) -> dict:
+def montar_entrada(caso: dict, hora_partida_utc_str: Optional[str]) -> dict:
+    """`hora_partida_utc_str` é None quando o caso não pede vento (TAREFA_
+    gabarito_v2_contrato.md, 26/08/26: default agora é SEM hora/SEM vento —
+    só os casos com `vento_modo: "relativo"` recebem uma string aqui, já
+    resolvida pelo chamador). Quando `vento_modo` está presente no caso,
+    ele e `vento_offset_h` são gravados na entrada — são a REGRA que
+    `verifica_gabarito.py` reaplica (com `time.time()` fresco) em vez de
+    reler o valor congelado, que é só informativo/reprodutível-se-logo."""
     entrada = {
         "origem": caso["origem"],
         "destino": caso["destino"],
@@ -74,6 +82,11 @@ def montar_entrada(caso: dict, hora_partida_utc_str: str) -> dict:
         "pista_destino": caso.get("pista_destino"),
         "hora_partida_utc": hora_partida_utc_str,
     }
+    if caso.get("vento_modo"):
+        entrada["vento_modo"] = caso["vento_modo"]
+        entrada["vento_offset_h"] = caso["vento_offset_h"]
+        if caso.get("vento_par_reciproco"):
+            entrada["vento_par_reciproco"] = caso["vento_par_reciproco"]
     if caso.get("sem_combustivel"):
         entrada["aeronave_observacao"] = (
             "aeronave real do catálogo com os 3 campos de combustível zerados "
@@ -84,14 +97,28 @@ def montar_entrada(caso: dict, hora_partida_utc_str: str) -> dict:
 
 
 def computar_caso(loader: PostgisLoader, catalog, terreno: Terrain, wind: Wind,
-                  hora_partida_utc: float, caso: dict) -> dict:
+                  hora_partida_utc: Optional[float], caso: dict) -> dict:
     """Roda o pipeline real (build_subgraph -> plan_v1_route -> plan_from_v1)
     e devolve o dict `esperado` no formato do gabarito (lateral/vertical/
     vento/magnetico). É a MESMA função usada para congelar o snapshot e para
-    verificar ao vivo — só o comparador (verifica_gabarito.py) muda."""
-    graph, meta = loader.build_subgraph(
-        caso["origem"], caso["destino"], chart_radius_nm=60.0, link_radius_nm=30.0,
-        pista_origem=caso.get("pista_origem"), pista_destino=caso.get("pista_destino"))
+    verificar ao vivo — só o comparador (verifica_gabarito.py) muda.
+
+    TAREFA_gabarito_v2_contrato.md (26/08/26): quando o input é incompleto
+    (hoje só pista obrigatória faltando), o MOTOR devolve um retorno
+    estruturado em vez de uma rota (`PistaObrigatoriaError.to_dict()`) — essa
+    função repassa esse dict tal qual (`{"status": "faltou_input", ...}`) no
+    lugar do dict lateral/vertical/vento/magnetico normal. `verifica_gabarito.
+    py`/`gerar_gabarito.py` distinguem os dois formatos pela chave "status"
+    (sinal) vs "lateral" (rota) — nunca uma exceção não tratada subindo pro
+    chamador nesse caso específico; qualquer OUTRA exceção (ex.: ICAO
+    inexistente, erro de banco) continua subindo normalmente, como falha
+    real do caso."""
+    try:
+        graph, meta = loader.build_subgraph(
+            caso["origem"], caso["destino"], chart_radius_nm=60.0, link_radius_nm=30.0,
+            pista_origem=caso.get("pista_origem"), pista_destino=caso.get("pista_destino"))
+    except PistaObrigatoriaError as e:
+        return e.to_dict()
     result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"],
                            origin_gate_ids=meta.get("origin_gate_ids"),
                            dest_gate_ids=meta.get("dest_gate_ids"))

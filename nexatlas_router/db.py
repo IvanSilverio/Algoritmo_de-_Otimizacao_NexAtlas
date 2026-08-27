@@ -32,7 +32,8 @@ from typing import Any, Iterable, Optional
 
 from .geo import LonLat
 from .graphmodel import Edge, Node, RouteGraph, border_score
-from .portoes import resolver_pontos_obrigatorios, PortaoDesconectadoError
+from .portoes import (resolver_pontos_obrigatorios, PortaoDesconectadoError,
+                      direcao_exige_pista, PistaObrigatoriaError)
 
 
 def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
@@ -216,6 +217,20 @@ class PostgisLoader:
                        link_radius_nm: float = 30.0,
                        pista_origem: Optional[str] = None,
                        pista_destino: Optional[str] = None) -> tuple[RouteGraph, dict]:
+        # TAREFA_pista_obrigatoria_e_vento_default.md: checagem OFFLINE (só o
+        # JSON de portões, sem tocar no banco) antes de qualquer query — se a
+        # direção só tem regra condicionada a cabeceira e a pista não veio,
+        # o motor recusa a rota com um retorno estruturado (nunca calcula com
+        # portão "meio aplicado", nunca cai silenciosamente no mínimo-local).
+        faltando: list = []
+        aerodromos: dict = {}
+        if direcao_exige_pista(origin_icao, "partida") and pista_origem is None:
+            faltando.append("pista_origem"); aerodromos["pista_origem"] = origin_icao
+        if direcao_exige_pista(dest_icao, "destino") and pista_destino is None:
+            faltando.append("pista_destino"); aerodromos["pista_destino"] = dest_icao
+        if faltando:
+            raise PistaObrigatoriaError(faltando, aerodromos)
+
         # link_radius_nm é mantido por compatibilidade da assinatura, mas o
         # modelo de arestas sintéticas agora decide entrada/saída por "está em
         # TMA REA?" (k-vizinhos) em vez de um raio fixo — ver add_synthetic_edges.
