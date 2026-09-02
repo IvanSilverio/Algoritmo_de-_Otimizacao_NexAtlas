@@ -28,12 +28,14 @@ constante GEOM_EXPR abaixo, que centraliza essa escolha em um único ponto.
 from __future__ import annotations
 
 import json
+import re
+from collections import defaultdict
 from typing import Any, Iterable, Optional
 
 from .geo import LonLat
 from .graphmodel import Edge, Node, RouteGraph, border_score
 from .portoes import (resolver_pontos_obrigatorios, PortaoDesconectadoError,
-                      direcao_exige_pista, PistaObrigatoriaError)
+                      direcao_exige_pista, PistaObrigatoriaError, carta_de)
 
 
 def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
@@ -61,6 +63,16 @@ WP_TABLE = f"{SCHEMA}.special_routes_waypoints"
 CONN_TABLE = f"{SCHEMA}.special_routes_connections"
 ADHP_TABLE = f"{SCHEMA}.adhps"
 AIRSPACE_TABLE = f"{SCHEMA}.airspaces"       # polígonos das TMAs (score de fronteira, PONTO 3)
+
+# TAREFA_cartas_relevantes.md: fração mínima dos waypoints de uma carta REA
+# que um designator (ctr/atz ou, na falta, tma) precisa cobrir pra virar a
+# "carta dona" dela. Calibrado ao vivo contra as 53 cartas REA do banco: com
+# 0.8, só 4 ficam abaixo do limiar em qualquer tipo (REA Londrina 73%, REA
+# Parintins 0%, REH Bacia de Santos 4% — corredor offshore —, REH Cabo Frio
+# 62%) — nenhuma delas aparece nos casos de validação da tarefa. Essas ficam
+# "ambíguas": usam o melhor disponível mesmo abaixo do limiar (nunca ficam
+# sem dono), sinalizadas em meta (ver _chart_home_designator).
+RELEVANCE_COVERAGE_THRESHOLD = 0.8
 
 # Ponto único para alternar entre coluna geometry nativa e GeoJSON.
 # Coluna geometry nativa (especificação):   "{col}"
@@ -155,6 +167,37 @@ LIMIT 1;
 # Lista de ICAOs (para autocomplete da CLI).
 SQL_LIST_ICAOS = f"SELECT designator_icao FROM {ADHP_TABLE} ORDER BY designator_icao;"
 
+# TAREFA_cartas_relevantes.md: espaços aéreos OFICIAIS (tma/ctr/atz, dado real
+# em published.airspaces, não raio) que contêm um ponto — usado tanto para
+# achar a "carta dona" de cada carta REA quanto para testar se uma ponta
+# (origem/destino) cai dentro dela. type mais específico (ctr/atz) reflete o
+# anel apertado de UM aeródromo; tma é a camada regional, quase sempre
+# compartilhada por várias cidades (ex.: TMA de Brasília cobre Formosa/SWFR
+# também) — por isso a prioridade ctr/atz > tma em _chart_home_designator.
+SQL_POINT_AIRSPACE_DESIGNATORS = f"""
+SELECT type, designator_icao
+FROM {AIRSPACE_TABLE}
+WHERE type IN ('ctr', 'atz', 'tma')
+  AND ST_Contains({GEOM_EXPR('geom')},
+                  ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326));
+"""
+
+# Para cada waypoint de UMA carta REA, em quais airspaces oficiais ele cai —
+# base para decidir a "carta dona" (_chart_home_designator): o designator
+# (normalizado, sem sufixo de setor _NN) que cobre a maior fatia dos
+# waypoints da carta, dando prioridade a ctr/atz sobre tma.
+SQL_CHART_WAYPOINT_AIRSPACES = f"""
+SELECT w.id, a.type, a.designator_icao
+FROM {WP_TABLE} w
+JOIN {AIRSPACE_TABLE} a
+  ON a.type IN ('ctr', 'atz', 'tma') AND ST_Contains({GEOM_EXPR('a.geom')}, {GEOM_EXPR('w.geom')})
+WHERE w.type = 'REA' AND w.chart = %(chart)s;
+"""
+
+SQL_CHART_WAYPOINT_COUNT = f"""
+SELECT count(*) FROM {WP_TABLE} WHERE type = 'REA' AND chart = %(chart)s;
+"""
+
 
 class PostgisLoader:
     """Loader do esquema published.
@@ -166,6 +209,7 @@ class PostgisLoader:
 
     def __init__(self, conn: Any) -> None:
         self.conn = conn
+        self._chart_home_cache: dict[str, Optional[str]] = {}
 
     def _rows(self, sql: str, params: dict) -> list[tuple]:
         try:
@@ -211,6 +255,97 @@ class PostgisLoader:
             charts.update(r[0] for r in rows)
         return sorted(charts)
 
+    # --------------------------------------------------------- cartas relevantes
+    @staticmethod
+    def _normalize_designator(designator: str) -> str:
+        """Tira o sufixo de setor (`SBWH_01` -> `SBWH`, `SBAN_2` -> `SBAN`) —
+        setores de uma mesma TMA/CTR contam como o mesmo "dono"."""
+        return re.sub(r"_\d+$", "", designator)
+
+    def _point_airspace_designators(self, pos: LonLat) -> set[str]:
+        """Designators (ctr/atz/tma, normalizados) de airspaces OFICIAIS que
+        contêm `pos` — dado real (`ST_Contains`), não raio."""
+        rows = self._rows(SQL_POINT_AIRSPACE_DESIGNATORS, {"lon": pos.lon, "lat": pos.lat})
+        return {self._normalize_designator(d) for _typ, d in rows}
+
+    def _chart_home_designator(self, chart: str) -> tuple[Optional[str], bool]:
+        """"Carta dona" de uma carta REA: o designator (ctr/atz > tma) cuja
+        área cobre a maior fatia dos waypoints da própria carta. Cacheado por
+        instância (dado estável dentro de uma execução).
+
+        Retorna (designator, ambíguo). `ambíguo=True` quando nenhum tipo
+        atinge RELEVANCE_COVERAGE_THRESHOLD — ainda assim devolve o melhor
+        disponível (nunca fica sem dono); ver TAREFA_cartas_relevantes.md.
+        """
+        if chart in self._chart_home_cache:
+            return self._chart_home_cache[chart]
+
+        total = self._rows(SQL_CHART_WAYPOINT_COUNT, {"chart": chart})[0][0]
+        home: Optional[str] = None
+        ambiguous = True
+        if total:
+            by_type: dict[str, dict[str, set]] = defaultdict(lambda: defaultdict(set))
+            for wid, typ, designator in self._rows(SQL_CHART_WAYPOINT_AIRSPACES, {"chart": chart}):
+                by_type[typ][self._normalize_designator(designator)].add(wid)
+
+            for typ in ("ctr", "atz", "tma"):
+                candidates = sorted(by_type.get(typ, {}).items(),
+                                    key=lambda kv: -len(kv[1]))
+                for designator, ids in candidates:
+                    if len(ids) / total >= RELEVANCE_COVERAGE_THRESHOLD:
+                        home, ambiguous = designator, False
+                        break
+                if home is not None:
+                    break
+
+            if home is None:
+                best = None
+                for typ_designators in by_type.values():
+                    for designator, ids in typ_designators.items():
+                        frac = len(ids) / total
+                        if best is None or frac > best[1]:
+                            best = (designator, frac)
+                if best is not None:
+                    home = best[0]
+
+        result = (home, ambiguous)
+        self._chart_home_cache[chart] = result
+        return result
+
+    def relevant_charts(self, candidate_charts: list[str], origin_icao: str, dest_icao: str,
+                        origin_pos: LonLat, dest_pos: LonLat) -> tuple[list[str], dict]:
+        """Das cartas candidatas (raio, `discover_charts`), mantém só as que
+        pertencem de fato a origem OU destino — carta dona (por airspace
+        oficial) contém a ponta. Sem isso, uma carta só "de passagem" (não é
+        de nenhuma das pontas) nunca entra no grafo: não atraca (Família 2)
+        nem vira obrigatória via owes (Família 1) — ela nem chega a existir
+        pro Dijkstra, sem precisar tocar em dijkstra.py.
+
+        Sempre inclui a carta documentada em portoes_rea.json (`carta_de`)
+        pra cada ponta, quando existir — salvaguarda pros 52 aeródromos com
+        portão publicado: a carta deles nunca some por causa do critério
+        geométrico.
+        """
+        origin_desigs = self._point_airspace_designators(origin_pos)
+        dest_desigs = self._point_airspace_designators(dest_pos)
+        relevant: set[str] = set()
+        diag: dict = {}
+        for chart in candidate_charts:
+            home, ambiguous = self._chart_home_designator(chart)
+            hit_origin = home is not None and home in origin_desigs
+            hit_dest = home is not None and home in dest_desigs
+            is_relevant = hit_origin or hit_dest
+            diag[chart] = {"home": home, "ambiguous": ambiguous,
+                          "hit_origin": hit_origin, "hit_dest": hit_dest}
+            if is_relevant:
+                relevant.add(chart)
+        for icao in (origin_icao, dest_icao):
+            forced = carta_de(icao)
+            if forced:
+                relevant.add(forced)
+                diag.setdefault(forced, {}).setdefault("forced_by_portao", set()).add(icao)
+        return sorted(relevant), diag
+
     # ------------------------------------------------------------------ graph
     def build_subgraph(self, origin_icao: str, dest_icao: str,
                        chart_radius_nm: float = 60.0,
@@ -244,9 +379,16 @@ class PostgisLoader:
 
         charts = self.discover_charts([origin.pos, dest.pos], chart_radius_nm)
 
-        if charts:
+        # TAREFA_cartas_relevantes.md: das cartas candidatas (raio), só carrega
+        # no grafo as que pertencem de fato à origem OU ao destino (airspace
+        # oficial, não raio) — uma carta só "de passagem" (ex.: REA Brasília
+        # na rota SNMH->SBVT) nunca entra; não atraca nem vira obrigatória.
+        relevant, relevance_diag = self.relevant_charts(
+            charts, origin_icao, dest_icao, origin.pos, dest.pos)
+
+        if relevant:
             for _id, name, chart, lon, lat, dist_border_nm, inside in self._rows(
-                SQL_WAYPOINTS_BY_CHARTS, {"charts": charts}
+                SQL_WAYPOINTS_BY_CHARTS, {"charts": relevant}
             ):
                 bs = border_score(
                     float(dist_border_nm) if dist_border_nm is not None else None,
@@ -256,7 +398,7 @@ class PostgisLoader:
 
             for (_id, src, tgt, corridor, mandatory, lo, hi,
                  heading, cls, geom_json, w) in self._rows(
-                SQL_CONNECTIONS_BY_CHARTS, {"charts": charts}
+                SQL_CONNECTIONS_BY_CHARTS, {"charts": relevant}
             ):
                 if src in g.nodes and tgt in g.nodes:
                     # Edge recebe corridor (name), is_mandatory e o traçado real
@@ -294,7 +436,10 @@ class PostgisLoader:
                 f"rota (sem caminho a partir do(s) ponto(s) obrigatório(s) do documento)"
             )
 
-        meta = {"charts": charts, "origin_id": origin.id, "dest_id": dest.id,
+        meta = {"charts": charts, "relevant_charts": relevant,
+                "charts_dropped": sorted(set(charts) - set(relevant)),
+                "relevance_diag": relevance_diag,
+                "origin_id": origin.id, "dest_id": dest.id,
                 "synthetic_diagnostics": diag,
                 "origin_gate_ids": set(origin_forced) if origin_forced else None,
                 "dest_gate_ids": set(dest_forced) if dest_forced else None}
