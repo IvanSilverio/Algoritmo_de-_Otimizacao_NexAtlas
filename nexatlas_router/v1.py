@@ -47,6 +47,11 @@ FATOR_RELATIVO_DIRETO = 1.7
 # db.build_subgraph) como referência de "mesma vizinhança operacional".
 PORTAO_PROXIMIDADE_LIMIAR_NM = 60.0
 
+# TAREFA_sintoma1_CORRECAO_podar.md (Sintoma 1, DIAGNOSTICO_coerencia.md §3.2):
+# margem de "além do destino" no eixo origem->destino — mesma ordem de
+# grandeza do RETROCESSO_LIMIAR_NM (mesmo tipo de tolerância geométrica).
+ALEM_DESTINO_LIMIAR_NM = 3.0
+
 
 def _real_distance_m(graph: RouteGraph, route) -> float:
     """Distância REAL (geográfica) da rota.
@@ -144,6 +149,77 @@ def _rota_incoerente(graph: RouteGraph, route: DecodedRoute, dest_pos,
     eventos = _eventos_incoerentes(graph, route, dest_pos, retro_limiar_nm, curva_limiar_deg)
     return any(not any(_evento_toca_perna(tipo, i, p) for p in pernas_protegidas)
               for tipo, i in eventos)
+
+
+def _alem_do_destino_nm(origin_pos, node_pos, dest_pos) -> float:
+    """Quanto o ponto passa DO DESTINO no eixo origem->destino, em NM
+    (positivo = está além do destino, exigiria retroceder para chegar).
+    Métrica de detecção do Sintoma 1 (DIAGNOSTICO_coerencia.md §3.2)."""
+    return (_progresso_nm(origin_pos, node_pos, dest_pos)
+            - _progresso_nm(origin_pos, dest_pos, dest_pos))
+
+
+def _podar_alem_destino(graph: RouteGraph, route: DecodedRoute, dest_id: str,
+                        gate_ids: frozenset = frozenset(),
+                        limiar_nm: float = ALEM_DESTINO_LIMIAR_NM) -> tuple:
+    """TAREFA_sintoma1_CORRECAO_podar.md (Sintoma 1): remove o "rabo" de
+    waypoints que ficam ALÉM do destino no fim da rota, religando ao destino
+    o último ponto que ainda progride — MANTENDO os corredores do começo.
+
+    É uma PODA DO FIM, da mesma família do `_remove_duplicidade_destino`
+    (tira a última posição e mantém o resto) e do caso 008 (encerrar o
+    corredor no ponto que já serve ao destino) — NÃO uma troca da rota pela
+    direta (foi esse o erro da 1ª implementação: no Caso 22 ela devolvia
+    `SBBI->SNGA`, quando o gabarito é `SBBI->IRAI->PEDREIRA->MARUMBI->
+    TREVO 277->SNGA`, com os corredores de saída de SBBI).
+
+    Discriminador (validado em DIAGNOSTICO_coerencia.md §3.2): só poda quando
+    AMBAS as pernas que tocam o waypoint são sintéticas/`DIRETO`
+    (`Edge.synthetic`) — pontes que o próprio algoritmo inventou. Ao caminhar
+    de trás para frente, PARA no primeiro corredor REAL: a geometria de um
+    corredor publicado é autoridade, nunca é podada (é o que protege
+    ITAIPU/FANTE em SBMT->SBRJ e CUMBUCO/BARRA no Caso 41, todos além do
+    destino no mesmo eixo, mas por corredor real).
+
+    `gate_ids`: nós de PORTÃO OBRIGATÓRIO documentado desta rota — a poda
+    também para neles. Um portão é alcançado por aresta SINTÉTICA (é assim
+    que `graphmodel.add_synthetic_edges(origin_forced=/dest_forced=)` o força),
+    então o discriminador de aresta sozinho não o protegeria — mas ele é
+    autoridade publicada, exatamente como o corredor real (achado ao vivo:
+    SÃO PEDRO é o portão documentado de SWEQ e projeta além do destino no
+    eixo SBBE->SWEQ; sem esta guarda a poda apagava o portão).
+
+    Roda sobre a rota já decidida (pós-rota), NÃO no Dijkstra/owes.
+    Devolve `(rota, removidos)` — `removidos` na ordem da rota original."""
+    n = len(route.node_ids)
+    if n < 3:
+        return route, []
+    origin_pos = graph.nodes[route.node_ids[0]].pos
+    dest_pos = graph.nodes[dest_id].pos
+    i = n - 2                     # último waypoint antes do destino
+    # A perna que SAI do waypoint precisa ser sintética já na 1ª volta; a
+    # partir daí a religação criada abaixo é sempre sintética por construção.
+    saida_sintetica = route.edges[i].synthetic
+    removidos: list[str] = []
+    while i >= 1 and saida_sintetica and route.edges[i - 1].synthetic:
+        if route.node_ids[i] in gate_ids:
+            break                 # portão documentado — autoridade, não poda
+        if _alem_do_destino_nm(origin_pos, graph.nodes[route.node_ids[i]].pos,
+                               dest_pos) <= limiar_nm:
+            break                 # este ponto ainda progride — religa aqui
+        removidos.append(route.node_ids[i])
+        i -= 1
+        saida_sintetica = True
+    if not removidos:
+        return route, []
+    religa_id = route.node_ids[i]
+    dist_m = graph.direct_distance_m(religa_id, dest_id)
+    nova_perna = Edge(religa_id, dest_id, dist_m, corridor="DIRETO", synthetic=True)
+    novos_edges = route.edges[:i] + [nova_perna]
+    nova_distancia = sum(e.weight_m for e in novos_edges)
+    podada = DecodedRoute(route.node_ids[:i + 1] + [dest_id], novos_edges,
+                          nova_distancia, route.complete, nova_distancia)
+    return podada, list(reversed(removidos))
 
 
 def _pernas_de_portao(route: DecodedRoute, origin_gate_ids: Optional[set],
@@ -350,6 +426,16 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             "verifique a montagem do grafo (origem/destino válidos?)."
         )
     route = _remove_duplicidade_destino(graph, route, dest_id)
+    # TAREFA_sintoma1_CORRECAO_podar.md: poda o "rabo" além do destino ANTES
+    # de derivar pontos/corredores/pernas/distância — assim tudo que vem
+    # abaixo (inclusive a coerência e o fator relativo) já enxerga a rota
+    # podada. Mantém os corredores; nunca troca a rota pela direta.
+    gate_ids = frozenset((origin_gate_ids or set()) | (dest_gate_ids or set()))
+    route, podados_ids = _podar_alem_destino(graph, route, dest_id, gate_ids)
+    poda_alem_destino = [
+        {"id": nid, "name": graph.nodes[nid].name, "chart": graph.nodes[nid].chart}
+        for nid in podados_ids
+    ]
 
     points = _route_points(graph, route)
     corridors = _corridors_used(route)
@@ -420,6 +506,12 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             f"{overhead:.1f} NM sobre a rota direta ({direct_nm:.1f} NM) — "
             f"menor distância total entre as alternativas disponíveis."
         )
+        # TAREFA_sintoma1_CORRECAO_podar.md: a poda é informada junto do
+        # motivo — a rota MANTÉM os corredores, só perdeu o rabo sintético.
+        if poda_alem_destino:
+            podados_txt = ", ".join(p["name"] for p in poda_alem_destino)
+            reason += (f" Removido(s) do fim, por ficar(em) além do destino em ponte "
+                      f"sem corredor real: {podados_txt}.")
         # Feedback do Ivan 17/08: em rotas "de proximidade" — toda a malha
         # numa ÚNICA carta REA — a direta continua uma opção viável mesmo com
         # o corredor como principal (ex.: caso 020, SBVT->SIVU). Mostra a
@@ -453,10 +545,17 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
                                  require_real_edge=eff_require)
     main_seq = list(route.node_ids)
     alternatives = []
+    vistas = {tuple(main_seq)}
     for alt in k_routes:
         alt = _remove_duplicidade_destino(graph, alt, dest_id)
-        if list(alt.node_ids) == main_seq:
+        # TAREFA_sintoma1_CORRECAO_podar.md: a alternativa é podada igual à
+        # principal (o rabo além do destino não deve aparecer nem aqui). A
+        # poda pode fazer duas candidatas coincidirem entre si ou com a
+        # principal — `vistas` evita repetir a mesma sequência na lista.
+        alt, _ = _podar_alem_destino(graph, alt, dest_id, gate_ids)
+        if tuple(alt.node_ids) in vistas:
             continue
+        vistas.add(tuple(alt.node_ids))
         # TAREFA_coerencia_geometrica.md (II).2 — filtro/rede de segurança:
         # descarta alternativa que começa no sentido oposto ou com desvio
         # relevante (retrocesso/curva), mesmo que a rota principal já esteja
@@ -499,6 +598,7 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
             "malha_incoerente": incoerente,
             "malha_fator_relativo": None if fator == float("inf") else round(fator, 2),
             "colisao_portao_coerencia": colisao_portao,
+            "poda_alem_destino": poda_alem_destino,
         },
         route=route,
     )
