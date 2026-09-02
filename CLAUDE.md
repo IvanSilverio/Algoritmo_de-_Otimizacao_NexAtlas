@@ -75,7 +75,7 @@ A malha REA às vezes é tecnicamente conectada mas geometricamente absurda (way
 - `geo.progresso_nm` (usada por `v1.py` e `graphmodel.py`): projeção do passo no eixo origem→destino, negativo = retrocesso. `v1._turn_deg`: mudança de rumo entre trechos consecutivos.
 - **A malha só vence a rota direta** se tiver ≥1 corredor REAL, for coerente (sem retrocesso `RETROCESSO_LIMIAR_NM=3 NM` nem curva `CURVA_LIMIAR_DEG=120°` acima do limiar) e não custar mais que `FATOR_RELATIVO_DIRETO=1,7×` a direta (constantes em `v1.py`). Mesmo limiar de curva pra rota principal E alternativas do k-shortest — um limiar frouxo só pras alternativas deixava passar desvios pouco viáveis.
 - **Portão de saída aceita vizinho mais próximo do destino quando o trecho até ele é OPCIONAL** (`graphmodel._skips_closer_corridor_node(..., only_mandatory=True)`, só no lado da SAÍDA): caso 008, TRAPICHE é portão válido de SBFL mesmo com TREVO mais perto, porque TRAPICHE→TREVO não é obrigatório.
-- **Rota direta injetada como alternativa extra** (`v1._mesma_malha`) quando a malha inteira está numa única carta REA (proximidade), mesmo com o corredor como recomendação principal.
+- **Rota direta injetada como alternativa extra** (`v1._mesma_malha`) quando a malha inteira está numa única carta REA (proximidade) **e o(s) corredor(es) da rota principal são só OPCIONAIS** (27/08/26) — corredor OBRIGATÓRIO nunca oferece a direta como alternativa (seria "furar" a obrigação; o `require_real_edge` do k-shortest já barra isso das alternativas GERADAS pelo Yen, mas esse `direto_extra` é injetado à parte e não checava `is_mandatory`; afetava 18 dos 60 casos, ex. 55 SBCG→SBUR, 56 SBBR→SNAL).
 
 ### Portões obrigatórios de aeródromo (TAREFA_portoes.md, 17-18/08/26)
 

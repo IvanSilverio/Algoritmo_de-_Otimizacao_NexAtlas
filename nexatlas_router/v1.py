@@ -424,7 +424,15 @@ def plan_v1_route(graph: RouteGraph, origin_id: str, dest_id: str,
         # numa ÚNICA carta REA — a direta continua uma opção viável mesmo com
         # o corredor como principal (ex.: caso 020, SBVT->SIVU). Mostra a
         # direta como alternativa extra, fora do cap de 4 do k-shortest.
-        if _mesma_malha(points):
+        #
+        # TAREFA_proibir_direta_55_56.md (27/08/26): só quando o(s) corredor(es)
+        # da primária são OPCIONAIS. Onde há corredor OBRIGATÓRIO cobrindo o
+        # trecho (55 SBCG->SBUR, 56 SBBR->SNAL e outros 18 dos 60), oferecer a
+        # direta como alternativa é "furar" a obrigação — o k_shortest (Yen) já
+        # não faz isso sozinho (require_real_edge=eff_require força used>=1 em
+        # todo candidato quando a malha é obrigatória); só este direto_extra,
+        # que não checava is_mandatory, escapava da regra.
+        if _mesma_malha(points) and not any(c["is_mandatory"] for c in corridors):
             direct_dist_m = graph.direct_distance_m(origin_id, dest_id)
             direct_route = DecodedRoute(
                 [origin_id, dest_id],
