@@ -24,7 +24,7 @@ if str(ROOT) not in sys.path:
 import psycopg2  # noqa: E402
 
 from nexatlas_router.db import PostgisLoader  # noqa: E402
-from nexatlas_router.portoes import PistaObrigatoriaError  # noqa: E402
+from nexatlas_router.portoes import EntradaAusenteError, PistaObrigatoriaError  # noqa: E402
 from nexatlas_router.v1 import plan_v1_route  # noqa: E402
 from nexatlas_router.vertical import (  # noqa: E402
     Terrain, Wind, find as find_aircraft, load_from_db as load_aircraft_catalog,
@@ -33,7 +33,7 @@ from nexatlas_router.vertical.magnetic import declination, WMM_EDITION  # noqa: 
 
 
 def connect():
-    required = ["NEXATLAS_DB_PASSWORD"]
+    required = ["NEXATLAS_DB_USER", "NEXATLAS_DB_PASSWORD"]
     missing = [k for k in required if not os.environ.get(k)]
     if missing:
         sys.exit(f"Variáveis de ambiente ausentes: {', '.join(missing)}. Execute: source .env.sh")
@@ -41,7 +41,7 @@ def connect():
         host=os.environ.get("NEXATLAS_DB_HOST", "jetstream.nexatlas.com"),
         port=os.environ.get("NEXATLAS_DB_PORT", "5433"),
         dbname=os.environ.get("NEXATLAS_DB_NAME", "jetstream"),
-        user=os.environ.get("NEXATLAS_DB_USER", "ivansilverio"),
+        user=os.environ["NEXATLAS_DB_USER"],
         password=os.environ["NEXATLAS_DB_PASSWORD"],
     )
     with conn.cursor() as cur:
@@ -104,10 +104,12 @@ def computar_caso(loader: PostgisLoader, catalog, terreno: Terrain, wind: Wind,
     verificar ao vivo — só o comparador (verifica_gabarito.py) muda.
 
     TAREFA_gabarito_v2_contrato.md (26/08/26): quando o input é incompleto
-    (hoje só pista obrigatória faltando), o MOTOR devolve um retorno
-    estruturado em vez de uma rota (`PistaObrigatoriaError.to_dict()`) — essa
-    função repassa esse dict tal qual (`{"status": "faltou_input", ...}`) no
-    lugar do dict lateral/vertical/vento/magnetico normal. `verifica_gabarito.
+    (pista obrigatória faltando, ou — TAREFA_faltou_input_origem_destino.md,
+    05/09/26 — origem/destino ausente), o MOTOR devolve um retorno
+    estruturado em vez de uma rota (`PistaObrigatoriaError.to_dict()` /
+    `EntradaAusenteError.to_dict()`, mesmo formato `{"status": "faltou_
+    input", ...}`) — essa função repassa esse dict tal qual no lugar do
+    dict lateral/vertical/vento/magnetico normal. `verifica_gabarito.
     py`/`gerar_gabarito.py` distinguem os dois formatos pela chave "status"
     (sinal) vs "lateral" (rota) — nunca uma exceção não tratada subindo pro
     chamador nesse caso específico; qualquer OUTRA exceção (ex.: ICAO
@@ -117,7 +119,7 @@ def computar_caso(loader: PostgisLoader, catalog, terreno: Terrain, wind: Wind,
         graph, meta = loader.build_subgraph(
             caso["origem"], caso["destino"], chart_radius_nm=60.0, link_radius_nm=30.0,
             pista_origem=caso.get("pista_origem"), pista_destino=caso.get("pista_destino"))
-    except PistaObrigatoriaError as e:
+    except (PistaObrigatoriaError, EntradaAusenteError) as e:
         return e.to_dict()
     result = plan_v1_route(graph, meta["origin_id"], meta["dest_id"],
                            origin_gate_ids=meta.get("origin_gate_ids"),

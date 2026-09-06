@@ -21,6 +21,12 @@ rotas_export.json
 validacao_portoes/
 validacao_referencia_pdf/
 
+# Saída gerada por gerar_gabarito_perguntas.py — regenerável a qualquer momento
+# contra o banco/CDN ao vivo, não é o roteiro (esse é PERGUNTAS_CAIO_roteiro.md,
+# versionado).
+gabarito_perguntas_orquestrador.md
+gabarito_perguntas_orquestrador.json
+
 # Dados provisórios baixados (opcional — descomente se não quiser versionar)
 # data/aerodromos_br_ourairports.csv
 

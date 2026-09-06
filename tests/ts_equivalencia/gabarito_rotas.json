@@ -6086,6 +6086,29 @@
           }
         ]
       }
+    },
+    {
+      "id": "contrato_origem_ausente",
+      "cobertura": [
+        "contrato:origem_destino_ausente"
+      ],
+      "tipo_caso": "contrato_input",
+      "entrada": {
+        "origem": "",
+        "destino": "SBRF",
+        "aeronave": "1n7s5U5J",
+        "pista_origem": null,
+        "pista_destino": null,
+        "hora_partida_utc": null
+      },
+      "esperado": {
+        "status": "faltou_input",
+        "faltando": [
+          "origem"
+        ],
+        "aerodromos": {},
+        "mensagem": "Informe o aeródromo de partida."
+      }
     }
   ]
 }

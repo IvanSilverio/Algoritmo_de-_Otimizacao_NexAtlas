@@ -36,6 +36,13 @@ python3 tests/ts_equivalencia/verifica_gabarito.py -v         # mostra os diffs 
 Precisa de acesso ao banco `jetstream` **ao vivo** e ao CDN de terreno/vento — o runner
 recalcula tudo na hora e compara com o congelado no JSON; ele não roda offline.
 
+**Nota (só pra quem roda ESTE `verifica_gabarito.py`, não pro fluxo do time do TS):** os
+blocos de vento são comparados de forma estrutural/com tolerância, nunca por valor exato (ver
+§3) — mas ainda assim podem dar FAIL **transitoriamente** se o CDN de vento estiver instável
+no momento da execução (um soluço de fetch faz o vento cair pra `(0,0)` num caso isolado). Se
+o FAIL aparecer **só** em casos de vento, rode de novo antes de concluir que quebrou algo —
+um FAIL de vento que some numa segunda rodada é instabilidade do CDN, não regressão.
+
 ## 2. Formato de `gabarito_rotas.json`
 
 ```jsonc
