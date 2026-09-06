@@ -17,6 +17,7 @@ from .wind import Wind, ground_speed, parse_hora_utc
 from .contract import LateralRoute, LateralLeg, lateral_route_from_v1
 from .profile import PerfilVertical, Vertice, SegmentoVento, plan_vertical_profile
 from .plot_profile import plot_vertical_profile
+from .plot_wind import plot_wind_sounding
 from . import rules, magnetic
 
 __all__ = [
@@ -24,7 +25,7 @@ __all__ = [
     "Terrain", "Wind", "ground_speed", "parse_hora_utc",
     "LateralRoute", "LateralLeg", "lateral_route_from_v1",
     "PerfilVertical", "Vertice", "SegmentoVento", "plan_vertical_profile", "plan_from_v1",
-    "plot_vertical_profile", "rules", "magnetic",
+    "plot_vertical_profile", "plot_wind_sounding", "rules", "magnetic",
 ]
 
 

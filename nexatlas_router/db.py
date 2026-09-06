@@ -35,7 +35,8 @@ from typing import Any, Iterable, Optional
 from .geo import LonLat
 from .graphmodel import Edge, Node, RouteGraph, border_score
 from .portoes import (resolver_pontos_obrigatorios, PortaoDesconectadoError,
-                      direcao_exige_pista, PistaObrigatoriaError, carta_de)
+                      direcao_exige_pista, PistaObrigatoriaError, carta_de,
+                      EntradaAusenteError)
 
 
 def _parse_linestring(geom_json: Optional[str]) -> Optional[tuple]:
@@ -352,6 +353,19 @@ class PostgisLoader:
                        link_radius_nm: float = 30.0,
                        pista_origem: Optional[str] = None,
                        pista_destino: Optional[str] = None) -> tuple[RouteGraph, dict]:
+        # TAREFA_faltou_input_origem_destino.md: origem/destino ausente
+        # (vazio/None) é a checagem MAIS básica de todas — roda antes até da
+        # de pista (que pressupõe um ICAO válido pra consultar o JSON de
+        # portões). Sem isto, cai num LookupError genérico em fetch_aerodrome,
+        # indistinguível de um ICAO real mas digitado errado.
+        faltando_entrada: list = []
+        if not (origin_icao or "").strip():
+            faltando_entrada.append("origem")
+        if not (dest_icao or "").strip():
+            faltando_entrada.append("destino")
+        if faltando_entrada:
+            raise EntradaAusenteError(faltando_entrada)
+
         # TAREFA_pista_obrigatoria_e_vento_default.md: checagem OFFLINE (só o
         # JSON de portões, sem tocar no banco) antes de qualquer query — se a
         # direção só tem regra condicionada a cabeceira e a pista não veio,

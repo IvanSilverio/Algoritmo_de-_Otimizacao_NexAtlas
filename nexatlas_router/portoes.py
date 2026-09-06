@@ -79,6 +79,33 @@ class PistaObrigatoriaError(PortaoError):
                 "aerodromos": dict(self.aerodromos), "mensagem": self.mensagem}
 
 
+class EntradaAusenteError(Exception):
+    """Origem e/ou destino ausente (string vazia/None) — TAREFA_faltou_input_
+    origem_destino.md. Mesmo sinal estruturado `faltou_input` do
+    `PistaObrigatoriaError` (`.to_dict()` no mesmo formato, `aerodromos`
+    sempre presente — vazio aqui, já que não há ICAO nenhum: é isso que está
+    faltando), mas SEM relação com portão/gate — não é subclasse de
+    `PortaoError`. Levantada por `db.build_subgraph` antes de qualquer outra
+    checagem (nem toca no banco, nem no JSON de portões: não faz sentido
+    checar regra de cabeceira de um aeródromo que nem foi informado).
+
+    ICAO informado mas INEXISTENTE no banco continua fora daqui — cai no
+    `LookupError` genérico de sempre (é entrada de fato inválida, não
+    "esqueci de informar"; gap conhecido, ver CONTRATO_ERROS.md §2)."""
+
+    _MSG = {"origem": "aeródromo de partida", "destino": "aeródromo de destino"}
+
+    def __init__(self, faltando: list[str]):
+        self.faltando = list(faltando)
+        partes = [f"informe o {self._MSG[campo]}" for campo in faltando]
+        self.mensagem = "; ".join(partes).capitalize() + "."
+        super().__init__(self.mensagem)
+
+    def to_dict(self) -> dict:
+        return {"status": "faltou_input", "faltando": list(self.faltando),
+                "aerodromos": {}, "mensagem": self.mensagem}
+
+
 def _carregar() -> dict:
     global _cache
     if _cache is None:

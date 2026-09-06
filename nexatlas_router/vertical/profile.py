@@ -292,6 +292,18 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     else:
         H_post = elev_d
 
+    # hpre_corr/hpost_corr: SÓ o higher_limit de um corredor REAL conectado
+    # (None se não houver) -- diferente de H_pre/H_post, que caem pra
+    # elevação de origem/destino quando não há corredor. Usado no piso de
+    # corredor do cruzeiro (abaixo) e no clamp do pico sem cruzeiro nivelado
+    # (Bug A, mais abaixo): um trecho puramente DIRETO (sem corredor em
+    # nenhuma ponta) não tem amarra de corredor nenhuma, só o teto
+    # operacional -- usar a ELEVAÇÃO como teto (via `alvo`/H_pre/H_post)
+    # impediria até uma subida curta e normal (achado ao vivo: SISM->SBMQ).
+    hpre_corr = (next((his(j) for j in range(cs - 1, -1, -1) if his(j) is not None), None)
+                if (tem_cruise_stretch and cs > 0) else None)
+    hpost_corr = next_corr_his(ce, n) if (tem_cruise_stretch and ce < n) else None
+
     # ---- PISOS do cruzeiro (só quando há trecho de cruzeiro) ----
     # (1) piso de CORREDOR: o cruzeiro não pode ficar ABAIXO do corredor que ele
     #     conecta (senão a aeronave desceria abaixo do corredor e subiria para
@@ -299,8 +311,6 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
     # (c) piso de TERRENO en-route (+500, como o documento estende "o ponto mais
     #     alto"): se ainda ficar abaixo da serra, sobe para o menor NÍVEL LEGAL.
     if tem_cruise_stretch and cruise is not None:
-        hpre_corr = next((his(j) for j in range(cs - 1, -1, -1) if his(j) is not None), None)
-        hpost_corr = next_corr_his(ce, n)
         corr_floor = max([x for x in (hpre_corr, hpost_corr) if x is not None], default=None)
         if corr_floor is not None and cruise < corr_floor - 1e-6:
             avisos.append(f"cruzeiro elevado de {cruise:.0f} para {corr_floor:.0f} ft "
@@ -403,6 +413,13 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
                 x0, x1 = cum[i], cum[i + 1]
                 tgt = his(i)
                 if tgt is None or abs(tgt - cur) <= 1:
+                    # Materializa o platô em `poly` (I-B1, TAREFA_V3_correcao_
+                    # pico_e_descida.md) -- antes só avançava `x` (por isso o
+                    # aviso/`descida_ingreme_nm` já acertavam a posição), mas a
+                    # geometria ficava presa no ponto de entrada do corredor e
+                    # `alt_at()` fabricava uma 3ª razão (nem a do banco, nem
+                    # nivelada) esticando o mergulho final numa rampa rasa.
+                    poly.append((x1, cur))
                     x = x1
                     continue
                 # mesma física do start_to (subida/descida na razão máxima
@@ -568,8 +585,28 @@ def plan_vertical_profile(lateral: LateralRoute, aeronave: Aeronave, terreno,
                 x_peak = x_en0 + L_en / 2.0
             x_peak = max(x_en0, min(total, x_peak))
             peak = H_pre + a * (x_peak - x_en0)
-            if cruise is not None:
-                peak = min(peak, alvo)
+            # I-A1/I-A3 (TAREFA_V3_correcao_pico_e_descida.md): nunca acima do
+            # teto operacional, mesmo com `cruise is None` (perna livre curta
+            # demais pra suggest_cruise_altitude devolver algo) -- antes só
+            # clampava quando `cruise is not None`, deixando o pico "correr
+            # solto" no fallback (achado ao vivo: 98-COM/096, pico de
+            # ~37700-49300 ft pra teto de 10000-14000 ft). I-A2: quando há um
+            # corredor REAL conectado (hpre_corr/hpost_corr), o pico também
+            # não passa da altura dele -- mas SEM corredor em nenhuma ponta
+            # (trecho puramente DIRETO) não há essa amarra, só o teto (achado
+            # ao vivo: SISM->SBMQ, subida curta e normal sem corredor nenhum,
+            # não pode ficar presa na elevação do campo).
+            corredor_alvo = max([x for x in (hpre_corr, hpost_corr) if x is not None],
+                                default=None)
+            teto_efetivo = (min(corredor_alvo, ac.teto_ft) if corredor_alvo is not None
+                            else ac.teto_ft)
+            if peak > teto_efetivo + 1e-6:
+                if peak > ac.teto_ft + 1e-6:
+                    avisos.append(
+                        f"pico de subida (sem cruzeiro nivelado) calculado em "
+                        f"{peak:.0f} ft excede o teto operacional "
+                        f"({ac.teto_ft:.0f} ft); limitado ao teto.")
+                peak = teto_efetivo
             if x_peak > x_en0 + 1e-6:
                 add(x_peak, peak, "virtual", None, False)
             alcancou = False

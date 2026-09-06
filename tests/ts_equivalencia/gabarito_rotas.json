@@ -1,10 +1,10 @@
 {
   "meta": {
-    "gerado_em": "2026-08-26T21:04:34.446979+00:00",
-    "commit": "37330a4",
+    "gerado_em": "2026-09-03T20:08:00.471510+00:00",
+    "commit": "87d545c",
     "wmm_edition": "WMM-2025",
     "vento_offset_h": 6,
-    "agora_relativa_usada": "2026-08-27T03:02:19.158207+00:00",
+    "agora_relativa_usada": "2026-09-04T02:04:03.172986+00:00",
     "nota": "Snapshot CONGELADO gerado a partir do banco jetstream (schema published) e do CDN de terreno/vento na data acima. Regenerar (python3 gerar_gabarito.py) quando o banco mudar de forma relevante para algum destes pares origem/destino. Tolerâncias de comparação em README_equivalencia.md. TAREFA_gabarito_v2_contrato.md (26/08/26): a maioria dos casos roda SEM `hora_partida_utc` (default do motor desde a TAREFA_pista_obrigatoria_e_vento_default.md) — o bloco `vento` fica vazio pra sempre, nunca expira. Só os casos com `entrada.vento_modo == 'relativo'` pedem vento de propósito: usam `agora_relativa_usada` (agora da GERAÇÃO + `vento_offset_h`), e `verifica_gabarito.py` RECALCULA essa hora com o `agora` dele (mesma regra) em vez de reler o valor congelado — por isso o vento desses casos é comparado por estrutura/sinal, não por igualdade exata. O bloco `magnetico` usa a declinação WMM na data de EXECUÇÃO de quem gerou/verificou (não em `hora_partida_utc`) — a variação secular do WMM (~0,025°/ano) fica bem dentro da tolerância de 0,01° por vários meses; ver README_equivalencia.md."
   },
   "casos": [
@@ -149,15 +149,15 @@
         "magnetico": [
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.1071,
+            "declinacao_deg": -21.1045,
             "rumo_magnetico_deg": 109.0,
-            "rumo_verdadeiro_deg": 87.8929
+            "rumo_verdadeiro_deg": 87.8955
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.0888,
+            "declinacao_deg": -21.0862,
             "rumo_magnetico_deg": 126.0,
-            "rumo_verdadeiro_deg": 104.9112
+            "rumo_verdadeiro_deg": 104.9138
           }
         ]
       }
@@ -405,21 +405,21 @@
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.2004,
+            "declinacao_deg": -21.1978,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.7996
+            "rumo_verdadeiro_deg": 15.8022
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.1673,
+            "declinacao_deg": -21.1647,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.8327
+            "rumo_verdadeiro_deg": 331.8353
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.1134,
+            "declinacao_deg": -21.1107,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.8866
+            "rumo_verdadeiro_deg": 31.8893
           }
         ]
       }
@@ -739,69 +739,69 @@
         "magnetico": [
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0358,
+            "declinacao_deg": -23.0364,
             "rumo_magnetico_deg": 279.0,
-            "rumo_verdadeiro_deg": 255.9642
+            "rumo_verdadeiro_deg": 255.9636
           },
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0008,
+            "declinacao_deg": -23.0014,
             "rumo_magnetico_deg": 278.0,
-            "rumo_verdadeiro_deg": 254.9992
+            "rumo_verdadeiro_deg": 254.9986
           },
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -22.9776,
+            "declinacao_deg": -22.9783,
             "rumo_magnetico_deg": 88.0,
-            "rumo_verdadeiro_deg": 65.0224
+            "rumo_verdadeiro_deg": 65.0217
           },
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -22.9732,
+            "declinacao_deg": -22.9739,
             "rumo_magnetico_deg": 9.0,
-            "rumo_verdadeiro_deg": 346.0268
+            "rumo_verdadeiro_deg": 346.0261
           },
           {
             "corredor": "PAPA",
-            "declinacao_deg": -22.9819,
+            "declinacao_deg": -22.9826,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 11.0181
+            "rumo_verdadeiro_deg": 11.0174
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.0104,
+            "declinacao_deg": -23.0111,
             "rumo_magnetico_deg": 85.0,
-            "rumo_verdadeiro_deg": 61.9896
+            "rumo_verdadeiro_deg": 61.9889
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.0594,
+            "declinacao_deg": -23.06,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 77.9406
+            "rumo_verdadeiro_deg": 77.94
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1127,
+            "declinacao_deg": -23.1132,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8873
+            "rumo_verdadeiro_deg": 79.8868
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1714,
+            "declinacao_deg": -23.1719,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8286
+            "rumo_verdadeiro_deg": 79.8281
           },
           {
             "corredor": "HORIZONTE",
-            "declinacao_deg": -20.3286,
+            "declinacao_deg": -20.3264,
             "rumo_magnetico_deg": 21.0,
-            "rumo_verdadeiro_deg": 0.6714
+            "rumo_verdadeiro_deg": 0.6736
           },
           {
             "corredor": "BEACH PARK",
-            "declinacao_deg": -20.2748,
+            "declinacao_deg": -20.2725,
             "rumo_magnetico_deg": 73.0,
-            "rumo_verdadeiro_deg": 52.7252
+            "rumo_verdadeiro_deg": 52.7275
           }
         ]
       }
@@ -1008,33 +1008,33 @@
         "magnetico": [
           {
             "corredor": "TANGO",
-            "declinacao_deg": -23.0946,
+            "declinacao_deg": -23.0951,
             "rumo_magnetico_deg": 9.0,
-            "rumo_verdadeiro_deg": 345.9054
+            "rumo_verdadeiro_deg": 345.9049
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1127,
+            "declinacao_deg": -23.1132,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8873
+            "rumo_verdadeiro_deg": 79.8868
           },
           {
             "corredor": "CHARLIE",
-            "declinacao_deg": -23.1714,
+            "declinacao_deg": -23.1719,
             "rumo_magnetico_deg": 103.0,
-            "rumo_verdadeiro_deg": 79.8286
+            "rumo_verdadeiro_deg": 79.8281
           },
           {
             "corredor": "HORIZONTE",
-            "declinacao_deg": -20.3286,
+            "declinacao_deg": -20.3264,
             "rumo_magnetico_deg": 21.0,
-            "rumo_verdadeiro_deg": 0.6714
+            "rumo_verdadeiro_deg": 0.6736
           },
           {
             "corredor": "BEACH PARK",
-            "declinacao_deg": -20.2748,
+            "declinacao_deg": -20.2725,
             "rumo_magnetico_deg": 73.0,
-            "rumo_verdadeiro_deg": 52.7252
+            "rumo_verdadeiro_deg": 52.7275
           }
         ]
       }
@@ -1390,87 +1390,87 @@
         "magnetico": [
           {
             "corredor": "PORTÃO CURICICA",
-            "declinacao_deg": -22.9328,
+            "declinacao_deg": -22.9333,
             "rumo_magnetico_deg": 231.0,
-            "rumo_verdadeiro_deg": 208.0672
+            "rumo_verdadeiro_deg": 208.0667
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8804,
+            "declinacao_deg": -22.881,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1196
+            "rumo_verdadeiro_deg": 253.119
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8215,
+            "declinacao_deg": -22.8221,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1785
+            "rumo_verdadeiro_deg": 253.1779
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.7571,
+            "declinacao_deg": -22.7578,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.2429
+            "rumo_verdadeiro_deg": 258.2422
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6697,
+            "declinacao_deg": -22.6704,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.3303
+            "rumo_verdadeiro_deg": 258.3296
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.585,
+            "declinacao_deg": -22.5857,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.415
+            "rumo_verdadeiro_deg": 248.4143
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.4757,
+            "declinacao_deg": -22.4765,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.5243
+            "rumo_verdadeiro_deg": 248.5235
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.3461,
+            "declinacao_deg": -22.3471,
             "rumo_magnetico_deg": 325.0,
-            "rumo_verdadeiro_deg": 302.6539
+            "rumo_verdadeiro_deg": 302.6529
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.2796,
+            "declinacao_deg": -22.2806,
             "rumo_magnetico_deg": 338.0,
-            "rumo_verdadeiro_deg": 315.7204
+            "rumo_verdadeiro_deg": 315.7194
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2411,
+            "declinacao_deg": -22.2421,
             "rumo_magnetico_deg": 296.0,
-            "rumo_verdadeiro_deg": 273.7589
+            "rumo_verdadeiro_deg": 273.7579
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1703,
+            "declinacao_deg": -22.1715,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.8297
+            "rumo_verdadeiro_deg": 258.8285
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0585,
+            "declinacao_deg": -22.0597,
             "rumo_magnetico_deg": 295.0,
-            "rumo_verdadeiro_deg": 272.9415
+            "rumo_verdadeiro_deg": 272.9403
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9714,
+            "declinacao_deg": -21.9727,
             "rumo_magnetico_deg": 337.0,
-            "rumo_verdadeiro_deg": 315.0286
+            "rumo_verdadeiro_deg": 315.0273
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9353,
+            "declinacao_deg": -21.9367,
             "rumo_magnetico_deg": 337.0,
-            "rumo_verdadeiro_deg": 315.0647
+            "rumo_verdadeiro_deg": 315.0633
           }
         ]
       }
@@ -1873,69 +1873,69 @@
         "magnetico": [
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0358,
+            "declinacao_deg": -23.0364,
             "rumo_magnetico_deg": 279.0,
-            "rumo_verdadeiro_deg": 255.9642
+            "rumo_verdadeiro_deg": 255.9636
           },
           {
             "corredor": "KILO",
-            "declinacao_deg": -23.0008,
+            "declinacao_deg": -23.0014,
             "rumo_magnetico_deg": 278.0,
-            "rumo_verdadeiro_deg": 254.9992
+            "rumo_verdadeiro_deg": 254.9986
           },
           {
             "corredor": "INDIA",
-            "declinacao_deg": -22.9485,
+            "declinacao_deg": -22.9492,
             "rumo_magnetico_deg": 265.0,
-            "rumo_verdadeiro_deg": 242.0515
+            "rumo_verdadeiro_deg": 242.0508
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.2021,
+            "declinacao_deg": -22.2033,
             "rumo_magnetico_deg": 236.0,
-            "rumo_verdadeiro_deg": 213.7979
+            "rumo_verdadeiro_deg": 213.7967
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.1484,
+            "declinacao_deg": -22.1496,
             "rumo_magnetico_deg": 236.0,
-            "rumo_verdadeiro_deg": 213.8516
+            "rumo_verdadeiro_deg": 213.8504
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -22.055,
+            "declinacao_deg": -22.0562,
             "rumo_magnetico_deg": 259.0,
-            "rumo_verdadeiro_deg": 236.945
+            "rumo_verdadeiro_deg": 236.9438
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.9468,
+            "declinacao_deg": -21.9481,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.0532
+            "rumo_verdadeiro_deg": 226.0519
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.8829,
+            "declinacao_deg": -21.8843,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.1171
+            "rumo_verdadeiro_deg": 226.1157
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.8666,
+            "declinacao_deg": -21.8679,
             "rumo_magnetico_deg": 169.0,
-            "rumo_verdadeiro_deg": 147.1334
+            "rumo_verdadeiro_deg": 147.1321
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8736,
+            "declinacao_deg": -21.8749,
             "rumo_magnetico_deg": 151.0,
-            "rumo_verdadeiro_deg": 129.1264
+            "rumo_verdadeiro_deg": 129.1251
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8784,
+            "declinacao_deg": -21.8796,
             "rumo_magnetico_deg": 167.0,
-            "rumo_verdadeiro_deg": 145.1216
+            "rumo_verdadeiro_deg": 145.1204
           }
         ]
       }
@@ -2103,76 +2103,118 @@
             },
             {
               "x_nm": 113.1,
-              "alt_ft": 45246.1,
+              "alt_ft": 1500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
               "x_nm": 130.56,
-              "alt_ft": 40009.2,
+              "alt_ft": 1500.0,
               "tipo": "corredor",
               "nome": "ILHA ANCHIETA",
               "real": true
             },
             {
+              "x_nm": 140.06,
+              "alt_ft": 5300.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 161.5,
-              "alt_ft": 30726.2,
+              "alt_ft": 5300.0,
               "tipo": "corredor",
               "nome": "REDENÇÃO (PORTÃO)",
               "real": true
             },
             {
+              "x_nm": 162.83,
+              "alt_ft": 4900.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 173.57,
-              "alt_ft": 27103.7,
+              "alt_ft": 4900.0,
               "tipo": "corredor",
               "nome": "CAÇAPAVA (PORTÃO)",
               "real": true
             },
             {
+              "x_nm": 176.57,
+              "alt_ft": 4000.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 183.81,
-              "alt_ft": 24032.5,
+              "alt_ft": 4000.0,
               "tipo": "corredor",
               "nome": "TRAVÉS NORTE SÃO JOSÉ",
               "real": true
             },
             {
               "x_nm": 198.15,
-              "alt_ft": 19731.9,
+              "alt_ft": 4000.0,
               "tipo": "corredor",
               "nome": "TRAVÉS NORTE IGARATÁ",
               "real": true
             },
             {
+              "x_nm": 200.65,
+              "alt_ft": 5000.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 221.05,
-              "alt_ft": 12859.5,
+              "alt_ft": 5000.0,
               "tipo": "corredor",
               "nome": "ATIBAIA",
               "real": true
             },
             {
+              "x_nm": 222.72,
+              "alt_ft": 4500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 234.56,
-              "alt_ft": 8806.6,
+              "alt_ft": 4500.0,
               "tipo": "corredor",
               "nome": "MORATO",
               "real": true
             },
             {
               "x_nm": 240.4,
-              "alt_ft": 7054.9,
+              "alt_ft": 4500.0,
               "tipo": "corredor",
               "nome": "PEDÁGIO LEROY",
               "real": true
             },
             {
+              "x_nm": 241.07,
+              "alt_ft": 4300.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 247.75,
-              "alt_ft": 4851.2,
+              "alt_ft": 4300.0,
               "tipo": "corredor",
               "nome": "PERUS",
               "real": true
             },
             {
-              "x_nm": 250.25,
+              "x_nm": 248.42,
               "alt_ft": 4100.0,
               "tipo": "virtual",
               "nome": null,
@@ -2207,22 +2249,23 @@
               "real": true
             }
           ],
-          "toc_nm": 113.1,
-          "tod_nm": 113.1,
+          "toc_nm": 140.06,
+          "tod_nm": 161.5,
           "tempo_min": {
-            "subida": 90.48,
-            "cruzeiro": 1.42,
-            "descida": 85.75,
-            "total": 177.65
+            "subida": 12.59,
+            "cruzeiro": 75.83,
+            "descida": 7.86,
+            "total": 96.27
           },
           "combustivel": {
-            "subida": 52.78,
-            "cruzeiro": 0.69,
-            "descida": 32.87,
-            "total": 86.34,
+            "subida": 7.34,
+            "cruzeiro": 36.65,
+            "descida": 3.01,
+            "total": 47.01,
             "unidade": "l"
           },
           "avisos": [
+            "pico de subida (sem cruzeiro nivelado) calculado em 45246 ft excede o teto operacional (13000 ft); limitado ao teto.",
             "trecho final PENTEADO (PORTÃO) -> SBMT: razão de descida necessária ~853 fpm excede a máxima do banco (500 fpm); trecho íngreme (piloto reduz velocidade / espiral)."
           ],
           "descida_ingreme_nm": [
@@ -2240,135 +2283,135 @@
         "magnetico": [
           {
             "corredor": "PORTÃO ITAIPU",
-            "declinacao_deg": -23.031,
+            "declinacao_deg": -23.0314,
             "rumo_magnetico_deg": 149.0,
-            "rumo_verdadeiro_deg": 125.969
+            "rumo_verdadeiro_deg": 125.9686
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -23.0167,
+            "declinacao_deg": -23.0171,
             "rumo_magnetico_deg": 283.0,
-            "rumo_verdadeiro_deg": 259.9833
+            "rumo_verdadeiro_deg": 259.9829
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9915,
+            "declinacao_deg": -22.992,
             "rumo_magnetico_deg": 283.0,
-            "rumo_verdadeiro_deg": 260.0085
+            "rumo_verdadeiro_deg": 260.008
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9755,
+            "declinacao_deg": -22.976,
             "rumo_magnetico_deg": 288.0,
-            "rumo_verdadeiro_deg": 265.0245
+            "rumo_verdadeiro_deg": 265.024
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9519,
+            "declinacao_deg": -22.9524,
             "rumo_magnetico_deg": 288.0,
-            "rumo_verdadeiro_deg": 265.0481
+            "rumo_verdadeiro_deg": 265.0476
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9248,
+            "declinacao_deg": -22.9253,
             "rumo_magnetico_deg": 288.0,
-            "rumo_verdadeiro_deg": 265.0752
+            "rumo_verdadeiro_deg": 265.0747
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8804,
+            "declinacao_deg": -22.881,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1196
+            "rumo_verdadeiro_deg": 253.119
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8215,
+            "declinacao_deg": -22.8221,
             "rumo_magnetico_deg": 276.0,
-            "rumo_verdadeiro_deg": 253.1785
+            "rumo_verdadeiro_deg": 253.1779
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.7571,
+            "declinacao_deg": -22.7578,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.2429
+            "rumo_verdadeiro_deg": 258.2422
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6697,
+            "declinacao_deg": -22.6704,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.3303
+            "rumo_verdadeiro_deg": 258.3296
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.585,
+            "declinacao_deg": -22.5857,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.415
+            "rumo_verdadeiro_deg": 248.4143
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.4757,
+            "declinacao_deg": -22.4765,
             "rumo_magnetico_deg": 271.0,
-            "rumo_verdadeiro_deg": 248.5243
+            "rumo_verdadeiro_deg": 248.5235
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.3461,
+            "declinacao_deg": -22.3471,
             "rumo_magnetico_deg": 325.0,
-            "rumo_verdadeiro_deg": 302.6539
+            "rumo_verdadeiro_deg": 302.6529
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.2796,
+            "declinacao_deg": -22.2806,
             "rumo_magnetico_deg": 338.0,
-            "rumo_verdadeiro_deg": 315.7204
+            "rumo_verdadeiro_deg": 315.7194
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2411,
+            "declinacao_deg": -22.2421,
             "rumo_magnetico_deg": 296.0,
-            "rumo_verdadeiro_deg": 273.7589
+            "rumo_verdadeiro_deg": 273.7579
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1703,
+            "declinacao_deg": -22.1715,
             "rumo_magnetico_deg": 281.0,
-            "rumo_verdadeiro_deg": 258.8297
+            "rumo_verdadeiro_deg": 258.8285
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0585,
+            "declinacao_deg": -22.0597,
             "rumo_magnetico_deg": 295.0,
-            "rumo_verdadeiro_deg": 272.9415
+            "rumo_verdadeiro_deg": 272.9403
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.9468,
+            "declinacao_deg": -21.9481,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.0532
+            "rumo_verdadeiro_deg": 226.0519
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.8829,
+            "declinacao_deg": -21.8843,
             "rumo_magnetico_deg": 248.0,
-            "rumo_verdadeiro_deg": 226.1171
+            "rumo_verdadeiro_deg": 226.1157
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -21.8666,
+            "declinacao_deg": -21.8679,
             "rumo_magnetico_deg": 169.0,
-            "rumo_verdadeiro_deg": 147.1334
+            "rumo_verdadeiro_deg": 147.1321
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8736,
+            "declinacao_deg": -21.8749,
             "rumo_magnetico_deg": 151.0,
-            "rumo_verdadeiro_deg": 129.1264
+            "rumo_verdadeiro_deg": 129.1251
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8784,
+            "declinacao_deg": -21.8796,
             "rumo_magnetico_deg": 167.0,
-            "rumo_verdadeiro_deg": 145.1216
+            "rumo_verdadeiro_deg": 145.1204
           }
         ]
       }
@@ -2733,27 +2776,27 @@
         "magnetico": [
           {
             "corredor": "ECHO",
-            "declinacao_deg": -23.5891,
+            "declinacao_deg": -23.5883,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 10.4109
+            "rumo_verdadeiro_deg": 10.4117
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.2004,
+            "declinacao_deg": -21.1978,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.7996
+            "rumo_verdadeiro_deg": 15.8022
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.1673,
+            "declinacao_deg": -21.1647,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.8327
+            "rumo_verdadeiro_deg": 331.8353
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.1134,
+            "declinacao_deg": -21.1107,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.8866
+            "rumo_verdadeiro_deg": 31.8893
           }
         ]
       }
@@ -3408,33 +3451,33 @@
         "magnetico": [
           {
             "corredor": "REPRESA",
-            "declinacao_deg": -20.4947,
+            "declinacao_deg": -20.4965,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 87.5053
+            "rumo_verdadeiro_deg": 87.5035
           },
           {
             "corredor": "REPRESA",
-            "declinacao_deg": -20.5346,
+            "declinacao_deg": -20.5364,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 87.4654
+            "rumo_verdadeiro_deg": 87.4636
           },
           {
             "corredor": "MARUMBÍ",
-            "declinacao_deg": -20.6048,
+            "declinacao_deg": -20.6066,
             "rumo_magnetico_deg": 137.0,
-            "rumo_verdadeiro_deg": 116.3952
+            "rumo_verdadeiro_deg": 116.3934
           },
           {
             "corredor": "VIANA",
-            "declinacao_deg": -23.708,
+            "declinacao_deg": -23.7077,
             "rumo_magnetico_deg": 1.0,
-            "rumo_verdadeiro_deg": 337.292
+            "rumo_verdadeiro_deg": 337.2923
           },
           {
             "corredor": "CARIACICA",
-            "declinacao_deg": -23.7063,
+            "declinacao_deg": -23.706,
             "rumo_magnetico_deg": 38.0,
-            "rumo_verdadeiro_deg": 14.2937
+            "rumo_verdadeiro_deg": 14.294
           }
         ]
       }
@@ -3895,135 +3938,135 @@
         "magnetico": [
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8784,
+            "declinacao_deg": -21.8796,
             "rumo_magnetico_deg": 347.0,
-            "rumo_verdadeiro_deg": 325.1216
+            "rumo_verdadeiro_deg": 325.1204
           },
           {
             "corredor": "PORTÃO PENTEADO",
-            "declinacao_deg": -21.8736,
+            "declinacao_deg": -21.8749,
             "rumo_magnetico_deg": 331.0,
-            "rumo_verdadeiro_deg": 309.1264
+            "rumo_verdadeiro_deg": 309.1251
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.8862,
+            "declinacao_deg": -21.8875,
             "rumo_magnetico_deg": 23.0,
-            "rumo_verdadeiro_deg": 1.1138
+            "rumo_verdadeiro_deg": 1.1125
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -21.9468,
+            "declinacao_deg": -21.9481,
             "rumo_magnetico_deg": 68.0,
-            "rumo_verdadeiro_deg": 46.0532
+            "rumo_verdadeiro_deg": 46.0519
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0585,
+            "declinacao_deg": -22.0597,
             "rumo_magnetico_deg": 115.0,
-            "rumo_verdadeiro_deg": 92.9415
+            "rumo_verdadeiro_deg": 92.9403
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1703,
+            "declinacao_deg": -22.1715,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.8297
+            "rumo_verdadeiro_deg": 78.8285
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2411,
+            "declinacao_deg": -22.2421,
             "rumo_magnetico_deg": 116.0,
-            "rumo_verdadeiro_deg": 93.7589
+            "rumo_verdadeiro_deg": 93.7579
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.288,
+            "declinacao_deg": -22.289,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.712
+            "rumo_verdadeiro_deg": 59.711
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.3246,
+            "declinacao_deg": -22.3256,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.6754
+            "rumo_verdadeiro_deg": 59.6744
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.3742,
+            "declinacao_deg": -22.3752,
             "rumo_magnetico_deg": 82.0,
-            "rumo_verdadeiro_deg": 59.6258
+            "rumo_verdadeiro_deg": 59.6248
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.4182,
+            "declinacao_deg": -22.4191,
             "rumo_magnetico_deg": 75.0,
-            "rumo_verdadeiro_deg": 52.5818
+            "rumo_verdadeiro_deg": 52.5809
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.4399,
+            "declinacao_deg": -22.4408,
             "rumo_magnetico_deg": 139.0,
-            "rumo_verdadeiro_deg": 116.5601
+            "rumo_verdadeiro_deg": 116.5592
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.4793,
+            "declinacao_deg": -22.4802,
             "rumo_magnetico_deg": 139.0,
-            "rumo_verdadeiro_deg": 116.5207
+            "rumo_verdadeiro_deg": 116.5198
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.5586,
+            "declinacao_deg": -22.5594,
             "rumo_magnetico_deg": 126.0,
-            "rumo_verdadeiro_deg": 103.4414
+            "rumo_verdadeiro_deg": 103.4406
           },
           {
             "corredor": "GOLF",
-            "declinacao_deg": -22.6899,
+            "declinacao_deg": -22.6906,
             "rumo_magnetico_deg": 95.0,
-            "rumo_verdadeiro_deg": 72.3101
+            "rumo_verdadeiro_deg": 72.3094
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -22.7874,
+            "declinacao_deg": -22.788,
             "rumo_magnetico_deg": 38.0,
-            "rumo_verdadeiro_deg": 15.2126
+            "rumo_verdadeiro_deg": 15.212
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -22.8357,
+            "declinacao_deg": -22.8363,
             "rumo_magnetico_deg": 55.0,
-            "rumo_verdadeiro_deg": 32.1643
+            "rumo_verdadeiro_deg": 32.1637
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.8744,
+            "declinacao_deg": -22.875,
             "rumo_magnetico_deg": 136.0,
-            "rumo_verdadeiro_deg": 113.1256
+            "rumo_verdadeiro_deg": 113.125
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.8906,
+            "declinacao_deg": -22.8912,
             "rumo_magnetico_deg": 136.0,
-            "rumo_verdadeiro_deg": 113.1094
+            "rumo_verdadeiro_deg": 113.1088
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.9155,
+            "declinacao_deg": -22.9161,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 84.0845
+            "rumo_verdadeiro_deg": 84.0839
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -22.9523,
+            "declinacao_deg": -22.9528,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 84.0477
+            "rumo_verdadeiro_deg": 84.0472
           },
           {
             "corredor": "PORTÃO ROXO",
-            "declinacao_deg": -22.9765,
+            "declinacao_deg": -22.977,
             "rumo_magnetico_deg": 151.0,
-            "rumo_verdadeiro_deg": 128.0235
+            "rumo_verdadeiro_deg": 128.023
           }
         ]
       }
@@ -4155,73 +4198,108 @@
             },
             {
               "x_nm": 77.51,
-              "alt_ft": 25401.6,
+              "alt_ft": 4500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
+              "x_nm": 86.24,
+              "alt_ft": 4500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
             },
             {
               "x_nm": 89.57,
-              "alt_ft": 23592.3,
+              "alt_ft": 4000.0,
               "tipo": "corredor",
               "nome": "TRAVÉS NORTE SÃO JOSÉ",
               "real": true
             },
             {
               "x_nm": 99.81,
-              "alt_ft": 22056.7,
+              "alt_ft": 4000.0,
               "tipo": "corredor",
               "nome": "CAÇAPAVA (PORTÃO)",
               "real": true
             },
             {
+              "x_nm": 103.14,
+              "alt_ft": 5000.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 111.88,
-              "alt_ft": 20245.4,
+              "alt_ft": 5000.0,
               "tipo": "corredor",
               "nome": "REDENÇÃO (PORTÃO)",
               "real": true
             },
             {
+              "x_nm": 113.55,
+              "alt_ft": 5500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 142.83,
-              "alt_ft": 15604.0,
+              "alt_ft": 5500.0,
               "tipo": "corredor",
               "nome": "ILHA ANCHIETA",
               "real": true
             },
             {
+              "x_nm": 156.16,
+              "alt_ft": 9500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 168.24,
-              "alt_ft": 11791.7,
+              "alt_ft": 9500.0,
               "tipo": "corredor",
               "nome": "LARANJEIRAS",
               "real": true
             },
             {
               "x_nm": 180.03,
-              "alt_ft": 10023.3,
+              "alt_ft": 7731.5,
               "tipo": "corredor",
               "nome": "PONTA (PORTÃO)",
               "real": true
             },
             {
+              "x_nm": 188.24,
+              "alt_ft": 6500.0,
+              "tipo": "virtual",
+              "nome": null,
+              "real": false
+            },
+            {
               "x_nm": 198.6,
-              "alt_ft": 7238.4,
+              "alt_ft": 6500.0,
               "tipo": "corredor",
               "nome": "GRANDE",
               "real": true
             },
             {
-              "x_nm": 212.73,
-              "alt_ft": 5118.8,
-              "tipo": "corredor",
-              "nome": "MARA",
-              "real": true
-            },
-            {
-              "x_nm": 216.85,
+              "x_nm": 211.93,
               "alt_ft": 4500.0,
               "tipo": "virtual",
               "nome": null,
               "real": false
+            },
+            {
+              "x_nm": 212.73,
+              "alt_ft": 4500.0,
+              "tipo": "corredor",
+              "nome": "MARA",
+              "real": true
             },
             {
               "x_nm": 223.15,
@@ -4259,22 +4337,23 @@
               "real": true
             }
           ],
-          "toc_nm": 77.51,
-          "tod_nm": 77.51,
+          "toc_nm": 156.16,
+          "tod_nm": 168.24,
           "tempo_min": {
-            "subida": 38.75,
-            "cruzeiro": 7.21,
-            "descida": 63.48,
-            "total": 109.44
+            "subida": 13.09,
+            "cruzeiro": 39.86,
+            "descida": 24.98,
+            "total": 77.92
           },
           "combustivel": {
-            "subida": 13.56,
-            "cruzeiro": 1.92,
-            "descida": 14.81,
-            "total": 30.3,
-            "unidade": "us gal"
+            "subida": 4.58,
+            "cruzeiro": 10.63,
+            "descida": 5.83,
+            "total": 21.04,
+            "unidade": "us-gal"
           },
           "avisos": [
+            "pico de subida (sem cruzeiro nivelado) calculado em 25402 ft excede o teto operacional (17000 ft); limitado ao teto.",
             "trecho final PORTÃO MARAPENDI -> SBJR: razão de descida necessária ~2632 fpm excede a máxima do banco (400 fpm); trecho íngreme (piloto reduz velocidade / espiral)."
           ],
           "descida_ingreme_nm": [
@@ -4292,93 +4371,93 @@
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9353,
+            "declinacao_deg": -21.9367,
             "rumo_magnetico_deg": 157.0,
-            "rumo_verdadeiro_deg": 135.0647
+            "rumo_verdadeiro_deg": 135.0633
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.9714,
+            "declinacao_deg": -21.9727,
             "rumo_magnetico_deg": 157.0,
-            "rumo_verdadeiro_deg": 135.0286
+            "rumo_verdadeiro_deg": 135.0273
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.0585,
+            "declinacao_deg": -22.0597,
             "rumo_magnetico_deg": 115.0,
-            "rumo_verdadeiro_deg": 92.9415
+            "rumo_verdadeiro_deg": 92.9403
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.1703,
+            "declinacao_deg": -22.1715,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.8297
+            "rumo_verdadeiro_deg": 78.8285
           },
           {
             "corredor": "MIKE",
-            "declinacao_deg": -22.2411,
+            "declinacao_deg": -22.2421,
             "rumo_magnetico_deg": 116.0,
-            "rumo_verdadeiro_deg": 93.7589
+            "rumo_verdadeiro_deg": 93.7579
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.2796,
+            "declinacao_deg": -22.2806,
             "rumo_magnetico_deg": 158.0,
-            "rumo_verdadeiro_deg": 135.7204
+            "rumo_verdadeiro_deg": 135.7194
           },
           {
             "corredor": "UNIFORM",
-            "declinacao_deg": -22.3461,
+            "declinacao_deg": -22.3471,
             "rumo_magnetico_deg": 145.0,
-            "rumo_verdadeiro_deg": 122.6539
+            "rumo_verdadeiro_deg": 122.6529
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.4757,
+            "declinacao_deg": -22.4765,
             "rumo_magnetico_deg": 91.0,
-            "rumo_verdadeiro_deg": 68.5243
+            "rumo_verdadeiro_deg": 68.5235
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.585,
+            "declinacao_deg": -22.5857,
             "rumo_magnetico_deg": 91.0,
-            "rumo_verdadeiro_deg": 68.415
+            "rumo_verdadeiro_deg": 68.4143
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.6697,
+            "declinacao_deg": -22.6704,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.3303
+            "rumo_verdadeiro_deg": 78.3296
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.7571,
+            "declinacao_deg": -22.7578,
             "rumo_magnetico_deg": 101.0,
-            "rumo_verdadeiro_deg": 78.2429
+            "rumo_verdadeiro_deg": 78.2422
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8215,
+            "declinacao_deg": -22.8221,
             "rumo_magnetico_deg": 96.0,
-            "rumo_verdadeiro_deg": 73.1785
+            "rumo_verdadeiro_deg": 73.1779
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.8804,
+            "declinacao_deg": -22.881,
             "rumo_magnetico_deg": 96.0,
-            "rumo_verdadeiro_deg": 73.1196
+            "rumo_verdadeiro_deg": 73.119
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -22.9248,
+            "declinacao_deg": -22.9253,
             "rumo_magnetico_deg": 108.0,
-            "rumo_verdadeiro_deg": 85.0752
+            "rumo_verdadeiro_deg": 85.0747
           },
           {
             "corredor": "PORTÃO MARAPENDI",
-            "declinacao_deg": -22.9405,
+            "declinacao_deg": -22.941,
             "rumo_magnetico_deg": 24.0,
-            "rumo_verdadeiro_deg": 1.0595
+            "rumo_verdadeiro_deg": 1.059
           }
         ]
       }
@@ -4572,7 +4651,7 @@
             "cruzeiro": 13.81,
             "descida": 5.53,
             "total": 24.88,
-            "unidade": "us gal"
+            "unidade": "us-gal"
           },
           "avisos": [
             "trecho final PANTANO DO SUL -> SBFL: razão de descida necessária ~946 fpm excede a máxima do banco (400 fpm); trecho íngreme (piloto reduz velocidade / espiral)."
@@ -4592,39 +4671,39 @@
         "magnetico": [
           {
             "corredor": "GM",
-            "declinacao_deg": -17.9973,
+            "declinacao_deg": -17.9994,
             "rumo_magnetico_deg": 81.0,
-            "rumo_verdadeiro_deg": 63.0027
+            "rumo_verdadeiro_deg": 63.0006
           },
           {
             "corredor": "FREEWAY",
-            "declinacao_deg": -18.1366,
+            "declinacao_deg": -18.1386,
             "rumo_magnetico_deg": 109.0,
-            "rumo_verdadeiro_deg": 90.8634
+            "rumo_verdadeiro_deg": 90.8614
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.853,
+            "declinacao_deg": -19.8546,
             "rumo_magnetico_deg": 29.0,
-            "rumo_verdadeiro_deg": 9.147
+            "rumo_verdadeiro_deg": 9.1454
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.9356,
+            "declinacao_deg": -19.9372,
             "rumo_magnetico_deg": 30.0,
-            "rumo_verdadeiro_deg": 10.0644
+            "rumo_verdadeiro_deg": 10.0628
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -19.9731,
+            "declinacao_deg": -19.9747,
             "rumo_magnetico_deg": 107.0,
-            "rumo_verdadeiro_deg": 87.0269
+            "rumo_verdadeiro_deg": 87.0253
           },
           {
             "corredor": "LESTE",
-            "declinacao_deg": -20.0065,
+            "declinacao_deg": -20.0081,
             "rumo_magnetico_deg": 60.0,
-            "rumo_verdadeiro_deg": 39.9935
+            "rumo_verdadeiro_deg": 39.9919
           }
         ]
       }
@@ -4784,21 +4863,21 @@
         "magnetico": [
           {
             "corredor": "NOVEMBER",
-            "declinacao_deg": -20.018,
+            "declinacao_deg": -20.0204,
             "rumo_magnetico_deg": 316.0,
-            "rumo_verdadeiro_deg": 295.982
+            "rumo_verdadeiro_deg": 295.9796
           },
           {
             "corredor": "OSCAR",
-            "declinacao_deg": -20.013,
+            "declinacao_deg": -20.0155,
             "rumo_magnetico_deg": 34.0,
-            "rumo_verdadeiro_deg": 13.987
+            "rumo_verdadeiro_deg": 13.9845
           },
           {
             "corredor": "OSCAR",
-            "declinacao_deg": -20.0696,
+            "declinacao_deg": -20.072,
             "rumo_magnetico_deg": 20.0,
-            "rumo_verdadeiro_deg": 359.9304
+            "rumo_verdadeiro_deg": 359.928
           }
         ]
       }
@@ -4815,7 +4894,7 @@
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "hora_partida_utc": "2026-09-04T02:04:03.172986+00:00",
         "vento_modo": "relativo",
         "vento_offset_h": 6,
         "vento_par_reciproco": "sbgo_sbbe"
@@ -5010,140 +5089,140 @@
               "x0_nm": 0.0,
               "x1_nm": 5.19,
               "fase": "subida",
-              "gs_kt": 70.85,
-              "componente_cauda_kt": -3.25,
-              "deriva_deg": -8.864
+              "gs_kt": 65.33,
+              "componente_cauda_kt": -9.67,
+              "deriva_deg": -0.119
             },
             {
               "x0_nm": 5.19,
               "x1_nm": 11.32,
               "fase": "cruzeiro",
-              "gs_kt": 90.45,
-              "componente_cauda_kt": -4.02,
-              "deriva_deg": -6.057
+              "gs_kt": 83.93,
+              "componente_cauda_kt": -11.07,
+              "deriva_deg": -0.134
             },
             {
               "x0_nm": 11.32,
               "x1_nm": 26.23,
               "fase": "cruzeiro",
-              "gs_kt": 108.35,
-              "componente_cauda_kt": 13.35,
-              "deriva_deg": 0.242
+              "gs_kt": 95.48,
+              "componente_cauda_kt": 0.87,
+              "deriva_deg": -5.183
             },
             {
               "x0_nm": 26.23,
               "x1_nm": 28.98,
               "fase": "subida",
-              "gs_kt": 66.47,
-              "componente_cauda_kt": -8.24,
-              "deriva_deg": 5.076
+              "gs_kt": 73.96,
+              "componente_cauda_kt": -1.03,
+              "deriva_deg": 0.678
             },
             {
               "x0_nm": 28.98,
               "x1_nm": 42.75,
               "fase": "cruzeiro",
-              "gs_kt": 86.53,
-              "componente_cauda_kt": -8.24,
-              "deriva_deg": 4.005
+              "gs_kt": 93.96,
+              "componente_cauda_kt": -1.03,
+              "deriva_deg": 0.535
             },
             {
               "x0_nm": 42.75,
               "x1_nm": 67.96,
               "fase": "cruzeiro",
-              "gs_kt": 95.57,
-              "componente_cauda_kt": 1.25,
-              "deriva_deg": 6.826
+              "gs_kt": 94.07,
+              "componente_cauda_kt": -0.91,
+              "deriva_deg": 1.11
             },
             {
               "x0_nm": 67.96,
               "x1_nm": 77.71,
               "fase": "subida",
-              "gs_kt": 66.55,
-              "componente_cauda_kt": -8.27,
-              "deriva_deg": 3.951
+              "gs_kt": 70.61,
+              "componente_cauda_kt": -4.39,
+              "deriva_deg": 0.278
             },
             {
               "x0_nm": 77.71,
               "x1_nm": 893.0,
               "fase": "cruzeiro",
-              "gs_kt": 86.9,
-              "componente_cauda_kt": -6.93,
-              "deriva_deg": -9.02
+              "gs_kt": 95.73,
+              "componente_cauda_kt": 1.65,
+              "deriva_deg": -7.967
             },
             {
               "x0_nm": 893.0,
               "x1_nm": 919.33,
               "fase": "descida",
-              "gs_kt": 95.75,
-              "componente_cauda_kt": -2.11,
-              "deriva_deg": -11.852
+              "gs_kt": 100.18,
+              "componente_cauda_kt": 3.65,
+              "deriva_deg": -15.147
             },
             {
               "x0_nm": 919.33,
               "x1_nm": 942.35,
               "fase": "cruzeiro",
-              "gs_kt": 79.68,
-              "componente_cauda_kt": -15.27,
-              "deriva_deg": -1.726
+              "gs_kt": 78.62,
+              "componente_cauda_kt": -16.27,
+              "deriva_deg": -2.818
             },
             {
               "x0_nm": 942.35,
               "x1_nm": 947.78,
               "fase": "cruzeiro",
-              "gs_kt": 109.51,
-              "componente_cauda_kt": 14.68,
-              "deriva_deg": -3.439
+              "gs_kt": 110.34,
+              "componente_cauda_kt": 15.47,
+              "deriva_deg": -2.995
             },
             {
               "x0_nm": 947.78,
               "x1_nm": 950.09,
               "fase": "cruzeiro",
-              "gs_kt": 100.46,
-              "componente_cauda_kt": 6.51,
-              "deriva_deg": -8.54
+              "gs_kt": 102.38,
+              "componente_cauda_kt": 8.51,
+              "deriva_deg": -8.858
             },
             {
               "x0_nm": 950.09,
               "x1_nm": 955.29,
               "fase": "descida",
-              "gs_kt": 103.01,
-              "componente_cauda_kt": 3.24,
-              "deriva_deg": -3.863
+              "gs_kt": 103.87,
+              "componente_cauda_kt": 4.11,
+              "deriva_deg": -3.946
             }
           ],
-          "tempo_min_vento": 657.53,
-          "combustivel_vento": 317.42
+          "tempo_min_vento": 605.53,
+          "combustivel_vento": 292.32
         },
         "magnetico": [
           {
             "corredor": "NEROPÓLIS",
-            "declinacao_deg": -21.7338,
+            "declinacao_deg": -21.7356,
             "rumo_magnetico_deg": 319.0,
-            "rumo_verdadeiro_deg": 297.2662
+            "rumo_verdadeiro_deg": 297.2644
           },
           {
             "corredor": "NOVA VENEZA",
-            "declinacao_deg": -21.6982,
+            "declinacao_deg": -21.7,
             "rumo_magnetico_deg": 18.0,
-            "rumo_verdadeiro_deg": 356.3018
+            "rumo_verdadeiro_deg": 356.3
           },
           {
             "corredor": "PETROLINA",
-            "declinacao_deg": -21.7588,
+            "declinacao_deg": -21.7606,
             "rumo_magnetico_deg": 75.0,
-            "rumo_verdadeiro_deg": 53.2412
+            "rumo_verdadeiro_deg": 53.2394
           },
           {
             "corredor": "LIMA",
-            "declinacao_deg": -20.266,
+            "declinacao_deg": -20.2663,
             "rumo_magnetico_deg": 79.0,
-            "rumo_verdadeiro_deg": 58.734
+            "rumo_verdadeiro_deg": 58.7337
           },
           {
             "corredor": "JULIET",
-            "declinacao_deg": -20.2556,
+            "declinacao_deg": -20.2559,
             "rumo_magnetico_deg": 292.0,
-            "rumo_verdadeiro_deg": 271.7444
+            "rumo_verdadeiro_deg": 271.7441
           }
         ]
       }
@@ -5160,7 +5239,7 @@
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "hora_partida_utc": "2026-09-04T02:04:03.172986+00:00",
         "vento_modo": "relativo",
         "vento_offset_h": 6,
         "vento_par_reciproco": "sbgo_sbbe"
@@ -5236,29 +5315,29 @@
               "x0_nm": 0.0,
               "x1_nm": 26.15,
               "fase": "subida",
-              "gs_kt": 73.29,
-              "componente_cauda_kt": 0.11,
-              "deriva_deg": 12.661
+              "gs_kt": 68.37,
+              "componente_cauda_kt": -3.48,
+              "deriva_deg": 16.653
             },
             {
               "x0_nm": 26.15,
               "x1_nm": 889.62,
               "fase": "cruzeiro",
-              "gs_kt": 103.08,
-              "componente_cauda_kt": 8.93,
-              "deriva_deg": 7.656
+              "gs_kt": 93.01,
+              "componente_cauda_kt": -0.87,
+              "deriva_deg": 8.827
             },
             {
               "x0_nm": 889.62,
               "x1_nm": 916.54,
               "fase": "descida",
-              "gs_kt": 111.72,
-              "componente_cauda_kt": 12.02,
-              "deriva_deg": -4.388
+              "gs_kt": 103.72,
+              "componente_cauda_kt": 3.79,
+              "deriva_deg": -2.155
             }
           ],
-          "tempo_min_vento": 538.47,
-          "combustivel_vento": 260.95
+          "tempo_min_vento": 595.56,
+          "combustivel_vento": 288.59
         },
         "magnetico": []
       }
@@ -5276,7 +5355,7 @@
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": "16L",
-        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "hora_partida_utc": "2026-09-04T02:04:03.172986+00:00",
         "vento_modo": "relativo",
         "vento_offset_h": 6
       },
@@ -5457,132 +5536,132 @@
               "x0_nm": 0.0,
               "x1_nm": 2.58,
               "fase": "subida",
-              "gs_kt": 75.71,
-              "componente_cauda_kt": 0.78,
-              "deriva_deg": -2.523
+              "gs_kt": 73.79,
+              "componente_cauda_kt": -1.21,
+              "deriva_deg": 0.2
             },
             {
               "x0_nm": 2.58,
               "x1_nm": 8.82,
               "fase": "cruzeiro",
-              "gs_kt": 94.08,
-              "componente_cauda_kt": -0.81,
-              "deriva_deg": -2.817
+              "gs_kt": 95.89,
+              "componente_cauda_kt": 0.89,
+              "deriva_deg": -0.556
             },
             {
               "x0_nm": 8.82,
               "x1_nm": 16.21,
               "fase": "cruzeiro",
-              "gs_kt": 89.04,
-              "componente_cauda_kt": -5.95,
-              "deriva_deg": -1.021
+              "gs_kt": 93.79,
+              "componente_cauda_kt": -1.19,
+              "deriva_deg": -1.039
             },
             {
               "x0_nm": 16.21,
               "x1_nm": 19.04,
               "fase": "cruzeiro",
-              "gs_kt": 88.82,
-              "componente_cauda_kt": -6.18,
-              "deriva_deg": 0.201
+              "gs_kt": 93.3,
+              "componente_cauda_kt": -1.69,
+              "deriva_deg": -0.749
             },
             {
               "x0_nm": 19.04,
               "x1_nm": 21.25,
               "fase": "cruzeiro",
-              "gs_kt": 87.35,
-              "componente_cauda_kt": -7.61,
-              "deriva_deg": 1.702
+              "gs_kt": 93.71,
+              "componente_cauda_kt": -1.28,
+              "deriva_deg": 1.095
             },
             {
               "x0_nm": 21.25,
               "x1_nm": 33.75,
               "fase": "subida",
-              "gs_kt": 65.09,
-              "componente_cauda_kt": -9.9,
-              "deriva_deg": 1.168
+              "gs_kt": 65.57,
+              "componente_cauda_kt": -9.42,
+              "deriva_deg": 0.259
             },
             {
               "x0_nm": 33.75,
               "x1_nm": 908.71,
               "fase": "cruzeiro",
-              "gs_kt": 99.48,
-              "componente_cauda_kt": 4.53,
-              "deriva_deg": -1.725
+              "gs_kt": 95.99,
+              "componente_cauda_kt": 1.08,
+              "deriva_deg": -2.404
             },
             {
               "x0_nm": 908.71,
               "x1_nm": 933.71,
               "fase": "descida",
-              "gs_kt": 92.92,
-              "componente_cauda_kt": -6.93,
-              "deriva_deg": -3.207
+              "gs_kt": 87.11,
+              "componente_cauda_kt": -11.72,
+              "deriva_deg": -8.773
             },
             {
               "x0_nm": 933.71,
               "x1_nm": 953.69,
               "fase": "cruzeiro",
-              "gs_kt": 85.01,
-              "componente_cauda_kt": -9.35,
-              "deriva_deg": -6.691
+              "gs_kt": 86.12,
+              "componente_cauda_kt": -7.92,
+              "deriva_deg": -8.173
             },
             {
               "x0_nm": 953.69,
               "x1_nm": 959.77,
               "fase": "cruzeiro",
-              "gs_kt": 92.94,
-              "componente_cauda_kt": -0.78,
-              "deriva_deg": -9.413
+              "gs_kt": 97.48,
+              "componente_cauda_kt": 3.91,
+              "deriva_deg": -9.953
             },
             {
               "x0_nm": 959.77,
               "x1_nm": 962.19,
               "fase": "cruzeiro",
-              "gs_kt": 79.46,
-              "componente_cauda_kt": -15.53,
-              "deriva_deg": 0.509
+              "gs_kt": 78.49,
+              "componente_cauda_kt": -16.44,
+              "deriva_deg": -2.316
             },
             {
               "x0_nm": 962.19,
               "x1_nm": 968.34,
               "fase": "descida",
-              "gs_kt": 84.46,
-              "componente_cauda_kt": -15.53,
-              "deriva_deg": 0.484
+              "gs_kt": 83.49,
+              "componente_cauda_kt": -16.44,
+              "deriva_deg": -2.2
             }
           ],
-          "tempo_min_vento": 594.03,
-          "combustivel_vento": 286.42
+          "tempo_min_vento": 613.45,
+          "combustivel_vento": 295.69
         },
         "magnetico": [
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.1786,
+            "declinacao_deg": -22.18,
             "rumo_magnetico_deg": 121.0,
-            "rumo_verdadeiro_deg": 98.8214
+            "rumo_verdadeiro_deg": 98.82
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.2021,
+            "declinacao_deg": -22.2034,
             "rumo_magnetico_deg": 140.0,
-            "rumo_verdadeiro_deg": 117.7979
+            "rumo_verdadeiro_deg": 117.7966
           },
           {
             "corredor": "DELTA",
-            "declinacao_deg": -22.2119,
+            "declinacao_deg": -22.2133,
             "rumo_magnetico_deg": 156.0,
-            "rumo_verdadeiro_deg": 133.7881
+            "rumo_verdadeiro_deg": 133.7867
           },
           {
             "corredor": "FOXTROT",
-            "declinacao_deg": -20.4214,
+            "declinacao_deg": -20.4187,
             "rumo_magnetico_deg": 84.0,
-            "rumo_verdadeiro_deg": 63.5786
+            "rumo_verdadeiro_deg": 63.5813
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -20.3354,
+            "declinacao_deg": -20.3327,
             "rumo_magnetico_deg": 43.0,
-            "rumo_verdadeiro_deg": 22.6646
+            "rumo_verdadeiro_deg": 22.6673
           }
         ]
       }
@@ -5741,21 +5820,21 @@
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.2004,
+            "declinacao_deg": -21.1978,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.7996
+            "rumo_verdadeiro_deg": 15.8022
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.1673,
+            "declinacao_deg": -21.1647,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.8327
+            "rumo_verdadeiro_deg": 331.8353
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.1134,
+            "declinacao_deg": -21.1107,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.8866
+            "rumo_verdadeiro_deg": 31.8893
           }
         ]
       }
@@ -5772,7 +5851,7 @@
         "aeronave": "1n7s5U5J",
         "pista_origem": null,
         "pista_destino": null,
-        "hora_partida_utc": "2026-08-27T03:02:19.158207+00:00",
+        "hora_partida_utc": "2026-09-04T02:04:03.172986+00:00",
         "vento_modo": "relativo",
         "vento_offset_h": 6
       },
@@ -5914,96 +5993,96 @@
               "x0_nm": 0.0,
               "x1_nm": 12.81,
               "fase": "subida",
-              "gs_kt": 66.4,
-              "componente_cauda_kt": -8.48,
-              "deriva_deg": -3.134
+              "gs_kt": 68.51,
+              "componente_cauda_kt": -6.03,
+              "deriva_deg": -6.364
             },
             {
               "x0_nm": 12.81,
               "x1_nm": 63.31,
               "fase": "cruzeiro",
-              "gs_kt": 85.72,
-              "componente_cauda_kt": -9.22,
-              "deriva_deg": -2.052
+              "gs_kt": 88.35,
+              "componente_cauda_kt": -6.28,
+              "deriva_deg": -5.065
             },
             {
               "x0_nm": 63.31,
               "x1_nm": 76.31,
               "fase": "descida",
-              "gs_kt": 93.28,
-              "componente_cauda_kt": -6.5,
-              "deriva_deg": -3.792
+              "gs_kt": 95.72,
+              "componente_cauda_kt": -3.84,
+              "deriva_deg": -5.34
             },
             {
               "x0_nm": 76.31,
               "x1_nm": 79.88,
               "fase": "cruzeiro",
-              "gs_kt": 91.31,
-              "componente_cauda_kt": -3.29,
-              "deriva_deg": -5.295
+              "gs_kt": 93.76,
+              "componente_cauda_kt": -0.01,
+              "deriva_deg": -9.225
             },
             {
               "x0_nm": 79.88,
               "x1_nm": 90.99,
               "fase": "cruzeiro",
-              "gs_kt": 98.92,
-              "componente_cauda_kt": 4.16,
-              "deriva_deg": -4.072
+              "gs_kt": 105.28,
+              "componente_cauda_kt": 10.86,
+              "deriva_deg": -6.334
             },
             {
               "x0_nm": 90.99,
               "x1_nm": 92.33,
               "fase": "descida",
-              "gs_kt": 95.99,
-              "componente_cauda_kt": -3.77,
-              "deriva_deg": -3.999
+              "gs_kt": 95.26,
+              "componente_cauda_kt": -3.66,
+              "deriva_deg": -8.419
             },
             {
               "x0_nm": 92.33,
               "x1_nm": 100.45,
               "fase": "cruzeiro",
-              "gs_kt": 90.98,
-              "componente_cauda_kt": -3.77,
-              "deriva_deg": -4.21
+              "gs_kt": 90.2,
+              "componente_cauda_kt": -3.66,
+              "deriva_deg": -8.865
             },
             {
               "x0_nm": 100.45,
               "x1_nm": 100.76,
               "fase": "cruzeiro",
-              "gs_kt": 86.9,
-              "componente_cauda_kt": -8.03,
-              "deriva_deg": -2.194
+              "gs_kt": 82.67,
+              "componente_cauda_kt": -11.82,
+              "deriva_deg": -5.89
             },
             {
               "x0_nm": 100.76,
               "x1_nm": 104.67,
               "fase": "descida",
-              "gs_kt": 95.92,
-              "componente_cauda_kt": -4.07,
-              "deriva_deg": -0.636
+              "gs_kt": 92.89,
+              "componente_cauda_kt": -6.94,
+              "deriva_deg": -3.288
             }
           ],
-          "tempo_min_vento": 73.22,
-          "combustivel_vento": 35.38
+          "tempo_min_vento": 71.27,
+          "combustivel_vento": 34.42
         },
         "magnetico": [
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.2004,
+            "declinacao_deg": -21.1978,
             "rumo_magnetico_deg": 37.0,
-            "rumo_verdadeiro_deg": 15.7996
+            "rumo_verdadeiro_deg": 15.8022
           },
           {
             "corredor": "BRAVO",
-            "declinacao_deg": -21.1673,
+            "declinacao_deg": -21.1647,
             "rumo_magnetico_deg": 353.0,
-            "rumo_verdadeiro_deg": 331.8327
+            "rumo_verdadeiro_deg": 331.8353
           },
           {
             "corredor": "ECHO",
-            "declinacao_deg": -21.1134,
+            "declinacao_deg": -21.1107,
             "rumo_magnetico_deg": 53.0,
-            "rumo_verdadeiro_deg": 31.8866
+            "rumo_verdadeiro_deg": 31.8893
           }
         ]
       }

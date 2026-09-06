@@ -79,6 +79,41 @@ tempo de voo e combustível, me diga a data e hora de decolagem (UTC)."
 
 ---
 
+### 1.3 `faltou_input` — origem e/ou destino ausente
+
+**Gatilho:** `origin_icao`/`dest_icao` vazio ou `None` (string em branco também conta) na chamada
+de `db.build_subgraph` — TAREFA_faltou_input_origem_destino.md (05/09/26). Checagem é a PRIMEIRA
+de todas, antes até da de pista (§1.1): não faz sentido checar regra de cabeceira de um aeródromo
+que nem foi informado. Não toca no banco nem no JSON de portões.
+
+**Onde:** `nexatlas_router.portoes.EntradaAusenteError`, levantada por `db.build_subgraph` antes
+de qualquer query. **Não** é subclasse de `PortaoError` (não tem relação com portão/gate) —
+diferente do `PistaObrigatoriaError`, então quem só captura `PortaoError` precisa capturar esta
+separadamente.
+
+**Retorno estruturado exato** (`EntradaAusenteError.to_dict()`):
+```json
+{
+  "status": "faltou_input",
+  "faltando": ["origem"],
+  "aerodromos": {},
+  "mensagem": "Informe o aeródromo de partida."
+}
+```
+Quando os dois faltam: `"faltando": ["origem", "destino"]`, mensagem combinando os dois. Mesmo
+formato de 4 chaves do `PistaObrigatoriaError` (§1.1) — `aerodromos` sempre presente, mas sempre
+`{}` aqui: não há ICAO nenhum a reportar (é justamente isso que está faltando).
+
+**Pergunta sugerida ao piloto:** uma por item de `faltando`:
+- `origem` presente → "Qual o aeródromo de partida?"
+- `destino` presente → "Qual o aeródromo de destino?"
+
+**Quando NÃO dispara:** ICAO informado mas INEXISTENTE no banco (ex.: `"SBXX"`) — continua fora
+deste sinal, cai no `LookupError` genérico de sempre (ver Seção 2 — é entrada de fato inválida,
+não "esqueci de informar"; decisão do Ivan, 05/09/26: manter como está, gap conhecido).
+
+---
+
 ## Seção 2 — NÃO é do motor (responsabilidade da camada do orquestrador/catálogo)
 
 Estes itens NUNCA chegam como um sinal estruturado do algoritmo de rota — se o assistente
@@ -90,14 +125,14 @@ precisa deles, a lógica é da camada de cima, antes ou depois de chamar o motor
   aeronave, quem decide é o orquestrador: simplesmente não chama a V3 (a rota lateral sai normal,
   sem seção vertical). Não há `faltou_input: aeronave`.
 
-- **Origem/destino ausente ou inválido.** Testado ao vivo (`build_subgraph(None, "SBRF")` e
-  `build_subgraph("", "SBRF")`): os dois casos caem no MESMO
-  `LookupError: Aeródromo 'X' não encontrado em published.adhps` que um ICAO real mas digitado
-  errado daria. **O motor não distingue hoje "não informado" de "ICAO inexistente"** — os dois
-  são a mesma exceção genérica, não um `faltou_input` estruturado. Se o orquestrador precisa
-  diferenciar "esqueci de perguntar" de "o piloto digitou um ICAO que não existe", isso tem que
-  ser resolvido ANTES de chamar o motor (checar string vazia/nula na camada do assistente) — não
-  é uma tarefa fechada aqui, fica como gap conhecido pra uma eventual tarefa futura.
+- **ICAO informado mas INEXISTENTE no banco** (ex.: `"SBXX"`). Origem/destino **ausente**
+  (vazio/`None`) SAIU daqui — agora é o sinal estruturado `faltou_input` da §1.3. Só o ICAO
+  informado-porém-inexistente continua caindo no `LookupError: Aeródromo 'X' não encontrado em
+  published.adhps` genérico — decisão do Ivan (05/09/26, TAREFA_faltou_input_origem_destino.md):
+  é entrada de fato inválida (não "esqueci de informar"), fica como está, não é um `faltou_input`
+  estruturado. Se o orquestrador precisa dizer "não achei XYZ" de um jeito diferente de outro
+  erro de banco, não é uma tarefa fechada aqui — fica como gap conhecido pra uma eventual tarefa
+  futura.
 
 - **Resolução de variante de aeronave** (ex.: "qual SR22? há N variantes em `aircraft_models`") —
   é busca no catálogo (`nexatlas_router.vertical.find`/`load_from_db`), feita ANTES de chamar o
