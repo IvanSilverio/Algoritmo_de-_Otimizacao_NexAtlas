@@ -103,6 +103,13 @@ casos também produzem um 2º PNG com as alternativas (próximas melhores rotas)
 
 ## Como funciona (resumo)
 
+Após o cálculo da rota principal, `restricted_airspaces.py` consulta as áreas
+SUA (`sua_dangerous`, `sua_prohibited` e `sua_restricted`) cujo polígono cruza
+o traçado. A CLI mostra limites, ativação, comunicações e `remarks`; o mapa
+destaca os polígonos em rosa translúcido e repete as observações no painel.
+A detecção é horizontal: limites verticais e horários são informativos até que
+o perfil e o instante do voo sejam usados para filtrar a ativação.
+
 ### Modelo do grafo (`graphmodel.py`)
 
 Nós são aeródromos e waypoints REA (cada waypoint tem `chart` = a TMA).

@@ -26,6 +26,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch, Polygon
 
 from .graphmodel import RouteGraph
 from .v1 import V1RouteResult
@@ -40,6 +41,7 @@ ORIGIN_MK = "#fbbf24"      # âmbar
 DEST_MK = "#f472b6"        # rosa
 MANDATORY_EDGE = "#ef4444" # vermelho sólido — corredor obrigatório
 OPTIONAL_EDGE = "#38bdf8"  # azul tracejado — corredor opcional
+RESTRICTED_AREA = "#ff4fb3" # rosa — áreas SUA cruzadas pela rota principal
 
 # Paleta das rotas candidatas (distinta de rota principal/origem/destino/corredor)
 ALT_COLORS = ["#c084fc", "#f97316", "#e879f9", "#fde047", "#5eead4"]
@@ -68,6 +70,7 @@ def plot_v1_combined(graph: RouteGraph, result: V1RouteResult,
     vértices de cada rota (mesma cor da linha no mapa).
     """
     alternatives = result.meta.get("alternatives", [])[:max_alternatives]
+    restricted_areas = result.meta.get("restricted_airspaces", [])
     routes = [("Principal", ROUTE, result.total_distance_nm, result.points)]
     for i, alt in enumerate(alternatives):
         routes.append((f"Alt {i + 1}", ALT_COLORS[i % len(ALT_COLORS)],
@@ -80,6 +83,18 @@ def plot_v1_combined(graph: RouteGraph, result: V1RouteResult,
         names = " → ".join(p["name"] for p in pts)
         for wrapped in (textwrap.wrap(names, width=150) or [""]):
             text_lines.append((color, "    " + wrapped, False))
+        text_lines.append((None, "", False))
+    if restricted_areas:
+        text_lines.append((RESTRICTED_AREA,
+                           f"ÁREAS SUA CRUZADAS — {len(restricted_areas)}", True))
+        for area in restricted_areas:
+            code = area.get("code") or "sem código"
+            limits = f"{area.get('lower_limit') or '?'} → {area.get('upper_limit') or '?'}"
+            header = f"{code} | {limits} | {area.get('operational_hours') or 'ativação não informada'}"
+            text_lines.append((RESTRICTED_AREA, header, True))
+            remarks = (area.get("remarks") or "Sem observações cadastradas.").replace("\n", " ")
+            for wrapped in (textwrap.wrap("Remarks: " + remarks, width=150) or [""]):
+                text_lines.append(("white", "    " + wrapped, False))
         text_lines.append((None, "", False))
     n_lines = len(text_lines)
 
@@ -94,6 +109,22 @@ def plot_v1_combined(graph: RouteGraph, result: V1RouteResult,
     ax_txt.set_facecolor(OCEAN)
     ax_txt.axis("off")
     _try_plot_brazil(ax)
+
+    # ---- áreas SUA cruzadas: rosa translúcido, abaixo da malha e da rota ----
+    for area in restricted_areas:
+        geom = area.get("geometry") or {}
+        polygons = ([geom.get("coordinates", [])]
+                    if geom.get("type") == "Polygon"
+                    else geom.get("coordinates", [])
+                    if geom.get("type") == "MultiPolygon" else [])
+        for polygon in polygons:
+            if not polygon:
+                continue
+            exterior = polygon[0]
+            ax.add_patch(Polygon(exterior, closed=True,
+                                 facecolor=RESTRICTED_AREA,
+                                 edgecolor=RESTRICTED_AREA,
+                                 linewidth=1.2, alpha=0.30, zorder=1))
 
     # ---- malha do subgrafo: cor por OBRIGATORIEDADE ------------------------
     drew_mandatory = drew_optional = False
@@ -171,6 +202,9 @@ def plot_v1_combined(graph: RouteGraph, result: V1RouteResult,
     if drew_optional:
         handles.append(Line2D([0], [0], color=OPTIONAL_EDGE, lw=2, ls="--",
                               label="Corredor opcional"))
+    if restricted_areas:
+        handles.append(Patch(facecolor=RESTRICTED_AREA, edgecolor=RESTRICTED_AREA,
+                             alpha=0.30, label="Área SUA cruzada"))
     ax.legend(handles=handles, loc="upper right", facecolor=LAND,
               edgecolor="white", labelcolor="white", fontsize=8.5)
 

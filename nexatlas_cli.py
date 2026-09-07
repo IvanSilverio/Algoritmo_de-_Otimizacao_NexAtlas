@@ -31,6 +31,7 @@ except ImportError:
 from nexatlas_router.db import PostgisLoader
 from nexatlas_router.v1 import plan_v1_route
 from nexatlas_router.portoes import aerodromo_exige_pista, PistaObrigatoriaError
+from nexatlas_router.restricted_airspaces import find_route_airspace_intersections
 try:
     from nexatlas_router.plot_route import plot_v1_combined
     _HAS_LATERAL_PLOT = True
@@ -189,6 +190,33 @@ def _print_route(origin: str, dest: str, result) -> None:
             print(DIM + textwrap.fill(seq, width=58, initial_indent="       ",
                                       subsequent_indent="       ") + RST)
         print()
+
+
+def _print_airspace_warnings(areas: list[dict]) -> None:
+    """Exibe os espaços SUA cruzados e suas informações operacionais."""
+    if not areas:
+        print(f"  {GRN}✓ A rota principal não cruza áreas SUA cadastradas.{RST}\n")
+        return
+    labels = {
+        "sua_dangerous": "PERIGOSA",
+        "sua_prohibited": "PROIBIDA",
+        "sua_restricted": "RESTRITA",
+    }
+    print(f"  {RED}{BLD}⚠ Espaços aéreos cruzados pela rota principal: {len(areas)}{RST}")
+    for area in areas:
+        code = area.get("code") or "sem código"
+        kind = labels.get(area.get("type"), area.get("type", "SUA"))
+        limits = f"{area.get('lower_limit') or '?'} → {area.get('upper_limit') or '?'}"
+        print(f"    {RED}• {code} [{kind}]{RST} — {area.get('name') or ''}")
+        print(f"      Limites: {limits} | Ativação: {area.get('operational_hours') or 'não informada'}")
+        remarks = (area.get("remarks") or "Sem observações cadastradas.").strip()
+        print(textwrap.fill(remarks, width=74, initial_indent="      Remarks: ",
+                            subsequent_indent="               "))
+        if area.get("comms_text"):
+            print(textwrap.fill(area["comms_text"].strip(), width=74,
+                                initial_indent="      Comunicações: ",
+                                subsequent_indent="                    "))
+    print()
 
 
 def _select_aircraft(catalog):
@@ -434,6 +462,15 @@ def main() -> None:
             print(f"\n  {RED}✗ Erro no otimizador:{RST} {e}\n"); continue
 
         _print_route(origin, dest, result)
+
+        # Pós-processamento SUA: roda após o cálculo e antes da plotagem.
+        try:
+            restricted_areas = find_route_airspace_intersections(conn, result)
+            result.meta["restricted_airspaces"] = restricted_areas
+            _print_airspace_warnings(restricted_areas)
+        except Exception as e:
+            result.meta["restricted_airspaces"] = []
+            print(f"  {RED}✗ Não foi possível verificar áreas SUA:{RST} {e}\n")
 
         # V3: perfil vertical sobre a rota lateral (terreno/vento do CDN, injetados).
         if _HAS_V3 and aircraft is not None:
