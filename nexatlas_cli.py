@@ -87,6 +87,7 @@ def _connect() -> "psycopg2.extensions.connection":
         dbname=os.environ.get("NEXATLAS_DB_NAME", "jetstream"),
         user=os.environ.get("NEXATLAS_DB_USER", "ivansilverio"),
         password=os.environ["NEXATLAS_DB_PASSWORD"],
+        sslmode=os.environ.get("NEXATLAS_DB_SSLMODE", "require"),
     )
     # Garante que objetos não-qualificados também resolvam no esquema published.
     with conn.cursor() as cur:

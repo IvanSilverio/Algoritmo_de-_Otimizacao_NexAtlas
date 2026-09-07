@@ -83,7 +83,8 @@ python3 test_regressao.py            # exit 0 se tudo passa, 1 se algo regrediu
 
 Credenciais via ambiente (defaults do `published`/`jetstream`, sobrescrevíveis):
 `NEXATLAS_DB_HOST=jetstream.nexatlas.com`, `NEXATLAS_DB_PORT=5433`,
-`NEXATLAS_DB_NAME=jetstream`, `NEXATLAS_DB_USER`, `NEXATLAS_DB_PASSWORD`.
+`NEXATLAS_DB_NAME=jetstream`, `NEXATLAS_DB_USER`, `NEXATLAS_DB_PASSWORD` e
+`NEXATLAS_DB_SSLMODE=require`.
 As credenciais ficam SÓ no `.env.sh` local (protegido pelo `.gitignore`).
 
 ## Casos de referência (bateria rápida no banco real)

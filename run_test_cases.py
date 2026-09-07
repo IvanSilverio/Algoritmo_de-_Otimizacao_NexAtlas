@@ -49,6 +49,7 @@ def get_conn():
         dbname=os.environ.get("NEXATLAS_DB_NAME", "jetstream"),
         user=os.environ.get("NEXATLAS_DB_USER", "ivansilverio"),
         password=os.environ["NEXATLAS_DB_PASSWORD"],
+        sslmode=os.environ.get("NEXATLAS_DB_SSLMODE", "require"),
     )
     with conn.cursor() as cur:
         cur.execute("SET search_path TO published, public;")
